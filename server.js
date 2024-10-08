@@ -12,7 +12,7 @@ app.use(express.static('public'));
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
-    console.log('Ein Benutzer hat sich verbunden');
+    console.log('Ein Benutzer hat sich verbunden (brrr gucci gang');
 
     // Nachricht empfangen und an alle Clients weiterleiten
     socket.on('chat message', (msg) => {
