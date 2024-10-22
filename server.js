@@ -1,6 +1,7 @@
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path');  // Path-Modul importieren
 
 // Initialisiere Express
 const app = express();
