@@ -10,6 +10,11 @@ const io = new Server(server);
 // Statische Dateien aus dem "public"-Ordner bereitstellen
 app.use(express.static('public'));
 
+// Pfad-Modul vom Login-Formular
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
     console.log('Ein Benutzer hat sich verbunden (brrr gucci gang');
