@@ -16,6 +16,7 @@ io.on('connection', (socket) => {
 
     // Nachricht empfangen und an alle Clients weiterleiten
     socket.on('chat message', (msg) => {
+        console.log("Msg", msg);
         io.emit('chat message', msg);
     });
 

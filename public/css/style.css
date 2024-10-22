@@ -1,0 +1,6 @@
+body { font-family: Arial, sans-serif; }
+ul { list-style-type: none; padding: 0; }
+li { padding: 8px; margin-bottom: 10px; background: #f4f4f4; border-radius: 4px; }
+#messages { margin-bottom: 20px; }
+#message-input { width: 80%; padding: 10px; }
+#send-button { padding: 10px; background: blue; color: white; border: none; cursor: pointer; }
