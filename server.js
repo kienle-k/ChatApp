@@ -2,6 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');  // Path-Modul importieren
+const port = 3001; // Port-Nummer
 
 // Initialisiere Express
 const app = express();
@@ -13,12 +14,13 @@ app.use(express.static('public'));
 
 // Pfad-Modul vom Login-Formular
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+    res.sendFile(path.join(__dirname, 'public', 'login', 'login.html'));  // Korrektes Verzeichnis
 });
+
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
-    console.log('Ein Benutzer hat sich verbunden (brrr gucci gang');
+    console.log('Ein Benutzer hat sich verbunden (brrr gucci gang)');
 
     // Nachricht empfangen und an alle Clients weiterleiten
     socket.on('chat message', (msg) => {
@@ -32,6 +34,6 @@ io.on('connection', (socket) => {
 });
 
 // Server starten
-server.listen(3000, () => {
-    console.log('Server läuft auf http://localhost:3000');
+server.listen(port, () => {
+    console.log('Server läuft auf http://localhost:3001');
 });
