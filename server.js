@@ -3,7 +3,7 @@ const http = require('http');
 const path = require('path');
 const { Server } = require('socket.io');
 
-const port = 3001; // Port-Nummer
+const port = 3002; // Port-Nummer
 
 // Initialisiere Express
 const app = express();
@@ -11,7 +11,8 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // Statische Dateien aus dem "public"-Ordner bereitstellen
-app.use(express.static('public'));
+//app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Pfad-Modul vom Login-Formular
 app.get('/', (req, res) => {
@@ -36,5 +37,5 @@ io.on('connection', (socket) => {
 
 // Server starten
 server.listen(port, () => {
-    console.log('Server läuft auf http://localhost:3001');
+    console.log(`Server läuft auf http://localhost:${port}`);
 });
