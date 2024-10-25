@@ -14,7 +14,7 @@ app.use(express.static('public'));
 
 // Pfad-Modul vom Login-Formular
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login', 'login.html'));  // Korrektes Verzeichnis
+    res.sendFile(path.join(__dirname, 'public', 'login', 'fenster.html'));  // Korrektes Verzeichnis
 });
 
 
