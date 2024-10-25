@@ -18,6 +18,7 @@
   "homepage": "https://github.com/kienle-k/ChatApp#readme",
   "dependencies": {
     "express": "^4.21.0",
+    "mysql2": "^3.11.3",
     "socket.io": "^4.8.0"
   }
 }
