@@ -63,13 +63,13 @@ CREATE TABLE IF NOT EXISTS `files` (
 
 
 -- Create example users
-INSERT IGNORE INTO users (username, email, password)
+INSERT IGNORE INTO `users` (username, email, password)
 VALUES ('admin_example', 'admin@example.com', 'securepassword');
 
-INSERT IGNORE INTO users (username, email, password)
+INSERT IGNORE INTO `users` (username, email, password)
 VALUES ('user2_example', 'user2@example.com', 'user2_password');
 
-INSERT IGNORE INTO users (username, email, password)
+INSERT IGNORE INTO `users` (username, email, password)
 VALUES ('user3_example', 'user3@example.com', 'user3_password');
 
 
