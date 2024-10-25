@@ -11,10 +11,13 @@
         #messages { margin-bottom: 20px; }
         #message-input { width: 80%; padding: 10px; }
         #send-button { padding: 10px; background: blue; color: white; border: none; cursor: pointer; }
+        #logout-button { padding: 10px; background: red; color: white; border: none; cursor: pointer; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <h1>Echtzeit-Chat Basti</h1>
+    <button id="logout-button">Logout</button> <!-- Logout-Button hinzugefügt -->
+    
     <ul id="messages"></ul>
     <form id="chat-form">
         <input id="message-input" autocomplete="off" /><button id="send-button">Senden</button>
@@ -38,6 +41,11 @@
             const input = document.getElementById('message-input');
             socket.emit('chat message', input.value); // Nachricht senden
             input.value = ''; // Eingabefeld leeren
+        });
+
+        document.getElementById('logout-button').addEventListener('click', () => {
+            // User auf die Login-Seite weiterleiten
+            window.location.href = '/login/fenster.html'; // Gehe zur Login-Seite zurück
         });
     </script>
 </body>
