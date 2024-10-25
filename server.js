@@ -1,7 +1,8 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
-const path = require('path');  // Path-Modul importieren
+
 const port = 3001; // Port-Nummer
 
 // Initialisiere Express
@@ -20,7 +21,7 @@ app.get('/', (req, res) => {
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
-    console.log('Ein Benutzer hat sich verbunden (brrr gucci gang)');
+    console.log('Ein Benutzer hat sich verbunden (Basti)');
 
     // Nachricht empfangen und an alle Clients weiterleiten
     socket.on('chat message', (msg) => {
