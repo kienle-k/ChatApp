@@ -19,8 +19,9 @@ io.on('connection', (socket) => {
         console.log("Msg", msg);
         // Timeout only for Dev and Testing phase
         setTimeout(() => {
-            io.emit('message confirmation', msg.id);
+            socket.emit('message confirmation', msg.id);
             // io.emit does not make sense here, cause it sends to every user there is
+            // Database insert needed 
             io.emit('chat message', msg.text);
         }, 2500);
     });
