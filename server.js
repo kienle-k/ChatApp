@@ -19,7 +19,7 @@ app.get('/login/fenster.html', (req, res) => {
 });
 
 // Route für die Chat-Seite
-app.get('/login/chat.html', (req, res) => {
+app.get('/chat.html', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login', 'chat.html'));
 });
 

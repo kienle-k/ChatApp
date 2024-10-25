@@ -11,7 +11,7 @@ document.getElementById('loginForm').addEventListener('submit', function(event) 
 
     if (username === correctUsername && password === correctPassword) {
         // Successful login
-        window.location.href = 'chat.html';  // Weiterleitung zu einer anderen Seite
+        window.location.href = '/chat.html';  // Weiterleitung zu einer anderen Seite
     } else {
         // Display error message
         errorMessage.textContent = 'Benutzername oder Passwort ist falsch.';
