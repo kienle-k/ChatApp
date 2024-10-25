@@ -34,11 +34,18 @@ app.use(express.static('public'));
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
-    console.log('Ein Benutzer hat sich verbunden (brrr gucci gang');
+    console.log('User has connected (brrr gucci gang (we gon steal every peace of personal info he has');
 
     // Nachricht empfangen und an alle Clients weiterleiten
     socket.on('chat message', (msg) => {
-        io.emit('chat message', msg);
+        console.log("Msg", msg);
+        // Timeout only for Dev and Testing phase
+        setTimeout(() => {
+            socket.emit('message confirmation', msg.id);
+            // io.emit does not make sense here, cause it sends to every user there is
+            // Database insert needed 
+            io.emit('chat message', msg.text);
+        }, 2500);
     });
 
     // Wenn ein Benutzer die Verbindung trennt
