@@ -9,9 +9,7 @@
 <body>
     <h1>Echtzeit-Chat</h1>
     <div id="chat-container">
-        <!-- <div id="message-history-container"> -->
-            <ul id="messages"></ul>
-        <!-- </div> -->
+        <ul id="messages"></ul>
         <div id="send-container">
             <form id="chat-form">
                 <input id="message-input" autocomplete="off" /><button id="send-button">Senden</button>
@@ -120,6 +118,7 @@
             socket.emit('chat message', { id: msgID, text: input.value }); 
             input.value = ''; // Eingabefeld leeren
         });
+        
     </script>
 </body>
 </html>
