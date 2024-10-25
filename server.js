@@ -3,7 +3,7 @@ const http = require('http');
 const path = require('path');
 const { Server } = require('socket.io');
 
-const port = 3002; // Port-Nummer
+const port = 3001; // Port-Nummer
 
 // Initialisiere Express
 const app = express();
@@ -11,14 +11,22 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // Statische Dateien aus dem "public"-Ordner bereitstellen
-//app.use(express.static('public'));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Pfad-Modul vom Login-Formular
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'login', 'fenster.html'));  // Korrektes Verzeichnis
+// Route für die Login-Seite
+app.get('/login/fenster.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login', 'fenster.html'));
 });
 
+// Route für die Chat-Seite
+app.get('/login/chat.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login', 'chat.html'));
+});
+
+// Route für den Root-Pfad
+app.get('/', (req, res) => {
+    res.redirect('/login/fenster.html'); // Weiterleitung zur Login-Seite
+});
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
