@@ -33,6 +33,17 @@
         const messageContainer = document.getElementById('message-history-container');
         const messagesUL = document.getElementById('messages');
 
+
+        const bottomThreshold = 150;
+
+        function isListNearBottom() {
+            // Calculate the distance from the bottom
+            const distanceFromBottom = messagesUL.scrollHeight - messagesUL.scrollTop - messagesUL.clientHeight;
+            
+            // Return true if within threshold, false otherwise
+            return distanceFromBottom < bottomThreshold;
+        }
+
         function scrollMessagesToBottom(){
             messagesUL.scrollTop = messagesUL.scrollHeight;
         }
@@ -109,8 +120,6 @@
             setTimeout(() => {
                 if (on_top) {
                     messagesUL.scrollTop = previousScrollTop + (messagesUL.scrollHeight - previousScrollHeight);
-                } else {
-                    messagesUL.scrollTop = lastTop;
                 }}, 20
             );
 
@@ -122,8 +131,10 @@
         socket.on('chat message', (msg) => {
             console.log("RECEIVED:", msg);
             let li = addMessage(msg, 'received');
-
-            setTimeout(scrollMessagesToBottom, 0);
+            if (isListNearBottom()) {
+                console.log("SCROLLIN");
+                setTimeout(scrollMessagesToBottom, 0);
+            }
           
         });
 
@@ -153,6 +164,7 @@
             let msgLi = addMessage(input.value, 'pending');
             pending_messages[msgID] = msgLi;
 
+            console.log("SCROLLLLLLIN my own");
             setTimeout(scrollMessagesToBottom, 0);
 
             let from_user = "Lil Pimp";
@@ -180,11 +192,10 @@
     messagesUL.addEventListener('scroll', function() {
         if (messagesUL.scrollTop === 0) {
             if (currently_loading_messages == false){
-                console.log("Scrolled to the top");
+                console.log("at the top, triggerin reload");
                 currently_loading_messages = true;
                 let num = messagesUL.querySelectorAll('.message').length;
                 requestHistoryMessages(num, 50);
-                messagesUL.scrollTop = 4;
             }
         }
     });

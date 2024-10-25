@@ -9,6 +9,8 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
+    user-select: none;
+
 }
 
 
@@ -22,6 +24,8 @@ body {
     padding: 10px;
     overflow-y: auto;
     overflow-x: hidden;
+    user-select: none;
+
 }
 
 #messages {
@@ -42,6 +46,8 @@ body {
     align-items: center;
     box-sizing: border-box;
     margin-top: 10px;
+    user-select: none;
+
 }
  
 .message-container:first-child {
@@ -103,6 +109,9 @@ body {
     opacity: 1;
 }
 
+h1 {
+    user-select: none;
+}
 
 
 #send-container {
@@ -111,6 +120,8 @@ body {
     padding: 0;
     margin: 0;
     width: 100%;
+    user-select: none;
+
 }
 
 #chat-form {
@@ -122,6 +133,8 @@ body {
     justify-content: center;
     box-sizing: border-box;
     margin: 0;
+    user-select: none;
+
 }
 
 #message-input {
@@ -132,6 +145,12 @@ body {
     box-sizing: border-box;
     border-radius: 20px;
     font-size: 1.4em;
+    border: 2px solid rgb(10, 30, 29);
+
+}
+#message-input:focus {
+    outline: none; /* Remove the default outline */
+    border: 2px solid lightseagreen;
 }
 
 #send-button {
@@ -146,4 +165,6 @@ body {
     border: none;
     cursor: pointer;
     border-radius: 20px;
+    user-select: none;
+
 }
