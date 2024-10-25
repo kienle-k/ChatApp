@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/style.css">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+
     <title>Echtzeit-Chat</title>
 </head>
 <body>
@@ -22,6 +24,9 @@
         // Verbindung mit dem Socket.IO-Server herstellen
         const socket = io();
 
+
+        var currently_loading_messages = false;
+
         var pending_messages = [];
 
         const input = document.getElementById("message-input");
@@ -32,7 +37,26 @@
             messagesUL.scrollTop = messagesUL.scrollHeight;
         }
 
-        function addMessage(message, messageType){
+        function requestHistoryMessages(start_at_id, number_of_messages) {
+            socket.emit('get-history', { start_at_id, number_of_messages });
+        }
+
+        socket.on('response-history', (data) => {
+            console.log('Received data from server:', data); // Process the returned data
+            let msg;
+            for (let i=data.length-1; i>= 0; i--){
+                msg = data[i];
+                let messageType = 'sent';
+                if (msg.from_user != "Karl"){
+                    messageType = 'received'
+                }
+                addMessage(msg.text, messageType, on_top=true);
+            }
+            currently_loading_messages = false;
+        });
+
+
+        function addMessage(message, messageType, on_top=false){
             // messageType can be 'pending' / 'sent' / 'received'
 
             // Nachricht sofort anzeigen
@@ -64,14 +88,31 @@
                     break;
             }
 
+
             li.appendChild(msg);
 
-            messagesUL.appendChild(li);
+
+            let previousScrollHeight = messagesUL.scrollHeight;
+            let previousScrollTop = messagesUL.scrollTop;
+
+            if (on_top){
+                messagesUL.insertBefore(li, messagesUL.firstChild);
+            }else{
+                messagesUL.appendChild(li);
+            } 
 
             // msg.addEventListener('transitionend', scrollMessagesToBottom);
             setTimeout(() => {
                 msg.classList.add('expanded');
             }, 10);
+
+            setTimeout(() => {
+                if (on_top) {
+                    messagesUL.scrollTop = previousScrollTop + (messagesUL.scrollHeight - previousScrollHeight);
+                } else {
+                    messagesUL.scrollTop = lastTop;
+                }}, 20
+            );
 
             return li;
         }
@@ -103,8 +144,8 @@
 
         // Nachricht senden
         document.getElementById('chat-form').addEventListener('submit', (event) => {
-            event.preventDefault(); // Verhindert, dass das Formular standardmäßig gesendet wird
-            const msgID = Date.now(); // Einzigartige ID für die Nachricht (kann auch anders generiert werden)
+            event.preventDefault(); 
+            const msgID = Date.now(); 
 
             if (input.value == ""){
                 return;
@@ -114,11 +155,40 @@
 
             setTimeout(scrollMessagesToBottom, 0);
 
-            // Nachricht mit ID an den Server senden
-            socket.emit('chat message', { id: msgID, text: input.value }); 
+            let from_user = "Lil Pimp";
+            let to_user = "Barack Michelle Trump";
+            let to_group = null;
+
+            let value = input.value;
+
             input.value = ''; // Eingabefeld leeren
+
+            // Nachricht mit ID an den Server senden
+            socket.emit('chat message', { id: msgID, from_user: from_user, to_user: to_user, to_group: to_group, text: value }); 
         });
-        
+    
+    
+    // Load last Messages on window load    
+    window.onload = function(){
+        requestHistoryMessages(0,100);
+        setTimeout(() => {
+            scrollMessagesToBottom();
+        }, 2500);
+    }  
+    
+    // Automatic reload when scrolled to the top
+    messagesUL.addEventListener('scroll', function() {
+        if (messagesUL.scrollTop === 0) {
+            if (currently_loading_messages == false){
+                console.log("Scrolled to the top");
+                currently_loading_messages = true;
+                let num = messagesUL.querySelectorAll('.message').length;
+                requestHistoryMessages(num, 50);
+                messagesUL.scrollTop = 4;
+            }
+        }
+    });
+            
     </script>
 </body>
 </html>
