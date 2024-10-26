@@ -11,6 +11,7 @@
 <body>
     <h1>Echtzeit-Chat</h1>
     <div id="chat-container">
+        <div id="user-info-bar"></div>
         <ul id="messages"></ul>
         <div id="send-container">
             <form id="chat-form">
@@ -54,15 +55,28 @@
 
         socket.on('response-history', (data) => {
             console.log('Received data from server:', data); // Process the returned data
+
+            
+
+
             let msg;
             for (let i=data.length-1; i>= 0; i--){
+                const scrollPosition = messagesUL.scrollTop;
+                const offsetHeightBefore = messagesUL.scrollHeight;
                 msg = data[i];
                 let messageType = 'sent';
                 if (msg.from_user != "Karl"){
                     messageType = 'received'
                 }
                 addMessage(msg.text, messageType, on_top=true);
+                if (on_top) {
+                    const offsetHeightAfter = messagesUL.scrollHeight;
+                    messagesUL.scrollTop = scrollPosition + (offsetHeightAfter - offsetHeightBefore);
+                }
             }
+
+            
+
             currently_loading_messages = false;
         });
 
@@ -103,9 +117,7 @@
             li.appendChild(msg);
 
 
-            let previousScrollHeight = messagesUL.scrollHeight;
-            let previousScrollTop = messagesUL.scrollTop;
-
+            
             if (on_top){
                 messagesUL.insertBefore(li, messagesUL.firstChild);
             }else{
@@ -117,11 +129,7 @@
                 msg.classList.add('expanded');
             }, 10);
 
-            setTimeout(() => {
-                if (on_top) {
-                    messagesUL.scrollTop = previousScrollTop + (messagesUL.scrollHeight - previousScrollHeight);
-                }}, 20
-            );
+            
 
             return li;
         }
