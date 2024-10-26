@@ -159,33 +159,43 @@
                 delete pending_messages[msgID]; // Entferne das Pending-Tracking
             }
         });
+        function sendMessage(event) {
+    event.preventDefault(); 
+    const msgID = Date.now(); 
 
+    if (input.value == ""){
+        return;
+    }
+    let msgLi = addMessage(input.value, 'pending');
+    pending_messages[msgID] = msgLi;
 
-        // Nachricht senden
-        document.getElementById('chat-form').addEventListener('submit', (event) => {
-            event.preventDefault(); 
-            const msgID = Date.now(); 
+    console.log("SCROLLLLLLIN my own");
+    setTimeout(scrollMessagesToBottom, 0);
 
-            if (input.value == ""){
-                return;
-            }
-            let msgLi = addMessage(input.value, 'pending');
-            pending_messages[msgID] = msgLi;
+    let from_user = "Lil Pimp";
+    let to_user = "Barack Michelle Trump";
+    let to_group = null;
 
-            console.log("SCROLLLLLLIN my own");
-            setTimeout(scrollMessagesToBottom, 0);
+    let value = input.value;
 
-            let from_user = "Lil Pimp";
-            let to_user = "Barack Michelle Trump";
-            let to_group = null;
+    input.value = ''; // Eingabefeld leeren
 
-            let value = input.value;
+    // Nachricht mit ID an den Server senden
+    socket.emit('chat message', { id: msgID, from_user: from_user, to_user: to_user, to_group: to_group, text: value }); 
+    
+    setTimeout(() => {
+        // document.getElementById('message-input').focus();
+    }, 1000);
+}
 
-            input.value = ''; // Eingabefeld leeren
+// Nachricht senden
+document.getElementById('chat-form').addEventListener('submit', sendMessage);
+document.getElementById('send-button').addEventListener("touchend", (e) => {
+    e.preventDefault();
+    sendMessage(e); // Event für Touch-Ende hinzufügen
+});
 
-            // Nachricht mit ID an den Server senden
-            socket.emit('chat message', { id: msgID, from_user: from_user, to_user: to_user, to_group: to_group, text: value }); 
-        });
+        
     
     
     // Load last Messages on window load    
@@ -207,6 +217,8 @@
             }
         }
     });
+    
+    
             
     </script>
 </body>
