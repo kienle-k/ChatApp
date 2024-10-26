@@ -36,14 +36,14 @@ app.use(express.static('public'));
 
 
 
-function generateRandomMessages(numMessages) {
-    const words = [
+
+const words = [
         "YOO", "hello", "how are you", "what's up", "let's meet", 
         "check this out", "long time no see", "see you soon", 
         "I'm busy", "sounds good", "why not", "okay", "let's go", 
         "goodbye", "talk later", "yes", "no", "maybe"
-    ];
-    
+];
+function generateRandomMessages(numMessages) {    
     const result = [];
     
     for (let i = 0; i < numMessages; i++) {
@@ -72,7 +72,12 @@ io.on('connection', (socket) => {
             socket.emit('message confirmation', msg.id);
             // io.emit does not make sense here, cause it sends to every user there is
             // Database insert needed 
-            io.emit('chat message', msg.text);
+            // testing: senf rand
+            const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
+            .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
+            .join(" "); // Join words into a send random sentence back
+            
+            socket.emit('chat message', randomText);
         }, 2500);
     });
 
