@@ -1,5 +1,6 @@
 const express = require('express');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 const mysql = require('mysql2');
 
@@ -25,13 +26,30 @@ connection.end();
 
 
 
+const port = 3001; // Port-Nummer
+
 // Initialisiere Express
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
 // Statische Dateien aus dem "public"-Ordner bereitstellen
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Route für die Login-Seite
+app.get('/login/fenster.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login', 'fenster.html'));
+});
+
+// Route für die Chat-Seite
+app.get('/chat.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login', 'chat.html'));
+});
+
+// Route für den Root-Pfad
+app.get('/', (req, res) => {
+    res.redirect('/login/fenster.html'); // Weiterleitung zur Login-Seite
+});
 
 
 
@@ -102,6 +120,6 @@ io.on('connection', (socket) => {
 });
 
 // Server starten
-server.listen(3000, () => {
-    console.log('Server läuft auf http://localhost:3000');
+server.listen(port, () => {
+    console.log(`Server läuft auf http://localhost:${port}`);
 });

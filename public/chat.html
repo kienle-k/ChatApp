@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Echtzeit-Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 8px; margin-bottom: 10px; background: #f4f4f4; border-radius: 4px; }
+        #messages { margin-bottom: 20px; }
+        #message-input { width: 80%; padding: 10px; }
+        #send-button { padding: 10px; background: blue; color: white; border: none; cursor: pointer; }
+        #logout-button { padding: 10px; background: red; color: white; border: none; cursor: pointer; margin-bottom: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Echtzeit-Chat Basti</h1>
+    <button id="logout-button">Logout</button> <!-- Logout-Button hinzugefügt -->
+
+    <ul id="messages"></ul>
+    <form id="chat-form">
+        <input id="message-input" autocomplete="off" /><button id="send-button">Senden</button>
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        // Verbindung mit dem Socket.IO-Server herstellen
+        const socket = io();
+
+        // Wenn eine Nachricht empfangen wird
+        socket.on('chat message', (msg) => {
+            const li = document.createElement('li');
+            li.textContent = msg;
+            document.getElementById('messages').appendChild(li);
+        });
+
+        // Nachricht senden
+        document.getElementById('chat-form').addEventListener('submit', (e) => {
+            e.preventDefault(); // Verhindert, dass das Formular standardmäßig gesendet wird
+            const input = document.getElementById('message-input');
+            socket.emit('chat message', input.value); // Nachricht senden
+            input.value = ''; // Eingabefeld leeren
+        });
+
+        document.getElementById('logout-button').addEventListener('click', () => {
+            // User auf die Login-Seite weiterleiten
+            window.location.href = '/login/fenster.html'; // Gehe zur Login-Seite zurück
+        });
+    </script>
+</body>
+</html>
