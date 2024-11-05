@@ -11,6 +11,7 @@
 <body>
     <h1>Echtzeit-Chat</h1>
     <div id="chat-container">
+        <button id="logout-button">Logout</button> <!-- Logout-Button hinzugefügt -->
         <div id="user-info-bar"></div>
         <ul id="messages"></ul>
         <div id="send-container">
@@ -19,6 +20,8 @@
             </form>
         </div>
     </div>
+
+    
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -194,8 +197,7 @@ document.getElementById('send-button').addEventListener("touchend", (e) => {
     e.preventDefault();
     sendMessage(e); // Event für Touch-Ende hinzufügen
 });
-
-        
+     
     
     
     // Load last Messages on window load    
@@ -217,6 +219,11 @@ document.getElementById('send-button').addEventListener("touchend", (e) => {
             }
         }
     });
+
+    document.getElementById('logout-button').addEventListener('click', () => {
+            // User auf die Login-Seite weiterleiten
+            window.location.href = '/index.html'; // Gehe zur Login-Seite zurück
+        });
     
     
             

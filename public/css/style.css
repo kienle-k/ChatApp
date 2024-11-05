@@ -2,6 +2,7 @@ body,
 html {
     font-family: Arial, sans-serif;
     height: 100%;
+    width: 100%;
     overflow: hidden;
 }
 
@@ -181,5 +182,15 @@ h1 {
     cursor: pointer;
     border-radius: 20px;
     user-select: none;
+
+}
+
+#logout-button {
+    padding: 10px;
+    background: red;
+    color: white;
+    border: none;
+    cursor: pointer;
+    margin-bottom: 20px;
 
 }
