@@ -2,7 +2,7 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2/promise');
-
+const port = 3001; // Globale Variable für den Port
 
 
 
@@ -263,6 +263,6 @@ io.on('connection', (socket) => {
 });
 
 // Server starten
-server.listen(3000, () => {
-    console.log('Server läuft auf http://localhost:3000');
+server.listen(port, () => {
+  console.log(`Server läuft auf http://localhost:${port}`);
 });
