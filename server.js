@@ -19,7 +19,7 @@ app.use(express.static('public'));
 const dbConfig = {
   host: 'localhost',
   user: 'root',
-  password: 'thisandthat123',
+  password: 'yourNewPassword', //thisandthat123
   database: 'chatAppDB'
 };
 
