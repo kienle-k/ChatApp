@@ -16,7 +16,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
       // Handle the response
       const result = await response.json();
-      const messageEl = document.getElementById("message");
+      const messageEl = document.getElementById("error-message");
   
    
       if (response.ok) {
@@ -30,6 +30,6 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 
     } catch (error) {
       console.error("Login Error:", error);
-      document.getElementById("message").textContent = "An error occurred. Please try again.";
+      document.getElementById("error-message").textContent = "An error occurred. Please try again.";
     }
   });

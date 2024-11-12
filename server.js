@@ -3,8 +3,8 @@ const session = require('express-session');
 const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcrypt');
 const port = 3000; // Globale Variable für den Port
-
 
 
 // Initialisiere Express
