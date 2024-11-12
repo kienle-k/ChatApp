@@ -22,10 +22,8 @@ body {
     flex-direction: column;
     align-items: center;
     user-select: none;
-    grid-column-start: 2;
-    grid-column-end: 4;
-    grid-row-start: 2;
-    grid-row-end: 3;
+    grid-column: 2 / 5;
+    grid-row-start: 2 / 3;
 
     padding: 10px;
     box-sizing: border-box;
@@ -204,5 +202,6 @@ h1 {
     border: none;
     cursor: pointer;
     margin-bottom: 20px;
-
+    grid-row: 1;
+    grid-column: 4;
 }
