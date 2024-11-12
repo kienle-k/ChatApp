@@ -4,7 +4,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
-const port = 3001; // Globale Variable für den Port
+const port = 3000; // Globale Variable für den Port
 
 // Initialisiere Express
 const app = express();
@@ -45,7 +45,7 @@ app.use(session({
 const dbConfig = {
   host: 'localhost',
   user: 'root',
-  password: 'yourNewPassword', //thisandthat123
+  password: 'thisandthat123', //thisandthat123
   database: 'chatAppDB'
 };
 
