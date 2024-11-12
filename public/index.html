@@ -19,7 +19,15 @@
             <button type="submit">Einloggen</button>
             <p id="error-message"></p>
         </form>
+        <p>Noch kein Konto?</p>
+        <button id="registerButton" onclick="openRegisterPage()">Registrieren</button>
     </div>
+    <script>
+        function openRegisterPage() {
+            // Weiterleitung zur Registrierungsseite
+            window.location.href = '/register.html';
+        }
+    </script>
     <script src="logik.js"></script> <!-- Korrekte Pfadangabe -->
 </body>
 </html>
