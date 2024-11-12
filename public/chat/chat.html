@@ -221,10 +221,28 @@ document.getElementById('send-button').addEventListener("touchend", (e) => {
         }
     });
 
-    document.getElementById('logout-button').addEventListener('click', () => {
-            // User auf die Login-Seite weiterleiten
-            window.location.href = '/index.html'; // Gehe zur Login-Seite zurück
+    document.getElementById('logout-button').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
         });
+
+        const result = await response.json();
+
+        if (result.success) {
+        alert('Logout success!')
+        window.location.href = '/index.html';  // Redirect to login page after logout
+        } else {
+        alert('Logout failed');
+        }
+    } catch (error) {
+        console.error('Error logging out:', error);
+    }
+    });
+
     
     
             
