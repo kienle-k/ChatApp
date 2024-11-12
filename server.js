@@ -1,8 +1,9 @@
 const express = require('express');
+const session = require('express-session');
 const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2/promise');
-const port = 3001; // Globale Variable für den Port
+const port = 3000; // Globale Variable für den Port
 
 
 
@@ -13,7 +14,33 @@ const io = new Server(server);
 
 // Middleware to parse JSON bodies
 app.use(express.json());
-app.use(express.static('public'));
+
+// Custom middleware to protect chat directory
+app.use('/chat', (req, res, next) => {
+  // Block direct access to chat.html
+  if (req.path.toLowerCase().endsWith('chat.html')) {
+    return res.redirect('/chat');
+  }
+  next();
+});
+
+app.use(express.static('public', {
+  index: 'index.html',
+  // Exclude the chat directory from static serving
+  setHeaders: (res, path) => {
+    if (path.includes('/chat/')) {
+      res.status(403).end('Forbidden');
+    }
+  }
+}));
+
+
+app.use(session({
+  secret: 'yourSecretKey',  // Replace with a strong secret key
+  resave: false,            // Don't save session if unmodified
+  saveUninitialized: true,  // Save uninitialized sessions
+  cookie: { maxAge: 1000 * 60 * 60 } // Session expires after 1 hour
+}));
 
 
 const dbConfig = {
@@ -39,6 +66,69 @@ async function testConnection() {
 }
 
 testConnection();
+
+
+// Login endpoint
+app.post('/api/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const connection = await pool.getConnection();
+    const query = 'SELECT id, username FROM users WHERE username = ? AND password = ?';
+    const [users] = await connection.execute(query, [username, password]);
+    connection.release();
+
+    console.log(users)
+
+    if (users.length > 0) {
+      const user = users[0];
+      req.session.user = { id: user.id, username: user.username };
+      return res.json({ success: true, message: 'Logged in successfully' });
+    }
+
+    res.status(401).json({ error: 'Invalid username or password' });
+  } catch (error) {
+    console.error('Login Error:', error);
+    res.status(500).json({ error: 'Failed to login' });
+  }
+});
+
+
+
+function isAuthenticated(req, res, next) {
+  if (req.session && req.session.user) {
+    console.log("Authenticated user:", req.session.user);
+    return next();
+  } else {
+    console.log("User is not authenticated");
+    res.redirect('/'); // Redirect to root instead of serving index.html directly
+  }
+}
+
+// Secure chat route
+app.get('/chat', isAuthenticated, (req, res) => {
+  res.sendFile(__dirname + '/public/chat/chat.html');
+});
+
+// Catch-all route for chat directory attempts
+app.get('/chat/*', (req, res) => {
+  res.redirect('/chat');
+});
+
+
+
+// Logout endpoint
+app.post('/api/logout', isAuthenticated, (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: 'Failed to logout' });
+    }
+    res.json({ success: true, message: 'Logged out successfully' });
+  });
+});
+
+
+
 
 
 //API to get the a number of the last messages of a chat

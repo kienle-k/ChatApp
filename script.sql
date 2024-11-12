@@ -64,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `files` (
 
 -- Create example users
 INSERT IGNORE INTO `users` (username, email, password)
-VALUES ('admin_example', 'admin@example.com', 'securepassword');
+VALUES ('admin_example', 'admin@example.com', 'admin_password');
 
 INSERT IGNORE INTO `users` (username, email, password)
 VALUES ('user2_example', 'user2@example.com', 'user2_password');
