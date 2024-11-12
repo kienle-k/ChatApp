@@ -64,15 +64,14 @@
 
         socket.on('response-history', (data) => {
             console.log('Received data from server:', data); // Process the returned data
-
+            if (!data.success){return; };
             
-
-
+            let messages = data.messages;
             let msg;
-            for (let i=data.length-1; i>= 0; i--){
+            for (let i=messages.length-1; i>= 0; i--){
                 const scrollPosition = messagesUL.scrollTop;
                 const offsetHeightBefore = messagesUL.scrollHeight;
-                msg = data[i];
+                msg = messages[i];
                 let messageType = 'sent';
                 if (msg.from_user != "Karl"){
                     messageType = 'received'

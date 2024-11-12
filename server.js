@@ -67,7 +67,6 @@ async function testConnection() {
 
 testConnection();
 
-
 // Login endpoint
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body;
@@ -128,6 +127,45 @@ app.post('/api/logout', isAuthenticated, (req, res) => {
 });
 
 
+
+
+// Registrierung Route
+app.post('/register', async (req, res) => {
+  
+  const { email, username, password } = req.body;
+
+  // Überprüfe, ob alle Felder ausgefüllt sind
+  if (!email || !username || !password) {
+    return res.status(400).send('Alle Felder sind erforderlich.');
+  }
+
+  try {
+    // Passwort hashen, um es sicher zu speichern
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Daten in die Datenbank einfügen
+    const query = 'INSERT INTO users (email, username, password) VALUES (?, ?, ?)';
+    const connection = await pool.getConnection();
+
+    try {
+      await connection.execute(query, [email, username, hashedPassword]);
+      console.log("User registrated");
+      res.status(200).send('Benutzer erfolgreich registriert.');
+    } catch (err) {
+      if (err.code === 'ER_DUP_ENTRY') {
+        res.status(400).send('Email oder Benutzername ist bereits vergeben.');
+      } else {
+        console.error('Fehler beim Einfügen in die Datenbank:', err);
+        res.status(500).send('Ein Fehler ist aufgetreten.');
+      }
+    } finally {
+      connection.release(); // Verbindung freigeben
+    }
+  } catch (err) {
+    console.error('Fehler beim Hashen des Passworts:', err);
+    res.status(500).send('Ein Fehler ist aufgetreten.');
+  }
+});
 
 
 
@@ -196,7 +234,7 @@ io.on('connection', (socket) => {
       try {
         // Ensure user IDs and limit are integers
 
-        const { user2_id, limit, index } = data;
+        const { user2_id, number_of_messages, start_at_id } = data;
     
         // Validate input
         if (isNaN(user2_id)) {
@@ -210,7 +248,8 @@ io.on('connection', (socket) => {
     
         try {
           // Query to get messages between two users
-          const [messages] = await connection.execute(
+          // const [messages] = await connection.execute(
+          let [messages] = await connection.query(
             `SELECT 
                 m.message_id,
                 m.sender_id,
@@ -228,10 +267,17 @@ io.on('connection', (socket) => {
                 OR 
                 (m.sender_id = ? AND m.receiver_id = ?)
             ORDER BY m.sent_at DESC
-            LIMIT ? OFFSET ?`,
-            [user1_id, user2_id, user2_id, user1_id, limit, index]
+            LIMIT ?
+            OFFSET ?`,
+            [user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id]
           );
-    
+
+          // DEVELOPMENT THING, TAKE OUT TODO!!!!!
+
+          if (messages.length == 0){
+            messages = generateRandomMessages(number_of_messages);
+          }
+
           socket.emit("response-history", {
             success: true,
             messages: messages.reverse() // Reverse to get chronological order
