@@ -329,7 +329,7 @@ io.on('connection', (socket) => {
             .join(" "); // Join words into a send random sentence back
             
             socket.emit('chat message', randomText);
-        }, 2500);
+        }, 1000);
     });
 
     // Listen for the requestData event
