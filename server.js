@@ -2,9 +2,8 @@ const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2/promise');
+const bcrypt = require('bcrypt');
 const port = 3001; // Globale Variable für den Port
-
-
 
 // Initialisiere Express
 const app = express();
@@ -14,7 +13,6 @@ const io = new Server(server);
 // Middleware to parse JSON bodies
 app.use(express.json());
 app.use(express.static('public'));
-
 
 const dbConfig = {
   host: 'localhost',
@@ -40,8 +38,43 @@ async function testConnection() {
 
 testConnection();
 
+// Registrierung Route
+app.post('/register', async (req, res) => {
+  const { email, username, password } = req.body;
 
-//API to get the a number of the last messages of a chat
+  // Überprüfe, ob alle Felder ausgefüllt sind
+  if (!email || !username || !password) {
+    return res.status(400).send('Alle Felder sind erforderlich.');
+  }
+
+  try {
+    // Passwort hashen, um es sicher zu speichern
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Daten in die Datenbank einfügen
+    const query = 'INSERT INTO users (email, username, password) VALUES (?, ?, ?)';
+    const connection = await pool.getConnection();
+
+    try {
+      await connection.execute(query, [email, username, hashedPassword]);
+      res.status(200).send('Benutzer erfolgreich registriert.');
+    } catch (err) {
+      if (err.code === 'ER_DUP_ENTRY') {
+        res.status(400).send('Email oder Benutzername ist bereits vergeben.');
+      } else {
+        console.error('Fehler beim Einfügen in die Datenbank:', err);
+        res.status(500).send('Ein Fehler ist aufgetreten.');
+      }
+    } finally {
+      connection.release(); // Verbindung freigeben
+    }
+  } catch (err) {
+    console.error('Fehler beim Hashen des Passworts:', err);
+    res.status(500).send('Ein Fehler ist aufgetreten.');
+  }
+});
+
+// API to get the a number of the last messages of a chat
 app.get('/api/messages/history', async (req, res) => {
   try {
     // Ensure user IDs and limit are integers
@@ -49,7 +82,6 @@ app.get('/api/messages/history', async (req, res) => {
     const user2_id = req.query.user2_id; // Treat as a string
     const limit = req.query.limit;
     
-
     // Validate input
     if (isNaN(user1_id) || isNaN(user2_id)) {
       return res.status(400).json({ error: 'Both user1_id and user2_id must be valid integers.' });
@@ -90,7 +122,6 @@ app.get('/api/messages/history', async (req, res) => {
     } finally {
       connection.release(); // Always release the connection
     }
-
   } catch (error) {
     console.error('Error fetching messages:', error);
     res.status(500).json({ 
@@ -99,16 +130,15 @@ app.get('/api/messages/history', async (req, res) => {
   }
 });
 
-//API to get the last message of every chat (needed to build left side of the chat screen with different chats)
+// API to get the last message of every chat (needed to build left side of the chat screen with different chats)
 app.get('/api/chats/history', async (req, res) => {
   try {
     // Ensure user IDs and limit are integers
     const user1_id = req.query.user1_id; // Treat as a string
     
-
     // Validate input
     if (isNaN(user1_id)) {
-      return res.status(400).json({ error: 'user1_id must be a valid integers.' });
+      return res.status(400).json({ error: 'user1_id must be a valid integer.' });
     }
 
     // Get connection from pool
@@ -181,7 +211,6 @@ app.get('/api/chats/history', async (req, res) => {
     } finally {
       connection.release(); // Always release the connection
     }
-
   } catch (error) {
     console.error('Error fetching messages:', error);
     res.status(500).json({ 
@@ -190,76 +219,64 @@ app.get('/api/chats/history', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
 const words = [
-        "YOO", "hello", "how are you", "what's up", "let's meet", 
-        "check this out", "long time no see", "see you soon", 
-        "I'm busy", "sounds good", "why not", "okay", "let's go", 
-        "goodbye", "talk later", "yes", "no", "maybe"
+  "YOO", "hello", "how are you", "what's up", "let's meet", 
+  "check this out", "long time no see", "see you soon", 
+  "I'm busy", "sounds good", "why not", "okay", "let's go", 
+  "goodbye", "talk later", "yes", "no", "maybe"
 ];
 function generateRandomMessages(numMessages) {    
-    const result = [];
+  const result = [];
+  
+  for (let i = 0; i < numMessages; i++) {
+    const fromUser = Math.random() > 0.5 ? "Karl" : "Kalle"; // Randomly choose the sender
+    const toUser = fromUser === "Karl" ? "Kalle" : "Karl"; // Ensure the recipient is the other user
+    const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
+      .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
+      .join(" "); // Join words into a sentence
     
-    for (let i = 0; i < numMessages; i++) {
-        const fromUser = Math.random() > 0.5 ? "Karl" : "Kalle"; // Randomly choose the sender
-        const toUser = fromUser === "Karl" ? "Kalle" : "Karl"; // Ensure the recipient is the other user
-        const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
-            .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
-            .join(" "); // Join words into a sentence
-        
-        result.push({ from_user: fromUser, to_user: toUser, text: randomText });
-    }
-    
-    return result;
+    result.push({ from_user: fromUser, to_user: toUser, text: randomText });
+  }
+  
+  return result;
 }
-
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
-    console.log('User has connected (brrr gucci gang (we gon steal every peace of personal info he has');
+  console.log('User has connected');
 
-    // Nachricht empfangen und an alle Clients weiterleiten
-    socket.on('chat message', (msg) => {
-        console.log("Msg", msg);
-        // Timeout only for Dev and Testing phase
-        setTimeout(() => {
-            socket.emit('message confirmation', msg.id);
-            // io.emit does not make sense here, cause it sends to every user there is
-            // Database insert needed 
-            // testing: senf rand
-            const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
-            .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
-            .join(" "); // Join words into a send random sentence back
-            
-            socket.emit('chat message', randomText);
-        }, 2500);
-    });
+  // Nachricht empfangen und an alle Clients weiterleiten
+  socket.on('chat message', (msg) => {
+    console.log("Msg", msg);
+    // Timeout only for Dev and Testing phase
+    setTimeout(() => {
+      socket.emit('message confirmation', msg.id);
+      // Database insert needed 
+      const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
+        .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
+        .join(" "); // Join words into a send random sentence back
+      
+      socket.emit('chat message', randomText);
+    }, 2500);
+  });
 
-    // Listen for the requestData event
-    socket.on('get-history', (data) => {
-        const { start_at_id, number_of_messages } = data;
-        console.log('Received parameters:', start_at_id, number_of_messages);
+  // Listen for the requestData event
+  socket.on('get-history', (data) => {
+    const { start_at_id, number_of_messages } = data;
+    console.log('Received parameters:', start_at_id, number_of_messages);
 
-        const result = generateRandomMessages(number_of_messages);
+    const result = generateRandomMessages(number_of_messages);
 
-        // Send the response back to the client
-        setTimeout(() => {
-            socket.emit('response-history', result);
-        }, 1000);
-    });
+    // Send the response back to the client
+    setTimeout(() => {
+      socket.emit('response-history', result);
+    }, 1000);
+  });
 
-
-    // Wenn ein Benutzer die Verbindung trennt
-    socket.on('disconnect', () => {
-        console.log('Kleiner hund at verbindung getrennt ya eri ya maniak ya sibby');
-    });
+  // Wenn ein Benutzer die Verbindung trennt
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
 });
 
 // Server starten
