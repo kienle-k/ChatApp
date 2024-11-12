@@ -28,6 +28,13 @@ CREATE TABLE IF NOT EXISTS `group_members` (
     FOREIGN KEY (user_id) REFERENCES `users`(id) ON DELETE CASCADE
 );
 
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    username VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL
+);
+
 
 
 -- Chat messages table
