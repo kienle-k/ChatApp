@@ -196,7 +196,9 @@ io.on('connection', (socket) => {
       try {
         // Ensure user IDs and limit are integers
 
-        const { user2_id, limit, index } = data;
+        const { user2_id, start_at_id, number_of_messages } = data;
+
+        console.log("REQUESTED HISTORY: ", data);
     
         // Validate input
         if (isNaN(user2_id)) {
@@ -209,6 +211,7 @@ io.on('connection', (socket) => {
         const connection = await pool.getConnection();
     
         try {
+          console.log(user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id);
           // Query to get messages between two users
           const [messages] = await connection.execute(
             `SELECT 
@@ -229,7 +232,7 @@ io.on('connection', (socket) => {
                 (m.sender_id = ? AND m.receiver_id = ?)
             ORDER BY m.sent_at DESC
             LIMIT ? OFFSET ?`,
-            [user1_id, user2_id, user2_id, user1_id, limit, index]
+            [user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id]
           );
     
           socket.emit("response-history", {

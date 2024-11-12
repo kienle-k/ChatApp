@@ -232,6 +232,7 @@
                 console.log("at the top, triggerin reload");
                 currently_loading_messages = true;
                 let num = messagesUL.querySelectorAll('.message').length;
+                console.log("REQUESTING:", num, 50);
                 requestHistoryMessages(num, 50);
             }
         }
