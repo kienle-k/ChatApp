@@ -13,7 +13,16 @@ body {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
+
+    /* New */
+    width: 40%;
+    min-width: 300px;
+    /* width: 300px; */
+    /* End new */
+
+    display: flex;
+    justify-content: center;
+    position: relative;
 }
 
 h2 {
@@ -31,9 +40,18 @@ label {
     font-weight: bold;
 }
 
+/* New */
+button,
+input {
+    box-sizing: border-box;
+}
+
+/* End */
+
 input[type="text"],
 input[type="email"],
 input[type="password"] {
+    width: 100%; /* New */
     padding: 10px;
     margin-top: 5px;
     border: 1px solid #ccc;
@@ -41,6 +59,7 @@ input[type="password"] {
 }
 
 button[type="submit"] {
+    width: 100%;
     margin-top: 20px;
     padding: 10px;
     background-color: #4CAF50;
@@ -62,14 +81,10 @@ button[type="submit"]:hover {
     text-align: center;
 }
 
-.register-container {
-    display: flex;
-    justify-content: center;
-    position: relative;
-}
+
 .form-container {
-    width: 60%;
-    margin-right: 20px;
+    width: 100%; /* 60%; */
+    /* margin-right: 20px; */
 }
 .requirements-container {
     width: 300px;
@@ -77,10 +92,10 @@ button[type="submit"]:hover {
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    position: fixed;
+    position: absolute; /* fixed; */ 
     top: 50%;
     transform: translateY(-50%);
-    right: 20px;
+    right: -330px; /* 20px */
 }
 .requirements-container h3 {
     margin-top: 0;

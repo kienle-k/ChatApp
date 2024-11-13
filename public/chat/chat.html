@@ -33,7 +33,7 @@
         const socket = io();
 
 
-        let CURRENT_USER = "Barack Michelle Trump";
+        let CURRENTLY_CHATTING_WITH_ID = 2;
         let CURRENT_GROUP = null;
 
         var currently_loading_messages = false;
@@ -147,29 +147,91 @@
 
 
         // Wenn eine Nachricht empfangen wird
-        socket.on('chat message', (msg) => {
+        socket.on('chat-message', (msg) => {
             console.log("RECEIVED:", msg);
-            let li = addMessage(msg, 'received');
-            if (isListNearBottom()) {
-                console.log("SCROLLIN");
-                setTimeout(scrollMessagesToBottom, 0);
+            from_user =  msg.from_user;
+            from_username = msg.from_username;
+            text = msg.text;
+
+            // TODO make it more logical, change addMessage function, change whole flow
+            // DEBUG MODE: ALL MESSAGES ARE PUT IN THE SAME CHAT
+            if (true) { //from_user == CURRENTLY_CHATTING_WITH_ID){
+                let li = addMessage(text, 'received');
+                if (isListNearBottom()) {
+                    setTimeout(scrollMessagesToBottom, 0);
+                }
+            } else {
+                console.log("Received message from user that is currently not chatted with");
             }
-          
         });
 
-        // Wenn eine Nachricht als bestätigt zurückkommt
-        socket.on('message confirmation', (msgID) => {
-            // Suchen der Nachricht mit der erhaltenen msgID
+        // Old approach, now API call -> different handling
+
+        // // Wenn eine Nachricht als bestätigt zurückkommt
+        // socket.on('message confirmation', (msgID) => {
+        //     // Suchen der Nachricht mit der erhaltenen msgID
+        //     const li = pending_messages[msgID];
+        //     if (li) {
+        //         const msg = li.querySelector("div");
+        //         msg.classList.remove('pending-message'); // Entfernt den Pending-Status
+        //         msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
+        //         // Hier ein Script ausführen, z. B. Animation oder Bestätigung
+        //         console.log("Message confirmed sent: " + msgID);
+        //         delete pending_messages[msgID]; // Entferne das Pending-Tracking
+        //     }
+        // });
+
+
+        async function sendMessageToAPI(messageData) {
+            const msgID = messageData.id;
             const li = pending_messages[msgID];
-            if (li) {
-                const msg = li.querySelector("div");
-                msg.classList.remove('pending-message'); // Entfernt den Pending-Status
-                msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
-                // Hier ein Script ausführen, z. B. Animation oder Bestätigung
-                console.log("Message confirmed sent: " + msgID);
-                delete pending_messages[msgID]; // Entferne das Pending-Tracking
+            let msg;
+            if (li){
+                msg = li.querySelector("div");
+            } else {
+                msg = null;
             }
-        });
+            console.log(msgID, li, msg);
+            try {
+                const response = await fetch('/api/send-message', {
+                    method: 'POST',  
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(messageData),
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Message sent:', result.message);
+                    
+                    if (msg){
+                        msg.classList.remove('pending-message'); // Entfernt den Pending-Status
+                        msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
+                        console.log("Message confirmed sent: " + msgID);
+                        delete pending_messages[msgID]; // Entferne das Pending-Tracking
+                    }
+                } else {
+                    const errorData = await response.json();
+                    console.error('Error:', errorData.error);
+                    if (msg){
+                        msg.style.backgroundColor = "red";
+                        delete pending_messages[msgID]; // Entferne das Pending-Tracking
+                    }
+                }
+            } catch (error) {
+                console.error('Request failed:', error);
+                if (msg){
+                    msg.style.backgroundColor = "darkred";
+                    delete pending_messages[msgID]; // Entferne das Pending-Tracking
+                }
+            }
+        }
+
+            // Equivalent message data
+            
+
+
         function sendMessage(event) {
             event.preventDefault(); 
             const msgID = Date.now(); 
@@ -182,7 +244,7 @@
 
             setTimeout(scrollMessagesToBottom, 0);
 
-            let to_user = CURRENT_USER;
+            let to_user = CURRENTLY_CHATTING_WITH_ID;
 
             let to_group = CURRENT_GROUP;
 
@@ -191,7 +253,18 @@
             input.value = ''; // Eingabefeld leeren
 
             // Nachricht mit ID an den Server senden
-            socket.emit('chat message', { id: msgID, to_user: to_user, to_group: to_group, text: value }); 
+
+            const messageData = {
+                id: msgID,
+                to_user: to_user,
+                to_group: to_group,
+                text: value,
+            };
+
+            sendMessageToAPI(messageData);
+
+            // Approach via socket
+            // socket.emit('chat message', { id: msgID, to_user: to_user, to_group: to_group, text: value }); 
             
             setTimeout(() => {
                      document.getElementById('message-input').focus();

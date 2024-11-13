@@ -75,6 +75,19 @@ async function testConnection() {
   }
 }
 
+
+async function getPasswordHash(password){
+  console.log(password);
+  const hashedPassword = await bcrypt.hash(password, 10);
+  return hashedPassword;
+}
+
+async function verifyPassword(password, hash){
+  const isMatch = await bcrypt.compare(password, hash);
+  return isMatch;
+}
+
+
 testConnection();
 
 // Login endpoint
@@ -83,18 +96,25 @@ app.post('/api/login', async (req, res) => {
 
   try {
     const connection = await pool.getConnection();
-    const query = 'SELECT id, username FROM users WHERE username = ? AND password = ?';
-    const [users] = await connection.execute(query, [username, password]);
+    let query = 'SELECT id, username, password FROM users WHERE username = ?';
+    const [users] = await connection.execute(query, [username]); // Search for username (Max 1 time, as registration is else not possible)
     connection.release();
 
     console.log(users)
 
     if (users.length > 0) {
       const user = users[0];
-      req.session.user = { id: user.id, username: user.username };
-      return res.json({ success: true, message: 'Logged in successfully' });
-    }
 
+
+      console.log(password, user.password);
+      // Check if the given password matches the hash representation in the database
+      if (await verifyPassword(password, user.password)){
+        req.session.user = { id: user.id, username: user.username };
+        return res.json({ success: true, message: 'Logged in successfully' });
+      } else {
+        res.status(401).json({ error: 'Invalid password' });
+      }
+    }
     res.status(401).json({ error: 'Invalid username or password' });
   } catch (error) {
     console.error('Login Error:', error);
@@ -119,6 +139,8 @@ function isAuthenticated(req, res, next) {
     }
   }
 }
+
+
 
 // Secure chat route
 app.get('/chat', isAuthenticated, (req, res) => {
@@ -157,7 +179,7 @@ app.post('/register', async (req, res) => {
 
   try {
     // Passwort hashen, um es sicher zu speichern
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await getPasswordHash(password);
 
     // Daten in die Datenbank einfügen
     const query = 'INSERT INTO users (email, username, password) VALUES (?, ?, ?)';
@@ -185,10 +207,15 @@ app.post('/register', async (req, res) => {
 
 
 async function handleMessage(sessionUser, msg) {
-    const { to_user, text } = msg;
+    const to_user = msg.to_user;
+    const text = msg.text;
+
+    console.log(sessionUser, to_user, text);
     
-    if (!sessionUser || !to_user || !text) {
-        throw new Error('Missing required fields');
+    if (!sessionUser == null || to_user == null || text == null) {
+      console.log("sessionUser, to_user or text of message is null -> not sending message");
+      return;
+      throw new Error('Missing required data, no valid message');
     }
     
     const connection = await pool.getConnection();
@@ -204,8 +231,7 @@ async function handleMessage(sessionUser, msg) {
         const broadcastMsg = {
             from_user: sessionUser.id,
             from_username: sessionUser.username,
-            to_user,
-            text
+            text : text
         };
         
         io.emit('chat-message', broadcastMsg);
@@ -222,6 +248,7 @@ async function handleMessage(sessionUser, msg) {
 
 app.post('/api/send-message', isAuthenticated, async (req, res) => {
   try {
+    console.log(req.session.user, req.body);
       // Use the authenticated user from session
       await handleMessage(req.session.user, req.body);
       res.json({ 
@@ -261,6 +288,9 @@ function generateRandomMessages(numMessages) {
 }
 
 
+
+
+
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
   console.log('User connected');
@@ -290,23 +320,23 @@ io.on('connection', (socket) => {
   
 
     // Nachricht empfangen und an alle Clients weiterleiten
-    ///socket.on('chat message', (msg) => {
-        //console.log("Msg", msg);
+    socket.on('chat message', (msg) => {
+        console.log("Msg", msg);
         // Timeout only for Dev and Testing phase
-        //setTimeout(() => {
-            //socket.emit('message confirmation', msg.id);
-        //}, 1000);
+        setTimeout(() => {
+            socket.emit('message confirmation', msg.id);
+        }, 1000);
         
-        //setTimeout(() => {
+        setTimeout(() => {
             // Database insert needed 
-            // testing: send rand
-            //const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
-            //.map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
-            //.join(" "); // Join words into a send random sentence back
+            // testing: send random
+            const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
+            .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
+            .join(" "); // Join words into a send random sentence back
             
-            //socket.emit('chat message', randomText);
-        //}, 2500);
-    //});
+            socket.emit('chat-message', randomText);
+        }, 2500);
+    });
 
     // Listen for the requestData event
     // socket.on('get-history', (data) => {
