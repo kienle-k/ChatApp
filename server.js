@@ -339,6 +339,7 @@ io.on('connection', (socket) => {
         const connection = await pool.getConnection();
     
         try {
+          console.log(user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id);
           // Query to get messages between two users
           // const [messages] = await connection.execute(
           let [messages] = await connection.query(
@@ -473,8 +474,6 @@ io.on('connection', (socket) => {
         console.error('Error fetching messages:', error);
       }
     });
-
-
 
 
     // Wenn ein Benutzer die Verbindung trennt

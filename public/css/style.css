@@ -1,9 +1,14 @@
 body,
 html {
-    font-family: Arial, sans-serif;
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
+  font-family: Arial, sans-serif;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+    display: grid;
+    grid: 3 4;
 }
 
 
@@ -11,25 +16,30 @@ html {
     /* width: 800px;
     height: 600px; */
     width: 100%;
-    height: 100%;
-    max-width: 600px;
+    height: 90dvh;
+    /* max-width: 600px; */
     display: flex;
     flex-direction: column;
     align-items: center;
     user-select: none;
+    grid-column: 2 / 5;
+    grid-row-start: 2 / 3;
 
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 
 #messages {
     list-style-type: none;
-    height: calc(100% -170px);
-    max-height: 80%;
+    /* height: 100%; */
+    height: calc(100% - 170px);
+    /* max-height: 80%; */
     border: 2px solid black;
     border-radius: 20px;
     width: 100%; /*calc(100% - 20px);*/
     margin: 10px;
-    margin-bottom: 100px;
+    /* margin-bottom: 110px; */
     padding: 10px;
     overflow-y: auto;
     overflow-x: hidden;
@@ -192,5 +202,6 @@ h1 {
     border: none;
     cursor: pointer;
     margin-bottom: 20px;
-
+    grid-row: 1;
+    grid-column: 4;
 }
