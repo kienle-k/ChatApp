@@ -7,10 +7,12 @@ const bcrypt = require('bcrypt');
 const port = 3000; // Globale Variable für den Port
 
 
+
 // Initialisiere Express
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
+
 
 // Middleware to parse JSON bodies
 app.use(express.json());
@@ -35,18 +37,26 @@ app.use(express.static('public', {
 }));
 
 
-app.use(session({
-  secret: 'yourSecretKey',  // Replace with a strong secret key
-  resave: false,            // Don't save session if unmodified
-  saveUninitialized: true,  // Save uninitialized sessions
-  cookie: { maxAge: 1000 * 60 * 60 } // Session expires after 1 hour
-}));
+const sessionMiddleware = session({
+  secret: 'yourSecretKey',
+  resave: false,
+  saveUninitialized: true,
+  cookie: { maxAge: 1000 * 60 * 60 }
+});
+
+// Use the session middleware with Express
+app.use(sessionMiddleware);
+
+// Use the session middleware with Socket.IO
+io.use((socket, next) => {
+  sessionMiddleware(socket.request, socket.request.res || {}, next);
+});
 
 
 const dbConfig = {
   host: 'localhost',
   user: 'root',
-  password: 'yourNewPassword', //thisandthat123
+  password: 'thisandthat123',
   database: 'chatAppDB'
 };
 
@@ -100,7 +110,13 @@ function isAuthenticated(req, res, next) {
     return next();
   } else {
     console.log("User is not authenticated");
-    res.redirect('/'); // Redirect to root instead of serving index.html directly
+    // Check if it's an API request
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    } else {
+      // For non-API routes, redirect to home
+      res.redirect('/');
+    }
   }
 }
 
@@ -168,6 +184,58 @@ app.post('/register', async (req, res) => {
 });
 
 
+async function handleMessage(sessionUser, msg) {
+    const { to_user, text } = msg;
+    
+    if (!sessionUser || !to_user || !text) {
+        throw new Error('Missing required fields');
+    }
+    
+    const connection = await pool.getConnection();
+    try {
+        const query = `
+            INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at)
+            VALUES (?, ?, ?, NOW())
+        `;
+        
+        await connection.execute(query, [sessionUser.id, to_user, text]);
+        
+        // Include sender information in broadcast
+        const broadcastMsg = {
+            from_user: sessionUser.id,
+            from_username: sessionUser.username,
+            to_user,
+            text
+        };
+        
+        io.emit('chat-message', broadcastMsg);
+        
+        return { success: true };
+    } catch (error) {
+        console.error('Error saving message:', error);
+        throw error;
+    } finally {
+        connection.release();
+    }
+}
+
+
+app.post('/api/send-message', isAuthenticated, async (req, res) => {
+  try {
+      // Use the authenticated user from session
+      await handleMessage(req.session.user, req.body);
+      res.json({ 
+          success: true, 
+          message: 'Message sent successfully' 
+      });
+  } catch (error) {
+      console.error('Error processing message:', error);
+      res.status(500).json({ 
+          success: false, 
+          error: 'Failed to process message' 
+      });
+  }
+});
 
 
 const words = [
@@ -195,26 +263,50 @@ function generateRandomMessages(numMessages) {
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
-    console.log('User has connected (brrr gucci gang (we gon steal every peace of personal info he has');
+  console.log('User connected');
+  
+  socket.on('chat-message', async (msg) => {
+      // Get user from session
+      const sessionUser = socket.request.session.user;
+      
+      if (!sessionUser) {
+          socket.emit('message-confirmation', { 
+              success: false, 
+              error: 'Not authenticated' 
+          });
+          return;
+      }
+      
+      try {
+          await handleMessage(sessionUser, msg);
+          socket.emit('message-confirmation', { success: true });
+      } catch (error) {
+          socket.emit('message-confirmation', { 
+              success: false, 
+              error: 'Failed to save message'
+          });
+      }
+  });
+  
 
     // Nachricht empfangen und an alle Clients weiterleiten
-    socket.on('chat message', (msg) => {
-        console.log("Msg", msg);
+    ///socket.on('chat message', (msg) => {
+        //console.log("Msg", msg);
         // Timeout only for Dev and Testing phase
-        setTimeout(() => {
-            socket.emit('message confirmation', msg.id);
-        }, 1000);
+        //setTimeout(() => {
+            //socket.emit('message confirmation', msg.id);
+        //}, 1000);
         
-        setTimeout(() => {
+        //setTimeout(() => {
             // Database insert needed 
             // testing: send rand
-            const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
-            .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
-            .join(" "); // Join words into a send random sentence back
+            //const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
+            //.map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
+            //.join(" "); // Join words into a send random sentence back
             
-            socket.emit('chat message', randomText);
-        }, 2500);
-    });
+            //socket.emit('chat message', randomText);
+        //}, 2500);
+    //});
 
     // Listen for the requestData event
     // socket.on('get-history', (data) => {
