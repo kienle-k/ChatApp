@@ -216,19 +216,6 @@ io.on('connection', (socket) => {
         }, 1000);
     });
 
-    // Listen for the requestData event
-    // socket.on('get-history', (data) => {
-    //     const { start_at_id, number_of_messages } = data;
-    //     console.log('Received parameters:', start_at_id, number_of_messages);
-
-    //     const result = generateRandomMessages(number_of_messages);
-
-    //     // Send the response back to the client
-    //     setTimeout(() => {
-    //         socket.emit('response-history', result);
-    //     }, 1000);
-    // });
-
 
     socket.on('get-history', async (data) => {
       try {
@@ -382,8 +369,6 @@ io.on('connection', (socket) => {
         console.error('Error fetching messages:', error);
       }
     });
-
-
 
 
     // Wenn ein Benutzer die Verbindung trennt
