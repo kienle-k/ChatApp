@@ -30,6 +30,9 @@
         const socket = io();
 
 
+        let CURRENT_USER = "Barack Michelle Trump";
+        let CURRENT_GROUP = null;
+
         var currently_loading_messages = false;
 
         var pending_messages = [];
@@ -38,6 +41,8 @@
         const messageContainer = document.getElementById('message-history-container');
         const messagesUL = document.getElementById('messages');
 
+
+        var user2_id = 1;
 
         const bottomThreshold = 150;
 
@@ -54,20 +59,19 @@
         }
 
         function requestHistoryMessages(start_at_id, number_of_messages) {
-            socket.emit('get-history', { start_at_id, number_of_messages });
+            socket.emit('get-history', { user2_id, start_at_id, number_of_messages });
         }
 
         socket.on('response-history', (data) => {
             console.log('Received data from server:', data); // Process the returned data
-
+            if (!data.success){return; };
             
-
-
+            let messages = data.messages;
             let msg;
-            for (let i=data.length-1; i>= 0; i--){
+            for (let i=messages.length-1; i>= 0; i--){
                 const scrollPosition = messagesUL.scrollTop;
                 const offsetHeightBefore = messagesUL.scrollHeight;
-                msg = data[i];
+                msg = messages[i];
                 let messageType = 'sent';
                 if (msg.from_user != "Karl"){
                     messageType = 'received'
@@ -164,41 +168,49 @@
             }
         });
         function sendMessage(event) {
-    event.preventDefault(); 
-    const msgID = Date.now(); 
+            event.preventDefault(); 
+            const msgID = Date.now(); 
 
-    if (input.value == ""){
-        return;
-    }
-    let msgLi = addMessage(input.value, 'pending');
-    pending_messages[msgID] = msgLi;
+            if (input.value == ""){
+                return;
+            }
+            let msgLi = addMessage(input.value, 'pending');
+            pending_messages[msgID] = msgLi;
 
-    console.log("SCROLLLLLLIN my own");
-    setTimeout(scrollMessagesToBottom, 0);
+            setTimeout(scrollMessagesToBottom, 0);
 
-    let from_user = "Lil Pimp";
-    let to_user = "Barack Michelle Trump";
-    let to_group = null;
+            let to_user = CURRENT_USER;
 
-    let value = input.value;
+            let to_group = CURRENT_GROUP;
 
-    input.value = ''; // Eingabefeld leeren
+            let value = input.value;
 
-    // Nachricht mit ID an den Server senden
-    socket.emit('chat message', { id: msgID, from_user: from_user, to_user: to_user, to_group: to_group, text: value }); 
-    
-    setTimeout(() => {
-        // document.getElementById('message-input').focus();
-    }, 1000);
-}
+            input.value = ''; // Eingabefeld leeren
 
-// Nachricht senden
-document.getElementById('chat-form').addEventListener('submit', sendMessage);
-document.getElementById('send-button').addEventListener("touchend", (e) => {
-    e.preventDefault();
-    sendMessage(e); // Event für Touch-Ende hinzufügen
-});
-     
+            // Nachricht mit ID an den Server senden
+            socket.emit('chat message', { id: msgID, to_user: to_user, to_group: to_group, text: value }); 
+            
+            setTimeout(() => {
+                     document.getElementById('message-input').focus();
+            }, 1000);
+        }
+
+        // Nachricht senden
+        document.getElementById('chat-form').addEventListener('submit', sendMessage);
+        document.getElementById('send-button').addEventListener("touchend", (e) => {
+            e.preventDefault();
+            sendMessage(e); // Event für Touch-Ende hinzufügen
+        });
+
+
+    // Nachricht senden
+    document.getElementById('chat-form').addEventListener('submit', sendMessage);
+    document.getElementById('send-button').addEventListener("touchend", (e) => {
+        e.preventDefault();
+        sendMessage(e); // Event für Touch-Ende hinzufügen
+    });
+        
+
     
     
     // Load last Messages on window load    
