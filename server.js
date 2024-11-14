@@ -30,6 +30,13 @@ app.use('/chat', (req, res, next) => {
   next();
 });
 
+
+
+app.use((req, res, next) => {
+  res.set('Cache-Control', 'no-store');  // Prevents caching on all pages
+  next();
+});
+
 app.use(express.static('public', {
   index: 'index.html',
   // Exclude the chat directory from static serving
@@ -55,6 +62,7 @@ app.use(sessionMiddleware);
 io.use((socket, next) => {
   sessionMiddleware(socket.request, socket.request.res || {}, next);
 });
+
 
 
 const dbConfig = {
@@ -129,6 +137,7 @@ app.post('/api/login', async (req, res) => {
 
 
 function isAuthenticated(req, res, next) {
+  console.log("IS AUTH ???");
   if (req.session && req.session.user) {
     console.log("Authenticated user:", req.session.user);
     return next();
@@ -139,6 +148,7 @@ function isAuthenticated(req, res, next) {
       return res.status(401).json({ error: 'Not authenticated' });
     } else {
       // For non-API routes, redirect to home
+      console.log("REDIRECT TO HOME");
       res.redirect('/');
     }
   }
@@ -151,6 +161,7 @@ app.get('/chat', isAuthenticated, (req, res) => {
   res.sendFile(__dirname + '/public/chat/chat.html');
 });
 
+
 // Catch-all route for chat directory attempts
 app.get('/chat/*', (req, res) => {
   res.redirect('/chat');
@@ -160,6 +171,12 @@ app.get('/chat/*', (req, res) => {
 
 // Logout endpoint
 app.post('/api/logout', isAuthenticated, (req, res) => {
+  sessionUser = req.session.user;
+  if (sessionUser && connected_users[sessionUser.id]){
+    connected_users[sessionUser.id].disconnect();
+    connected_users[sessionUser.id] = null;
+  }
+  req.session.user = null;
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to logout' });
@@ -319,8 +336,10 @@ io.on('connection', (socket) => {
     const sessionUser = socket.request.session.user;
     if (sessionUser) {
       connected_users[sessionUser.id] = socket;
+    } else {
+      socket.disconnect();
+      return;
     }
-
 
     // Verbindung trennen
     socket.on('disconnect', () => {
@@ -405,7 +424,7 @@ io.on('connection', (socket) => {
         const connection = await pool.getConnection();
     
         try {
-          console.log(user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id);
+          // console.log(user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id);
           // Query to get messages between two users
           // const [messages] = await connection.execute(
           let [messages] = await connection.query(
@@ -432,7 +451,7 @@ io.on('connection', (socket) => {
             [user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id]
           );
 
-          console.log(messages);
+          // console.log(messages);
 
           // Add fake messages if none could be loaded / none are there
           // if (messages.length == 0){

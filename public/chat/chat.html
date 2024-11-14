@@ -126,6 +126,8 @@
             socket.emit('get-history', { user2_id, start_at_id, number_of_messages });
         }
 
+
+
         socket.on('response-history', (data) => {
             console.log('Received data from server:', data); // Process the returned data
             if (!data.success){return; };
@@ -336,63 +338,70 @@
             }, 1000);
         }
 
-    // Nachricht senden
-    document.getElementById('chat-form').addEventListener('submit', sendMessage);
-    document.getElementById('send-button').addEventListener("touchend", (e) => {
-        e.preventDefault();
-        sendMessage(e); // Event für Touch-Ende hinzufügen
-    });
+        // Nachricht senden
+        document.getElementById('chat-form').addEventListener('submit', sendMessage);
+        document.getElementById('send-button').addEventListener("touchend", (e) => {
+            e.preventDefault();
+            sendMessage(e); // Event für Touch-Ende hinzufügen
+        });
+            
+
         
-
-    
-    
-    // Load last Messages on window load    
-    window.onload = async function(){
-        await getUserData();
-        requestHistoryMessages(0,100);
-        setTimeout(() => {
-            scrollMessagesToBottom();
-        }, 2500);
-    }  
-    
-    // Automatic reload when scrolled to the top
-    messagesUL.addEventListener('scroll', function() {
-        if (messagesUL.scrollTop === 0) {
-            if (currently_loading_messages == false){
-                console.log("at the top, triggerin reload");
-                currently_loading_messages = true;
-                let num = messagesUL.querySelectorAll('.message').length;
-                console.log("REQUESTING:", num, 50);
-                requestHistoryMessages(num, 50);
+        
+        // Load last Messages on window load    
+        window.onload = async function(){
+            await getUserData();
+            requestHistoryMessages(0,100);
+            setTimeout(() => {
+                scrollMessagesToBottom();
+            }, 2500);
+        }  
+        
+        // Automatic reload when scrolled to the top
+        messagesUL.addEventListener('scroll', function() {
+            if (messagesUL.scrollTop === 0) {
+                if (currently_loading_messages == false){
+                    console.log("at the top, triggerin reload");
+                    currently_loading_messages = true;
+                    let num = messagesUL.querySelectorAll('.message').length;
+                    console.log("REQUESTING:", num, 50);
+                    requestHistoryMessages(num, 50);
+                }
             }
-        }
-    });
-
-    document.getElementById('logout-button').addEventListener('click', async () => {
-    try {
-        const response = await fetch('/api/logout', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
         });
 
-        const result = await response.json();
+        document.getElementById('logout-button').addEventListener('click', async () => {
+        try {
+            const response = await fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            });
 
-        if (result.success) {
-        alert('Logout success!')
-        window.location.href = '/index.html';  // Redirect to login page after logout
-        } else {
-        alert('Logout failed');
+            const result = await response.json();
+
+            if (result.success) {
+                // alert('Logout success!')
+                window.location.href = '/logout.html';  // Redirect to login page after logout
+            } else {
+                alert('Logout failed');
+            }
+        } catch (error) {
+            console.error('Error logging out:', error);
         }
-    } catch (error) {
-        console.error('Error logging out:', error);
-    }
-    });
+        });
 
-    
-    
+
+
+        // socket.on('disconnect', () => {
+        //     console.log('Socket disconnected, reloading the page...');
             
+        //     // Optionally, you can check the reason or do other actions before reloading
+        //     window.location.reload();  // Reload the page
+        // });
+
+           
     </script>
 </body>
 </html>
