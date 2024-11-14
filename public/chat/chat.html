@@ -61,7 +61,6 @@
         const messagesUL = document.getElementById('messages');
 
 
-        var user2_id = 1;
 
         const bottomThreshold = 150;
 
@@ -78,6 +77,7 @@
         }
 
         function requestHistoryMessages(start_at_id, number_of_messages) {
+            const user2_id = CURRENTLY_CHATTING_WITH_ID;
             socket.emit('get-history', { user2_id, start_at_id, number_of_messages });
         }
 
@@ -92,10 +92,11 @@
                 const offsetHeightBefore = messagesUL.scrollHeight;
                 msg = messages[i];
                 let messageType = 'sent';
-                if (msg.from_user != "Karl"){
+                console.log(CURRENTLY_CHATTING_WITH_ID, "|> MESSAGE: ", msg.sender_id, msg.receiver_id);
+                if (msg.sender_id == CURRENTLY_CHATTING_WITH_ID){
                     messageType = 'received'
                 }
-                addMessage(msg.text, messageType, on_top=true);
+                addMessage(msg.message, messageType, on_top=true);
                 if (on_top) {
                     const offsetHeightAfter = messagesUL.scrollHeight;
                     messagesUL.scrollTop = scrollPosition + (offsetHeightAfter - offsetHeightBefore);

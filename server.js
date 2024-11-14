@@ -296,15 +296,11 @@ function generateRandomMessages(numMessages) {
 }
 
 
-
-
-
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
   console.log('User connected');
 
   const sessionUser = socket.request.session.user;
-  console.log(sessionUser);
   if (sessionUser) {
     connected_users[sessionUser.id] = socket;
   }
@@ -333,7 +329,7 @@ io.on('connection', (socket) => {
   });
   
 
-    // Nachricht empfangen und an alle Clients weiterleiten
+    // Nachricht empfangen und confirmation senden
     socket.on('chat message', (msg) => {
         console.log("Msg", msg);
         // Timeout only for Dev and Testing phase
@@ -346,25 +342,11 @@ io.on('connection', (socket) => {
             // testing: send random
             const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
             .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
-            .join(" "); // Join words into a send random sentence back
+            .join(" "); // Join words into a random sentence
             
-            socket.emit('chat-message', randomText);
+            socket.emit('chat-message', randomText); // Send back to socket
         }, 2500);
     });
-
-    // Listen for the requestData event
-    // socket.on('get-history', (data) => {
-    //     const { start_at_id, number_of_messages } = data;
-    //     console.log('Received parameters:', start_at_id, number_of_messages);
-
-    //     const result = generateRandomMessages(number_of_messages);
-
-    //     // Send the response back to the client
-    //     setTimeout(() => {
-    //         socket.emit('response-history', result);
-    //     }, 1000);
-    // });
-
 
     socket.on('get-history', async (data) => {
       try {
@@ -374,10 +356,19 @@ io.on('connection', (socket) => {
     
         // Validate input
         if (isNaN(user2_id)) {
-          return res.status(400).json({ error: 'user2_id must be a valid integer.' });
+          return;
         }
 
-        let user1_id = 0;
+        const sessionUser = socket.request.session.user;
+        let user1_id;
+        if (sessionUser) {
+          user1_id = parseInt(sessionUser.id); // GET USER FROM SESSION
+        }
+        
+        // Validate input
+        if (isNaN(user1_id)) {
+          return;
+        }
     
         // Get connection from pool
         const connection = await pool.getConnection();
@@ -406,14 +397,31 @@ io.on('connection', (socket) => {
             ORDER BY m.sent_at DESC
             LIMIT ?
             OFFSET ?`,
+            // `SELECT 
+            //       message_id,
+            //       sender_id,
+            //       receiver_id,
+            //       message,
+            //       sent_at
+            //   FROM 
+            //       chat_messages
+            //   WHERE 
+            //       (sender_id = ? AND receiver_id = ?)
+            //       OR 
+            //       (sender_id = ? AND receiver_id = ?)
+            //   ORDER BY 
+            //       sent_at DESC
+            //   LIMIT ? OFFSET ?`,
             [user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id]
           );
 
+          console.log(messages);
+
           // DEVELOPMENT THING, TAKE OUT TODO!!!!!
 
-          if (messages.length == 0){
-            messages = generateRandomMessages(number_of_messages);
-          }
+          // if (messages.length == 0){
+          //   messages = generateRandomMessages(number_of_messages);
+          // }
 
           socket.emit("response-history", {
             success: true,
@@ -435,12 +443,15 @@ io.on('connection', (socket) => {
     //API to get the last message of every chat (needed to build left side of the chat screen with different chats)
     socket.on('get-chat-history', async () => {
       try {
-        // Ensure user IDs and limit are integers
-        const user1_id = 0; // TODO: GET USER FROM SESSION
+       
+        const sessionUser = socket.request.session.user;
+        if (sessionUser) {
+          const user1_id = parseInt(sessionUser.id); // GET USER FROM SESSION
+        }
         
         // Validate input
         if (isNaN(user1_id)) {
-          return res.status(400).json({ error: 'user1_id must be a valid integers.' });
+          return;
         }
 
         // Get connection from pool
@@ -522,7 +533,11 @@ io.on('connection', (socket) => {
 
     // Wenn ein Benutzer die Verbindung trennt
     socket.on('disconnect', () => {
-        console.log('Kleiner hund at verbindung getrennt ya eri ya maniak ya sibby');
+        const sessionUser = socket.request.session.user;
+        if (sessionUser) {
+          connected_users[sessionUser.id] = null;
+        }
+        console.log('Kleiner hund hat verbindung getrennt ya eri ya maniak ya sibby');
     });
 });
 
