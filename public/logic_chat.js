@@ -2,6 +2,10 @@
 const socket = io();
 
 
+
+var FIRST_LOAD = true; //Flag for scrolling down when loading the first time -> will be set to zero after first load
+
+
 let MY_USER;
 let MY_USER_ID;
 
@@ -82,8 +86,11 @@ socket.on('response-history', (data) => {
             messagesUL.scrollTop = scrollPosition + (offsetHeightAfter - offsetHeightBefore);
         }
     }
-
-    
+    if (FIRST_LOAD == true){
+        console.log("SCROLLING TO BTM");
+        scrollMessagesToBottom();
+        FIRST_LOAD = false;
+    }
 
     currently_loading_messages = false;
 });
@@ -286,9 +293,7 @@ window.onload = async function(){
     await getUserData();
     socket.emit("get-chat-history");
     requestHistoryMessages(0,100);
-    setTimeout(() => {
-        scrollMessagesToBottom();
-    }, 2500);
+    FIRST_LOAD = true; // Asure true
 }  
 
 // Automatic reload when scrolled to the top

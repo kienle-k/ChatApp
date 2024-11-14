@@ -99,7 +99,8 @@ body {
     border: none;
     transition: background-color 5s ease, margin-right 5s ease;
     overflow-wrap: break-word;
-    max-width: 50%;
+    /* max-width: 50%; */
+    max-width: 70%;
     box-sizing: border-box;
     user-select: none;
     /* cursor: grab; */
