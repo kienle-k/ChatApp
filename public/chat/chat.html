@@ -9,8 +9,28 @@
     <title>Echtzeit-Chat</title>
 </head>
 <body>
-    <h1>Echtzeit-Chat</h1>
-    <button type="button" id="logout-button">Logout</button> <!-- Logout-Button hinzugefügt -->
+    <div id="home-button-container">
+      <a id="home-button" href="/chat/chat.html">
+        <img src="/images/appIcon.png" alt="Talker">
+      </a>
+      <div id="app-name-container">
+        <img src="/images/appName.png">
+      </div>
+    </div>
+    <div id="current-user-container">
+      <ul id="current-user-info-elements">
+        <li>
+          <button type="button" id="current-user-profile">
+            <img src="/images/profile.jpg" alt="My Profile">
+          </button>
+        </li>
+        <li>
+          <button type="button" id="logout-button">
+            <img src="/images/logout.png" alt="Logout">
+          </button>
+        </li>
+      </ul>
+    </div>
     <div id="contacts-container">
       <ul id="contacts">
         <li class="contact-container">
