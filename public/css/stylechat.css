@@ -15,6 +15,7 @@ body {
 }
 
 
+
 #chat-container {
     width: 100%;
     height: 90dvh;
@@ -128,10 +129,6 @@ body {
     opacity: 1;
 }
 
-h1 {
-    user-select: none;
-}
-
 
 
 #send-container {
@@ -173,6 +170,7 @@ h1 {
 #message-input:focus {
     outline: none; /* Remove the default outline */
     border: 2px solid lightseagreen;
+    /* transition: background-color 5s ease, margin-right 5s ease; */
     background-color: #ededed;
 }
 
@@ -189,222 +187,4 @@ h1 {
     cursor: pointer;
     border-radius: 20px;
     user-select: none;
-
-}
-
-
-
-#contacts-container {
-    width: 100%;
-    height: 90dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    user-select: none;
-    border-radius: 20px;
-    grid-column: 1 / 2;
-    grid-row-start: 2 / 3;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-#contacts {
-    list-style-type: none;
-    height: 100%;
-    border-radius: 20px;
-    background-color: #ededed;
-    width: 100%;
-    margin: 0;
-    padding: 10px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    user-select: none;
-    box-sizing: border-box;
-}
-
-.contact-container {
-    width: 100%;
-    height: 80px;
-    min-height: fit-content;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: left;
-    box-sizing: border-box;
-    margin-bottom: 10px;
-    padding: 10px;
-    user-select: none;
-    border-radius: 20px;
-    overflow: hidden;
-    background-color: #ffffff;
-}
-
-.contact-profile-button {
-    width: 60px;
-    height: 100%;
-    padding: 10px;
-    background-color:#ffffff;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 20px;
-}
-
-.contact-profile-button img {
-    height: 50px;
-    width: 50px;
-}
-
-.choose-contact-button {
-    width: 100%;
-    height: 100%;
-    padding: 10px;
-    background-color: #ffffff;
-    border: none;
-    cursor: -webkit-grab;
-    display: flex;
-    align-items: center;
-    justify-content: left;
-}
-
-.contact {
-    width: fit-content;
-    height: fit-content;
-    padding: 10px;
-    margin: 0;
-    margin-right: 0;
-    border-radius: 15px;
-    border: none;
-    transition: background-color 5s ease, margin-right 5s ease;
-    overflow-wrap: break-word;
-    max-width: 50%;
-    box-sizing: border-box;
-    user-select: none;
-    /* cursor: grab; */
-}
-
-#home-button-container {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    justify-content: left;
-    align-items: center;
-    grid-column: 1 / 2;
-    grid-row: 1 / 2;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-#home-button {
-    width: 50px;
-    height: 50px;
-    padding: 0;
-    border: none;
-    cursor: pointer;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#home-button img {
-  width: 70%;
-  height: 70%;
-}
-
-#app-name-container {
-    width: 243px;
-    height: 50px;
-    padding: 0;
-    border: none;
-    cursor: pointer;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#app-name-container img {
-  width: 70%;
-  height: 70%;
-}
-
-
-
-#current-user-container {
-    width: 100%;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    border-radius: 20px;
-    grid-column: 2 / 5;
-    grid-row: 1 / 2;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-#current-user-info-elements {
-    list-style-type: none;
-    display: flex;
-    justify-content: right;
-    align-items: center;
-    height: 100%;
-    width: 100%;
-    margin: 0;
-    overflow-y: auto;
-    overflow-x: hidden;
-    user-select: none;
-    box-sizing: border-box;
-}
-
-#current-user-info-elements li {
-    margin-left: 5px;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#current-user-profile {
-    width: 50px;
-    height: 50px;
-    padding: 0;
-    background: #ffffff;
-    border: none;
-    border-radius: 25%;
-    cursor: pointer;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#current-user-profile img {
-  width: 70%;
-  height: 70%;
-}
-
-#logout-button {
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    background: red;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#logout-button img {
-  width: 70%;
-  height: 70%;
 }
