@@ -14,6 +14,10 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 
+
+let connected_users = [];
+
+
 // Middleware to parse JSON bodies
 app.use(express.json());
 
@@ -233,8 +237,12 @@ async function handleMessage(sessionUser, msg) {
             from_username: sessionUser.username,
             text : text
         };
-        
-        io.emit('chat-message', broadcastMsg);
+
+        // If the adressed user is currently connected, directly send message
+        if (connected_users[to_user]){
+           let to_user_socket = connected_users[sessionUser.id];
+           to_user_socket.emit('chat-message', broadcastMsg);
+        }
         
         return { success: true };
     } catch (error) {
@@ -294,6 +302,12 @@ function generateRandomMessages(numMessages) {
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
   console.log('User connected');
+
+  const sessionUser = socket.request.session.user;
+  console.log(sessionUser);
+  if (sessionUser) {
+    connected_users[sessionUser.id] = socket;
+  }
   
   socket.on('chat-message', async (msg) => {
       // Get user from session
