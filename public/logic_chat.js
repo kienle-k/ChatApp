@@ -180,16 +180,6 @@ socket.on('message-confirmation', (output) => {
 });
 
 
-// This socket receives updates on the chats
-socket.on('response-chat-history', (rows) => {
-    console.log("RECEIVED CHATS:", rows.messages);
-    // TODO
-    // CJ FU
-    // Logik für das Generieren / Regenerieren der Divs (je nachdem ob nur neu laden / hinzufügen zur liste)
-    // Divs brauchen data-id, um die richtigen chats laden zu können <div class=".." data-id=${chat_partner.id}>
-});
-
-
 async function sendMessageToAPI(messageData) {
     const msgID = messageData.id;
     const li = pending_messages[msgID];
