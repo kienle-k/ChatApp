@@ -37,15 +37,7 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use(express.static('public', {
-  index: 'index.html',
-  // Exclude the chat directory from static serving
-  setHeaders: (res, path) => {
-    if (path.includes('/chat/')) {
-      res.status(403).end('Forbidden');
-    }
-  }
-}));
+
 
 
 const sessionMiddleware = session({
@@ -148,13 +140,10 @@ function isAuthenticated(req, res, next) {
       return res.status(401).json({ error: 'Not authenticated' });
     } else {
       // For non-API routes, redirect to home
-      console.log("REDIRECT TO HOME");
       res.redirect('/');
     }
   }
 }
-
-
 
 // Secure chat route
 app.get('/chat', isAuthenticated, (req, res) => {
@@ -167,7 +156,41 @@ app.get('/chat/*', (req, res) => {
   res.redirect('/chat');
 });
 
+// Endpoints for pages
+app.get('/register', (req, res) => {
+  res.sendFile(__dirname + '/public/register.html');
+});
+app.get('/login', (req, res) => {
+  res.sendFile(__dirname + '/public/index.html');
+});
 
+app.get('/logout', (req, res) => {
+  res.sendFile(__dirname + '/public/logout.html');
+});
+
+
+// Redirect to pretty url when searching for the html
+app.get('/register.html', (req, res) => {
+  res.redirect(301, '/register');
+});
+app.get('/index.html', (req, res) => {
+  res.redirect(301, '/');
+});
+
+app.get('/logout.html', (req, res) => {
+  res.redirect(301, '/logout');
+});
+
+
+app.use(express.static('public', {
+  index: 'index.html',
+  // Exclude the chat directory from static serving
+  setHeaders: (res, path) => {
+    if (path.includes('/chat')) {
+      res.status(403).end('Forbidden');
+    }
+  }
+}));
 
 // Logout endpoint
 app.post('/api/logout', isAuthenticated, (req, res) => {
