@@ -510,6 +510,7 @@ io.on('connection', (socket) => {
         
         // Validate input
         if (isNaN(user1_id)) {
+          console.log("NO SESSION USER; NOT SENDING CHATS");
           return;
         }
 
@@ -574,7 +575,8 @@ io.on('connection', (socket) => {
             ORDER BY 
                 sent_at ASC;  -- Order by sent_at date
         `, [user1_id, user1_id, user1_id]);
-
+          
+          console.log(rows);
           socket.emit("response-chat-history", {
             success: true,
             messages: rows // Reverse to get chronological order
