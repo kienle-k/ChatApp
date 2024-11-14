@@ -116,13 +116,13 @@ app.post('/api/login', async (req, res) => {
         req.session.user = { id: user.id, username: user.username };
         return res.json({ success: true, message: 'Logged in successfully' });
       } else {
-        res.status(401).json({ error: 'Invalid password' });
+        return res.status(401).json({ error: 'Invalid password' });
       }
     }
-    res.status(401).json({ error: 'Invalid username or password' });
+    return res.status(401).json({ error: 'Invalid username or password' });
   } catch (error) {
     console.error('Login Error:', error);
-    res.status(500).json({ error: 'Failed to login' });
+    return res.status(500).json({ error: 'Failed to login' });
   }
 });
 
