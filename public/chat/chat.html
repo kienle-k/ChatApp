@@ -1,32 +1,80 @@
 <!DOCTYPE html>
+
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/css/stylechat.css">
+    <link rel="stylesheet" href="/css/stylecontacts.css">
+    <link rel="stylesheet" href="/css/styleinfobar.css">
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 
     <title>Echtzeit-Chat</title>
 </head>
 <body>
-    <h1>Echtzeit-Chat</h1>
-    <button type="button" id="logout-button">Logout</button> <!-- Logout-Button hinzugefügt -->
+    <div id="home-button-container">
+      <a id="home-button" href="/chat/chat.html">
+        <img src="/images/appIcon.png" alt="Talker">
+      </a>
+      <div id="app-name-container">
+        <img src="/images/appName.png">
+      </div>
+    </div>
+    <div id="current-user-container">
+      <ul id="current-user-info-elements">
+        <li>
+          <button type="button" id="current-user-profile">
+            <img src="/images/profile.jpg" alt="My Profile">
+          </button>
+        </li>
+        <li>
+          <button type="button" id="logout-button">
+            <img src="/images/logout.png" alt="Logout">
+          </button>
+        </li>
+      </ul>
+    </div>
     <div id="contacts-container">
       <ul id="contacts">
         <li class="contact-container">
-          <div class="contact">Connor</div>
+          <button type="button" class="contact-profile-button">
+            <img src="/images/profile.jpg">
+          </button>
+          <button type="button" class="choose-contact-button">
+            <div class="contact">Connor</div>
+          </button>
         </li>
         <li class="contact-container">
-          <div class="contact">Mark</div>
+          <button type="button" class="contact-profile-button">
+            <img src="/images/profile.jpg">
+          </button>
+          <button type="button" class="choose-contact-button">
+            <div class="contact">Steve</div>
+          </button>
         </li>
         <li class="contact-container">
-          <div class="contact">Thomas</div>
+          <button type="button" class="contact-profile-button">
+            <img src="/images/profile.jpg">
+          </button>
+          <button type="button" class="choose-contact-button">
+            <div class="contact">Balkan Boss</div>
+          </button>
         </li>
         <li class="contact-container">
-          <div class="contact">Markus</div>
+          <button type="button" class="contact-profile-button">
+            <img src="/images/profile.jpg">
+          </button>
+          <button type="button" class="choose-contact-button">
+            <div class="contact">Mexican Biden</div>
+          </button>
         </li>
         <li class="contact-container">
-          <div class="contact">Mahatma</div>
+          <button type="button" class="contact-profile-button">
+            <img src="/images/profile.jpg">
+          </button>
+          <button type="button" class="choose-contact-button">
+            <div class="contact">Him</div>
+          </button>
         </li>
       </ul>
     </div>
@@ -41,316 +89,9 @@
     </div>
     
 
-    
+<script src="/socket.io/socket.io.js"></script>
+<script src="../logic_chat.js"></script>
+<script src="../logic_chat_cj.js"></script>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-        // Verbindung mit dem Socket.IO-Server herstellen
-        const socket = io();
-
-
-        let CURRENTLY_CHATTING_WITH_ID = 2;
-        let CURRENT_GROUP = null;
-
-        var currently_loading_messages = false;
-
-        var pending_messages = [];
-
-        const input = document.getElementById("message-input");
-        const messageContainer = document.getElementById('message-history-container');
-        const messagesUL = document.getElementById('messages');
-
-
-        var user2_id = 1;
-
-        const bottomThreshold = 150;
-
-        function isListNearBottom() {
-            // Calculate the distance from the bottom
-            const distanceFromBottom = messagesUL.scrollHeight - messagesUL.scrollTop - messagesUL.clientHeight;
-            
-            // Return true if within threshold, false otherwise
-            return distanceFromBottom < bottomThreshold;
-        }
-
-        function scrollMessagesToBottom(){
-            messagesUL.scrollTop = messagesUL.scrollHeight;
-        }
-
-        function requestHistoryMessages(start_at_id, number_of_messages) {
-            socket.emit('get-history', { user2_id, start_at_id, number_of_messages });
-        }
-
-        socket.on('response-history', (data) => {
-            console.log('Received data from server:', data); // Process the returned data
-            if (!data.success){return; };
-            
-            let messages = data.messages;
-            let msg;
-            for (let i=messages.length-1; i>= 0; i--){
-                const scrollPosition = messagesUL.scrollTop;
-                const offsetHeightBefore = messagesUL.scrollHeight;
-                msg = messages[i];
-                let messageType = 'sent';
-                if (msg.from_user != "Karl"){
-                    messageType = 'received'
-                }
-                addMessage(msg.text, messageType, on_top=true);
-                if (on_top) {
-                    const offsetHeightAfter = messagesUL.scrollHeight;
-                    messagesUL.scrollTop = scrollPosition + (offsetHeightAfter - offsetHeightBefore);
-                }
-            }
-
-            
-
-            currently_loading_messages = false;
-        });
-
-
-        function addMessage(message, messageType, on_top=false){
-            // messageType can be 'pending' / 'sent' / 'received'
-
-            // Nachricht sofort anzeigen
-            const li = document.createElement('li');
-
-            li.classList.add("message-container");            
-            
-            const msg = document.createElement('div');
-
-            msg.innerText = message;
-
-            msg.classList.add('message');
-            msg.classList.add('new-message');
-            
-            switch(messageType) {
-                case "pending":
-                li.classList.add('right');
-                msg.classList.add('pending-message');
-                    break;
-                
-                case "sent":
-                    li.classList.add('right');
-                    msg.classList.add('sent-message');
-                    break;
-                
-                case "received":
-                    li.classList.add('left');
-                    msg.classList.add('received-message');
-                    break;
-            }
-
-
-            li.appendChild(msg);
-
-
-            
-            if (on_top){
-                messagesUL.insertBefore(li, messagesUL.firstChild);
-            }else{
-                messagesUL.appendChild(li);
-            } 
-
-            // msg.addEventListener('transitionend', scrollMessagesToBottom);
-            setTimeout(() => {
-                msg.classList.add('expanded');
-            }, 10);
-
-            
-
-            return li;
-        }
-
-
-        // Wenn eine Nachricht empfangen wird
-        socket.on('chat-message', (msg) => {
-            console.log("RECEIVED:", msg);
-            from_user =  msg.from_user;
-            from_username = msg.from_username;
-            text = msg.text;
-
-            // TODO make it more logical, change addMessage function, change whole flow
-            // DEBUG MODE: ALL MESSAGES ARE PUT IN THE SAME CHAT
-            if (true) { //from_user == CURRENTLY_CHATTING_WITH_ID){
-                let li = addMessage(text, 'received');
-                if (isListNearBottom()) {
-                    setTimeout(scrollMessagesToBottom, 0);
-                }
-            } else {
-                console.log("Received message from user that is currently not chatted with");
-            }
-        });
-
-        // Old approach, now API call -> different handling
-
-        // // Wenn eine Nachricht als bestätigt zurückkommt
-        // socket.on('message confirmation', (msgID) => {
-        //     // Suchen der Nachricht mit der erhaltenen msgID
-        //     const li = pending_messages[msgID];
-        //     if (li) {
-        //         const msg = li.querySelector("div");
-        //         msg.classList.remove('pending-message'); // Entfernt den Pending-Status
-        //         msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
-        //         // Hier ein Script ausführen, z. B. Animation oder Bestätigung
-        //         console.log("Message confirmed sent: " + msgID);
-        //         delete pending_messages[msgID]; // Entferne das Pending-Tracking
-        //     }
-        // });
-
-
-        async function sendMessageToAPI(messageData) {
-            const msgID = messageData.id;
-            const li = pending_messages[msgID];
-            let msg;
-            if (li){
-                msg = li.querySelector("div");
-            } else {
-                msg = null;
-            }
-            console.log(msgID, li, msg);
-            try {
-                const response = await fetch('/api/send-message', {
-                    method: 'POST',  
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(messageData),
-                });
-
-                if (response.ok) {
-                    const result = await response.json();
-                    console.log('Message sent:', result.message);
-                    
-                    if (msg){
-                        msg.classList.remove('pending-message'); // Entfernt den Pending-Status
-                        msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
-                        console.log("Message confirmed sent: " + msgID);
-                        delete pending_messages[msgID]; // Entferne das Pending-Tracking
-                    }
-                } else {
-                    const errorData = await response.json();
-                    console.error('Error:', errorData.error);
-                    if (msg){
-                        msg.style.backgroundColor = "red";
-                        delete pending_messages[msgID]; // Entferne das Pending-Tracking
-                    }
-                }
-            } catch (error) {
-                console.error('Request failed:', error);
-                if (msg){
-                    msg.style.backgroundColor = "darkred";
-                    delete pending_messages[msgID]; // Entferne das Pending-Tracking
-                }
-            }
-        }
-
-            // Equivalent message data
-            
-
-
-        function sendMessage(event) {
-            event.preventDefault(); 
-            const msgID = Date.now(); 
-
-            if (input.value == ""){
-                return;
-            }
-            let msgLi = addMessage(input.value, 'pending');
-            pending_messages[msgID] = msgLi;
-
-            setTimeout(scrollMessagesToBottom, 0);
-
-            let to_user = CURRENTLY_CHATTING_WITH_ID;
-
-            let to_group = CURRENT_GROUP;
-
-            let value = input.value;
-
-            input.value = ''; // Eingabefeld leeren
-
-            // Nachricht mit ID an den Server senden
-
-            const messageData = {
-                id: msgID,
-                to_user: to_user,
-                to_group: to_group,
-                text: value,
-            };
-
-            sendMessageToAPI(messageData);
-
-            // Approach via socket
-            // socket.emit('chat message', { id: msgID, to_user: to_user, to_group: to_group, text: value }); 
-            
-            setTimeout(() => {
-                     document.getElementById('message-input').focus();
-            }, 1000);
-        }
-
-        // Nachricht senden
-        document.getElementById('chat-form').addEventListener('submit', sendMessage);
-        document.getElementById('send-button').addEventListener("touchend", (e) => {
-            e.preventDefault();
-            sendMessage(e); // Event für Touch-Ende hinzufügen
-        });
-
-
-    // Nachricht senden
-    document.getElementById('chat-form').addEventListener('submit', sendMessage);
-    document.getElementById('send-button').addEventListener("touchend", (e) => {
-        e.preventDefault();
-        sendMessage(e); // Event für Touch-Ende hinzufügen
-    });
-        
-
-    
-    
-    // Load last Messages on window load    
-    window.onload = function(){
-        requestHistoryMessages(0,100);
-        setTimeout(() => {
-            scrollMessagesToBottom();
-        }, 2500);
-    }  
-    
-    // Automatic reload when scrolled to the top
-    messagesUL.addEventListener('scroll', function() {
-        if (messagesUL.scrollTop === 0) {
-            if (currently_loading_messages == false){
-                console.log("at the top, triggerin reload");
-                currently_loading_messages = true;
-                let num = messagesUL.querySelectorAll('.message').length;
-                console.log("REQUESTING:", num, 50);
-                requestHistoryMessages(num, 50);
-            }
-        }
-    });
-
-    document.getElementById('logout-button').addEventListener('click', async () => {
-    try {
-        const response = await fetch('/api/logout', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-        alert('Logout success!')
-        window.location.href = '/index.html';  // Redirect to login page after logout
-        } else {
-        alert('Logout failed');
-        }
-    } catch (error) {
-        console.error('Error logging out:', error);
-    }
-    });
-
-    
-    
-            
-    </script>
 </body>
 </html>

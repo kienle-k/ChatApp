@@ -71,6 +71,9 @@ VALUES ('user2_example', 'user2@example.com', 'user2_password');
 INSERT IGNORE INTO `users` (username, email, password)
 VALUES ('user3_example', 'user3@example.com', 'user3_password');
 
+INSERT IGNORE INTO `users` (username, email, password)
+VALUES ('user3example', 'user3@example.com', 'User3!example');
+
 
 -- Create group + chat
 INSERT IGNORE INTO `groups` (group_name)

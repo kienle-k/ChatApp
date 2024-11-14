@@ -4,20 +4,26 @@ html {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  margin: 0;
 }
 
 body {
     display: grid;
-    grid: 3 4;
+
+    /* grid: 3 5; */
+    /*CHANGED TO: */
+    grid-template-columns: 1fr 2fr; /* Define two columns */
+    grid-template-rows: 1fr;
+
+    padding: 10px;
+    box-sizing: border-box;
 }
 
 
+
 #chat-container {
-    /* width: 800px;
-    height: 600px; */
     width: 100%;
     height: 90dvh;
-    /* max-width: 600px; */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -35,6 +41,7 @@ body {
     /* max-height: 80%; */
     border: 2px solid black;
     border-radius: 20px;
+    background-color: #ededed;
     width: 100%; /*calc(100% - 20px);*/
     margin: 0;
     margin-bottom: min(10px);
@@ -92,7 +99,8 @@ body {
     border: none;
     transition: background-color 5s ease, margin-right 5s ease;
     overflow-wrap: break-word;
-    max-width: 50%;
+    /* max-width: 50%; */
+    max-width: 70%;
     box-sizing: border-box;
     user-select: none;
     /* cursor: grab; */
@@ -127,11 +135,6 @@ body {
     opacity: 1;
 }
 
-h1 {
-    user-select: none;
-}
-
-
 
 
 #send-container {
@@ -156,10 +159,7 @@ h1 {
     justify-content: center;
     box-sizing: border-box;
     user-select: none;
-
 }
-
-
 
 #message-input {
     padding: 10px;
@@ -170,11 +170,14 @@ h1 {
     border-radius: 20px;
     font-size: 1.4em;
     border: 2px solid rgb(10, 30, 29);
+    background-color: #cccccc;
 
 }
 #message-input:focus {
     outline: none; /* Remove the default outline */
     border: 2px solid lightseagreen;
+    /* transition: background-color 5s ease, margin-right 5s ease; */
+    background-color: #ededed;
 }
 
 #send-button {
@@ -190,71 +193,4 @@ h1 {
     cursor: pointer;
     border-radius: 20px;
     user-select: none;
-
-}
-
-#contacts-container {
-    width: 100%;
-    height: 90dvh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    user-select: none;
-    border-radius: 20px;
-    grid-column: 1 / 2;
-    grid-row-start: 2 / 3;
-    padding: 10px;
-    box-sizing: border-box;
-}
-
-#contacts {
-    list-style-type: none;
-    height: 100%;
-    border: 2px solid black;
-    border-radius: 20px;
-    width: 100%;
-    margin: 0;
-    padding: 10px;
-    overflow-y: auto;
-    overflow-x: hidden;
-    user-select: none;
-    box-sizing: border-box;
-}
-
-.contact-container {
-    width: 100%;
-    min-height: fit-content;
-    display: flex;
-    flex-direction: row;
-    align-items: left;
-    box-sizing: border-box;
-    margin-top: 10px;
-    user-select: none;
-}
-
-.contact {
-    width: fit-content;
-    height: fit-content;
-    padding: 10px;
-    margin: 0;
-    margin-right: 0;
-    border-radius: 15px;
-    border: none;
-    transition: background-color 5s ease, margin-right 5s ease;
-    overflow-wrap: break-word;
-    max-width: 50%;
-    box-sizing: border-box;
-    user-select: none;
-    /* cursor: grab; */
-}
-
-#logout-button {
-    padding: 10px;
-    background: red;
-    color: white;
-    border: none;
-    cursor: pointer;
-    margin-bottom: 20px;
-    grid-row: 1;
-    grid-column: 4;
 }
