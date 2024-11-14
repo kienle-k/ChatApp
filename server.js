@@ -327,6 +327,81 @@ app.get('/api/get-my-user', isAuthenticated, async (req, res) => {
   }
 });
 
+//just for testing
+/*app.post('/api/chat-history', async (req, res) => {
+  try {
+    // Get the user ID from the request
+    const userId = parseInt(req.body.userId);
+
+    // Validate the user ID
+    if (isNaN(userId)) {
+      return res.status(400).json({ error: 'Invalid user ID' });
+    }
+
+    // Get a connection from the pool
+    const connection = await pool.getConnection();
+
+    try {
+      // Query to get the last message of each chat
+      const [rows] = await connection.execute(`
+        WITH LastMessages AS (
+          SELECT
+            cm.message_id,
+            cm.sender_id,
+            cm.receiver_id,
+            cm.receiver_group_id,
+            u.username AS sender_username,
+            u2.username AS receiver_username,
+            g.group_name,
+            cm.message,
+            cm.sent_at,
+            CASE
+              WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id
+              ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))
+            END AS conversation_id,
+            ROW_NUMBER() OVER (
+              PARTITION BY
+                CASE
+                  WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id
+                  ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))
+                END
+              ORDER BY cm.sent_at DESC
+            ) AS message_rank
+          FROM chat_messages cm
+          JOIN users u ON cm.sender_id = u.id
+          LEFT JOIN users u2 ON cm.receiver_id = u2.id
+          LEFT JOIN \`groups\` g ON cm.receiver_group_id = g.group_id
+          WHERE cm.sender_id = ? OR cm.receiver_id = ?
+        )
+        SELECT
+          message_id,
+          sender_id,
+          receiver_id,
+          receiver_group_id,
+          sender_username,
+          receiver_username,
+          group_name,
+          message,
+          sent_at
+        FROM LastMessages
+        WHERE message_rank = 1
+        ORDER BY sent_at DESC;
+      `, [userId, userId]);
+      
+      
+
+      res.json({ success: true, messages: rows });
+    } finally {
+      // Always release the connection back to the pool
+      connection.release();
+    }
+  } catch (error) {
+    console.error('Error fetching messages:', error);
+    res.status(500).json({ error: 'Failed to fetch chat history' });
+  }
+});
+*/
+
 
 
 const words = [
@@ -518,76 +593,60 @@ io.on('connection', (socket) => {
         const connection = await pool.getConnection();
 
         try {
-          // Query to get last message of each chat
-          const [rows] = await pool.execute(`
-            WITH RankedMessages AS (
-                SELECT 
-                    cm.message_id,
-                    u.username AS sender_username,
-                    u2.username AS receiver_username,
-                    g.group_name,
-                    cm.message,
-                    cm.sent_at,
-                    -- Create a unique identifier for each conversation
-                    CASE 
-                        WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id  -- Group chat
-                        ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))  -- Individual chat
-                    END AS conversation_id,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY 
-                            CASE 
-                                WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id  -- Group chat
-                                ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))  -- Individual chat
-                            END 
-                        ORDER BY cm.sent_at ASC
-                    ) AS message_rank
-                FROM 
-                    chat_messages cm
-                JOIN 
-                    users u ON cm.sender_id = u.id
-                LEFT JOIN 
-                    users u2 ON cm.receiver_id = u2.id
-                LEFT JOIN 
-                    \`groups\` g ON cm.receiver_group_id = g.group_id
-                WHERE 
-                    u.id = ?  -- Sender ID must match
-                    OR 
-                    (cm.receiver_id = ? AND cm.receiver_group_id IS NULL)  -- User is the receiver in individual chat
-                    OR 
-                    (cm.receiver_group_id IS NOT NULL AND EXISTS (
-                        SELECT 1 
-                        FROM group_members gm 
-                        WHERE gm.group_id = cm.receiver_group_id AND gm.user_id = ?
-                    ))  -- User is in the group for group messages
+          // Query to get the last message of each chat
+          const [rows] = await connection.execute(`
+            WITH LastMessages AS (
+              SELECT
+                cm.message_id,
+                cm.sender_id,
+                cm.receiver_id,
+                cm.receiver_group_id,
+                u.username AS sender_username,
+                u2.username AS receiver_username,
+                g.group_name,
+                cm.message,
+                cm.sent_at,
+                CASE
+                  WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id
+                  ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))
+                END AS conversation_id,
+                ROW_NUMBER() OVER (
+                  PARTITION BY
+                    CASE
+                      WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id
+                      ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))
+                    END
+                  ORDER BY cm.sent_at DESC
+                ) AS message_rank
+              FROM chat_messages cm
+              JOIN users u ON cm.sender_id = u.id
+              LEFT JOIN users u2 ON cm.receiver_id = u2.id
+              LEFT JOIN \`groups\` g ON cm.receiver_group_id = g.group_id
+              WHERE cm.sender_id = ? OR cm.receiver_id = ?
             )
-        
-            SELECT 
-                message_id,
-                sender_username,
-                receiver_username,
-                group_name,
-                message,
-                sent_at
-            FROM 
-                RankedMessages
-            WHERE 
-                message_rank = 1  -- Get only the first message per chat
-            ORDER BY 
-                sent_at ASC;  -- Order by sent_at date
-        `, [user1_id, user1_id, user1_id]);
-          
-          console.log(rows);
-          socket.emit("response-chat-history", {
-            success: true,
-            messages: rows // Reverse to get chronological order
-          });
-
+            SELECT
+              message_id,
+              sender_id,
+              receiver_id,
+              receiver_group_id,
+              sender_username,
+              receiver_username,
+              group_name,
+              message,
+              sent_at
+            FROM LastMessages
+            WHERE message_rank = 1
+            ORDER BY sent_at DESC;
+          `, [userId, userId]);
+    
+          res.json({ success: true, messages: rows });
         } finally {
-          connection.release(); // Always release the connection
+          // Always release the connection back to the pool
+          connection.release();
         }
-
       } catch (error) {
         console.error('Error fetching messages:', error);
+        res.status(500).json({ error: 'Failed to fetch chat history' });
       }
     });
 
