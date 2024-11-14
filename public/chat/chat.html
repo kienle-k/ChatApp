@@ -69,8 +69,12 @@
         const socket = io();
 
 
+        let MY_USER;
+        let MY_USER_ID;
+
+        // EDIT THESE VALUES TO SET THE CURRENTLY CHATTED WITH USER (CONSCHTI)
         let CURRENTLY_CHATTING_WITH_ID = 2;
-        let CURRENT_GROUP = null;
+        let CURRENT_CHAT_GROUP = null;
 
         var currently_loading_messages = false;
 
@@ -80,9 +84,30 @@
         const messageContainer = document.getElementById('message-history-container');
         const messagesUL = document.getElementById('messages');
 
-
-
         const bottomThreshold = 150;
+
+
+
+        async function getUserData() {
+            try {
+                const response = await fetch('/api/get-my-user', {
+                    method: 'GET',
+                    credentials: 'include', // Include cookies/session for authenticated requests
+                });
+
+                if (response.ok) {
+                    const { username, id } = await response.json();
+                    MY_USER = username;
+                    MY_USER_ID = id;
+                    console.log(`Logged in user: ${username} (ID: ${id})`);
+                    // You can now use the username and id as needed in your application
+                } else {
+                    console.error('Failed to fetch user data:', await response.json());
+                }
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+            }
+        }
 
         function isListNearBottom() {
             // Calculate the distance from the bottom
@@ -185,7 +210,8 @@
 
         // Wenn eine Nachricht empfangen wird
         socket.on('chat-message', (msg) => {
-            console.log("RECEIVED:", msg);
+            console.log("RECEIVED: ", msg);
+
             from_user =  msg.from_user;
             from_username = msg.from_username;
             text = msg.text;
@@ -205,18 +231,18 @@
         // Old approach, now API call -> different handling
 
         // // Wenn eine Nachricht als bestätigt zurückkommt
-        // socket.on('message confirmation', (msgID) => {
-        //     // Suchen der Nachricht mit der erhaltenen msgID
-        //     const li = pending_messages[msgID];
-        //     if (li) {
-        //         const msg = li.querySelector("div");
-        //         msg.classList.remove('pending-message'); // Entfernt den Pending-Status
-        //         msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
-        //         // Hier ein Script ausführen, z. B. Animation oder Bestätigung
-        //         console.log("Message confirmed sent: " + msgID);
-        //         delete pending_messages[msgID]; // Entferne das Pending-Tracking
-        //     }
-        // });
+        socket.on('message-confirmation', (output) => {
+            let msgID = output.id;
+            // Suchen der Nachricht mit der erhaltenen msgID
+            const li = pending_messages[msgID];
+            if (li) {
+                const msg = li.querySelector("div");
+                msg.classList.remove('pending-message'); // Entfernt den Pending-Status
+                msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
+                console.log("Message confirmed sent: " + msgID);
+                delete pending_messages[msgID]; // Entferne das Pending-Tracking
+            }
+        });
 
 
         async function sendMessageToAPI(messageData) {
@@ -273,6 +299,8 @@
             event.preventDefault(); 
             const msgID = Date.now(); 
 
+
+
             if (input.value == ""){
                 return;
             }
@@ -283,7 +311,7 @@
 
             let to_user = CURRENTLY_CHATTING_WITH_ID;
 
-            let to_group = CURRENT_GROUP;
+            let to_group = CURRENT_CHAT_GROUP;
 
             let value = input.value;
 
@@ -298,23 +326,15 @@
                 text: value,
             };
 
-            sendMessageToAPI(messageData);
+            // sendMessageToAPI(messageData);
 
             // Approach via socket
-            // socket.emit('chat message', { id: msgID, to_user: to_user, to_group: to_group, text: value }); 
+            socket.emit('chat-message', { id: msgID, to_user: to_user, to_group: to_group, text: value }); 
             
             setTimeout(() => {
                      document.getElementById('message-input').focus();
             }, 1000);
         }
-
-        // Nachricht senden
-        document.getElementById('chat-form').addEventListener('submit', sendMessage);
-        document.getElementById('send-button').addEventListener("touchend", (e) => {
-            e.preventDefault();
-            sendMessage(e); // Event für Touch-Ende hinzufügen
-        });
-
 
     // Nachricht senden
     document.getElementById('chat-form').addEventListener('submit', sendMessage);
@@ -327,7 +347,8 @@
     
     
     // Load last Messages on window load    
-    window.onload = function(){
+    window.onload = async function(){
+        await getUserData();
         requestHistoryMessages(0,100);
         setTimeout(() => {
             scrollMessagesToBottom();

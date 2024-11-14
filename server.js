@@ -244,10 +244,17 @@ async function handleMessage(sessionUser, msg) {
            to_user_socket.emit('chat-message', broadcastMsg);
         }
         
-        return { success: true };
+        return { 
+          id: msg.id,
+          success: true
+        };
     } catch (error) {
         console.error('Error saving message:', error);
-        throw error;
+        return {
+          id: msg.id,
+          success: false, 
+          error: error
+        };
     } finally {
         connection.release();
     }
@@ -271,6 +278,15 @@ app.post('/api/send-message', isAuthenticated, async (req, res) => {
       });
   }
 });
+
+app.get('/api/get-my-user', isAuthenticated, async (req, res) => {
+  if (req.session.user) {
+    res.status(200).json({ success: true, username: req.session.user.username, id: req.session.user.id });
+  }else{
+    res.status(401).json({ success: false, error: 'Not authenticated' });
+  }
+});
+
 
 
 const words = [
@@ -298,56 +314,71 @@ function generateRandomMessages(numMessages) {
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
-  console.log('User connected');
+    console.log('User connected');
 
-  const sessionUser = socket.request.session.user;
-  if (sessionUser) {
-    connected_users[sessionUser.id] = socket;
-  }
-  
-  socket.on('chat-message', async (msg) => {
-      // Get user from session
-      const sessionUser = socket.request.session.user;
-      
-      if (!sessionUser) {
-          socket.emit('message-confirmation', { 
-              success: false, 
-              error: 'Not authenticated' 
-          });
-          return;
-      }
-      
-      try {
-          await handleMessage(sessionUser, msg);
-          socket.emit('message-confirmation', { success: true });
-      } catch (error) {
-          socket.emit('message-confirmation', { 
-              success: false, 
-              error: 'Failed to save message'
-          });
-      }
-  });
-  
+    const sessionUser = socket.request.session.user;
+    if (sessionUser) {
+      connected_users[sessionUser.id] = socket;
+    }
 
-    // Nachricht empfangen und confirmation senden
-    socket.on('chat message', (msg) => {
+
+    // Verbindung trennen
+    socket.on('disconnect', () => {
+        // const sessionUser = socket.request.session.user;
+        // if (sessionUser) {
+        //   connected_users[sessionUser.id] = null;
+        // }
+        console.log(`User has disconnected.`);
+    });
+    
+
+    // Message input über Socket
+    // socket.emit('chat-message', { id: msgID, to_user: to_user, to_group: to_group, text: value });
+
+    socket.on('chat-message', async (msg) => {
+        // const sessionUser = socket.request.session.user;
+        // if (!sessionUser) {
+        //   console.log("No session user");
+        //     socket.emit('message-confirmation', { 
+        //         success: false, 
+        //         error: 'Not authenticated' 
+        //     });
+        //     return;
+        // }
+        // More logic and a middleware wrapper needed for session user check, so skip and maybe implement later
+        
+        try {
+            let result = await handleMessage(sessionUser, msg);
+  
+            socket.emit('message-confirmation', result);
+
+        } catch (error) {
+            socket.emit('message-confirmation', { 
+                id: msg.id,
+                success: false, 
+                error: 'Failed to save message',
+                error_message: error
+            });
+        }
+    });
+    
+
+    // Socket endpoint  für random antworten
+    socket.on('random-chat-message', (msg) => {
         console.log("Msg", msg);
-        // Timeout only for Dev and Testing phase
-        setTimeout(() => {
-            socket.emit('message confirmation', msg.id);
-        }, 1000);
+
+        socket.emit('message confirmation', msg.id);
         
         setTimeout(() => {
-            // Database insert needed 
-            // testing: send random
-            const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
-            .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
-            .join(" "); // Join words into a random sentence
-            
-            socket.emit('chat-message', randomText); // Send back to socket
+            const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 })
+            .map(() => words[Math.floor(Math.random() * words.length)]) 
+            .join(" ");
+            socket.emit('chat-message', randomText);
         }, 2500);
     });
 
+
+    // Socket für Nachrichtenverlauf mit bestimmtem User
     socket.on('get-history', async (data) => {
       try {
         // Ensure user IDs and limit are integers
@@ -397,28 +428,13 @@ io.on('connection', (socket) => {
             ORDER BY m.sent_at DESC
             LIMIT ?
             OFFSET ?`,
-            // `SELECT 
-            //       message_id,
-            //       sender_id,
-            //       receiver_id,
-            //       message,
-            //       sent_at
-            //   FROM 
-            //       chat_messages
-            //   WHERE 
-            //       (sender_id = ? AND receiver_id = ?)
-            //       OR 
-            //       (sender_id = ? AND receiver_id = ?)
-            //   ORDER BY 
-            //       sent_at DESC
-            //   LIMIT ? OFFSET ?`,
+
             [user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id]
           );
 
           console.log(messages);
 
-          // DEVELOPMENT THING, TAKE OUT TODO!!!!!
-
+          // Add fake messages if none could be loaded / none are there
           // if (messages.length == 0){
           //   messages = generateRandomMessages(number_of_messages);
           // }
@@ -440,13 +456,14 @@ io.on('connection', (socket) => {
 
 
     
-    //API to get the last message of every chat (needed to build left side of the chat screen with different chats)
+    //API to get the last message of every chat (for the left side of the chat screen with different chats)
     socket.on('get-chat-history', async () => {
       try {
        
         const sessionUser = socket.request.session.user;
+        let user1_id;
         if (sessionUser) {
-          const user1_id = parseInt(sessionUser.id); // GET USER FROM SESSION
+          user1_id = parseInt(sessionUser.id); 
         }
         
         // Validate input
@@ -458,7 +475,7 @@ io.on('connection', (socket) => {
         const connection = await pool.getConnection();
 
         try {
-          // Query to get messages between two users
+          // Query to get last message of each chat
           const [rows] = await pool.execute(`
             WITH RankedMessages AS (
                 SELECT 
@@ -530,15 +547,6 @@ io.on('connection', (socket) => {
       }
     });
 
-
-    // Wenn ein Benutzer die Verbindung trennt
-    socket.on('disconnect', () => {
-        const sessionUser = socket.request.session.user;
-        if (sessionUser) {
-          connected_users[sessionUser.id] = null;
-        }
-        console.log('Kleiner hund hat verbindung getrennt ya eri ya maniak ya sibby');
-    });
 });
 
 // Server starten
