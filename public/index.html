@@ -4,10 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link rel="stylesheet" href="/css/stylelogin.css">
+    <link rel="stylesheet" href="/css/login_style.css">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 </head>
 <body>
-    <div class="login-container">
+    <div class="login-container" id="login-container">
         <h2>Login</h2>
         <form id="loginForm">
             <label for="username">Benutzername:</label>
@@ -20,14 +21,13 @@
             <p id="error-message"></p>
         </form>
         <p>Noch kein Konto?</p>
-        <button id="registerButton" onclick="openRegisterPage()">Registrieren</button>
+        <button id="registerButton" onclick="window.location.href = '/register';">Registrieren</button>
     </div>
     <script>
-        function openRegisterPage() {
-            // Weiterleitung zur Registrierungsseite
-            window.location.href = '/register';
+        window.onload = function(){
+            document.getElementById("login-container").style.opacity = "1";
         }
     </script>
-    <script src="logik.js"></script> <!-- Korrekte Pfadangabe -->
+    <script src="scripts/login_logic.js"></script> <!-- Korrekte Pfadangabe -->
 </body>
 </html>

@@ -23,6 +23,9 @@ body {
     display: flex;
     justify-content: center;
     position: relative;
+
+    opacity: 0;
+    transition: opacity 1s ease;
 }
 
 h2 {

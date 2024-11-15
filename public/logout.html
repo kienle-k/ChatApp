@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Logout</title>
     <link rel="stylesheet" href="/css/logout_styles.css">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div id="logout-container">
         <h2>Sie wurden erfolgreich ausgeloggt!</h2>
-        <button id="loginButton" onclick="openLogin()">Zum Login</button>
+        <button id="loginButton" onclick="window.location.href = '/';">Zum Login</button>
     </div>
-    <script>
-        function openLogin() {
-            window.location.href = '/';
-        }        
-    </script>
+     <script>
+        window.onload = function(){
+            document.getElementById("logout-container").style.opacity = "1";
+        }
+     </script>
 </body>
 </html>
