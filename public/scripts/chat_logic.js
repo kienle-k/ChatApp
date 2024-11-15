@@ -64,7 +64,6 @@ function requestHistoryMessages(start_at_id, number_of_messages) {
 }
 
 
-
 socket.on('response-history', (data) => {
     console.log('Received data from server:', data); // Process the returned data
     if (!data.success){return; };
@@ -76,7 +75,6 @@ socket.on('response-history', (data) => {
         const offsetHeightBefore = messagesUL.scrollHeight;
         msg = messages[i];
         let messageType = 'sent';
-        console.log(CURRENTLY_CHATTING_WITH_ID, "|> MESSAGE: ", msg.sender_id, msg.receiver_id);
         if (msg.sender_id == CURRENTLY_CHATTING_WITH_ID){
             messageType = 'received'
         }

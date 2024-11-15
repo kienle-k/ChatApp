@@ -38,6 +38,8 @@ app.use((req, res, next) => {
 });
 
 
+app.use(express.static('public'));
+
 
 
 const sessionMiddleware = session({
@@ -140,45 +142,45 @@ function isAuthenticated(req, res, next) {
       return res.status(401).json({ error: 'Not authenticated' });
     } else {
       // For non-API routes, redirect to home
-      res.redirect('/');
+      return res.redirect('/');
     }
   }
 }
 
 // Secure chat route
 app.get('/chat', isAuthenticated, (req, res) => {
-  res.sendFile(__dirname + '/public/chat/chat.html');
+  return res.sendFile(__dirname + '/public/chat/chat.html');
 });
 
 
 // Catch-all route for chat directory attempts
 app.get('/chat/*', (req, res) => {
-  res.redirect('/chat');
+  return res.redirect('/chat');
 });
 
 // Endpoints for pages
 app.get('/register', (req, res) => {
-  res.sendFile(__dirname + '/public/register.html');
+  return res.sendFile(__dirname + '/public/register.html');
 });
 app.get('/login', (req, res) => {
-  res.sendFile(__dirname + '/public/index.html');
+  return res.sendFile(__dirname + '/public/index.html');
 });
 
 app.get('/logout', (req, res) => {
-  res.sendFile(__dirname + '/public/logout.html');
+  return res.sendFile(__dirname + '/public/logout.html');
 });
 
 
 // Redirect to pretty url when searching for the html
 app.get('/register.html', (req, res) => {
-  res.redirect(301, '/register');
+  return res.redirect(301, '/register');
 });
 app.get('/index.html', (req, res) => {
-  res.redirect(301, '/');
+  return res.redirect(301, '/');
 });
 
 app.get('/logout.html', (req, res) => {
-  res.redirect(301, '/logout');
+  return res.redirect(301, '/logout');
 });
 
 
@@ -187,7 +189,7 @@ app.use(express.static('public', {
   // Exclude the chat directory from static serving
   setHeaders: (res, path) => {
     if (path.includes('/chat')) {
-      res.status(403).end('Forbidden');
+      return res.status(403).end('Forbidden');
     }
   }
 }));
@@ -203,8 +205,9 @@ app.post('/api/logout', isAuthenticated, (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to logout' });
+    }else{
+      return res.json({ success: true, message: 'Logged out successfully' });
     }
-    res.json({ success: true, message: 'Logged out successfully' });
   });
 });
 
@@ -306,13 +309,13 @@ app.post('/api/send-message', isAuthenticated, async (req, res) => {
     console.log(req.session.user, req.body);
       // Use the authenticated user from session
       await handleMessage(req.session.user, req.body);
-      res.json({ 
+      return res.json({ 
           success: true, 
           message: 'Message sent successfully' 
       });
   } catch (error) {
       console.error('Error processing message:', error);
-      res.status(500).json({ 
+      return res.status(500).json({ 
           success: false, 
           error: 'Failed to process message' 
       });
@@ -321,87 +324,11 @@ app.post('/api/send-message', isAuthenticated, async (req, res) => {
 
 app.get('/api/get-my-user', isAuthenticated, async (req, res) => {
   if (req.session.user) {
-    res.status(200).json({ success: true, username: req.session.user.username, id: req.session.user.id });
+    return res.status(200).json({ success: true, username: req.session.user.username, id: req.session.user.id });
   }else{
-    res.status(401).json({ success: false, error: 'Not authenticated' });
+    return res.status(401).json({ success: false, error: 'Not authenticated' });
   }
 });
-
-//just for testing
-/*app.post('/api/chat-history', async (req, res) => {
-  try {
-    // Get the user ID from the request
-    const userId = parseInt(req.body.userId);
-
-    // Validate the user ID
-    if (isNaN(userId)) {
-      return res.status(400).json({ error: 'Invalid user ID' });
-    }
-
-    // Get a connection from the pool
-    const connection = await pool.getConnection();
-
-    try {
-      // Query to get the last message of each chat
-      const [rows] = await connection.execute(`
-        WITH LastMessages AS (
-          SELECT
-            cm.message_id,
-            cm.sender_id,
-            cm.receiver_id,
-            cm.receiver_group_id,
-            u.username AS sender_username,
-            u2.username AS receiver_username,
-            g.group_name,
-            cm.message,
-            cm.sent_at,
-            CASE
-              WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id
-              ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))
-            END AS conversation_id,
-            ROW_NUMBER() OVER (
-              PARTITION BY
-                CASE
-                  WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id
-                  ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))
-                END
-              ORDER BY cm.sent_at DESC
-            ) AS message_rank
-          FROM chat_messages cm
-          JOIN users u ON cm.sender_id = u.id
-          LEFT JOIN users u2 ON cm.receiver_id = u2.id
-          LEFT JOIN \`groups\` g ON cm.receiver_group_id = g.group_id
-          WHERE cm.sender_id = ? OR cm.receiver_id = ?
-        )
-        SELECT
-          message_id,
-          sender_id,
-          receiver_id,
-          receiver_group_id,
-          sender_username,
-          receiver_username,
-          group_name,
-          message,
-          sent_at
-        FROM LastMessages
-        WHERE message_rank = 1
-        ORDER BY sent_at DESC;
-      `, [userId, userId]);
-      
-      
-
-      res.json({ success: true, messages: rows });
-    } finally {
-      // Always release the connection back to the pool
-      connection.release();
-    }
-  } catch (error) {
-    console.error('Error fetching messages:', error);
-    res.status(500).json({ error: 'Failed to fetch chat history' });
-  }
-});
-*/
-
 
 
 const words = [
@@ -637,16 +564,16 @@ io.on('connection', (socket) => {
             FROM LastMessages
             WHERE message_rank = 1
             ORDER BY sent_at DESC;
-          `, [userId, userId]);
+          `, [user1_id, user1_id]);
     
-          res.json({ success: true, messages: rows });
+          socket.emit("response-chat-history", ({ success: true, messages: rows }));
         } finally {
           // Always release the connection back to the pool
           connection.release();
         }
       } catch (error) {
         console.error('Error fetching messages:', error);
-        res.status(500).json({ error: 'Failed to fetch chat history' });
+        socket.emit("response-chat-history", ({ success: false, error: error }));
       }
     });
 
