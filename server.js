@@ -282,8 +282,9 @@ async function handleMessage(sessionUser, msg) {
         };
 
         // If the adressed user is currently connected, directly send message
+        console.log("DIRECT SENDING TO:", to_user);
         if (connected_users[to_user]){
-           let to_user_socket = connected_users[sessionUser.id];
+           let to_user_socket = connected_users[to_user];
            to_user_socket.emit('chat-message', broadcastMsg);
         }
         

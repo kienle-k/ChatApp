@@ -10,7 +10,7 @@ let MY_USER;
 let MY_USER_ID;
 
 // EDIT THESE VALUES TO SET THE CURRENTLY CHATTED WITH USER (CONSCHTI)
-let CURRENTLY_CHATTING_WITH_ID = 2;
+let CURRENTLY_CHATTING_WITH_ID = null;
 let CURRENT_CHAT_GROUP = null;
 
 var currently_loading_messages = false;
@@ -24,6 +24,43 @@ const messagesUL = document.getElementById('messages');
 const bottomThreshold = 150;
 
 
+async function addContact(id, name){
+
+    const resultsContainer = document.getElementById('user-list');
+    const ct_wrapper = document.getElementById('drop-down-users');
+
+    resultsContainer.innerHTML = '';
+    ct_wrapper.style.opacity = "0";
+    setTimeout(()=> {
+        ct_wrapper.style.display = "none";
+    }, 250);
+
+    const contact_list = document.getElementById("contacts");
+
+    // Check if contact already exists
+    for (let child of contact_list.children) {
+        const contactButton = child.querySelector('.choose-contact-button');
+    
+        if (contactButton && contactButton.getAttribute('data-id') == id) {
+            choosePersonalChat(id);
+            return; // Exit function after finding the match
+        }
+    }
+
+
+    contact_list.insertAdjacentHTML('beforeend', 
+        `<li class="contact-container">
+            <button type="button" class="contact-profile-button">
+            <img src="/images/profile.jpg">
+            </button>
+            <button type="button" class="choose-contact-button" data-id=${id} onclick="choosePersonalChat(${id})">
+            <div class="contact">${name}</div>
+            </button>
+        </li>`
+    );
+
+
+}
 
 async function findUser() {
 
@@ -65,7 +102,7 @@ async function findUser() {
 
         data.users.forEach(user => {
           const userDiv = document.createElement('div');
-          userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}">${user.username}<br>Email: ${user.email}</button>`;
+          userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}')">${user.username}<br>Email: ${user.email}</button>`;
           resultsContainer.appendChild(userDiv);
         });
       } else {
@@ -75,6 +112,37 @@ async function findUser() {
        console.error('An error occurred while searching for users:', error);
     //    alert('An error occurred while searching for users.');
     }
+}
+
+async function updateSelectedChatDisplay() {
+    const contact_list = document.getElementById("contacts");
+
+    // Check if contact already exists
+    for (let child of contact_list.children) {
+        const contactButton = child.querySelector('.choose-contact-button');
+        child.classList.remove("selected-chat-user");
+        if (contactButton && contactButton.getAttribute('data-id') == CURRENTLY_CHATTING_WITH_ID) {
+            child.classList.add("selected-chat-user");
+        }
+    }  
+}
+
+async function choosePersonalChat(user_id){
+    if (CURRENTLY_CHATTING_WITH_ID == user_id){
+        const tmp = document.getElementById("messages").style.border;
+        document.getElementById("messages").style.border = "2px solid lightseagreen";
+        setTimeout(() => {
+            document.getElementById("messages").style.border = tmp;
+        }, 500);
+        return;
+    }
+    CURRENTLY_CHATTING_WITH_ID = user_id;
+
+    updateSelectedChatDisplay();
+    
+    messagesUL.innerHTML = "";
+    requestHistoryMessages(0, 100);
+    FIRST_LOAD = true;
 }
 
 
@@ -215,7 +283,7 @@ socket.on('chat-message', (msg) => {
 
     // TODO make it more logical, change addMessage function, change whole flow
     // DEBUG MODE: ALL MESSAGES ARE PUT IN THE SAME CHAT
-    if (true) { //from_user == CURRENTLY_CHATTING_WITH_ID){
+    if (from_user == CURRENTLY_CHATTING_WITH_ID){
         let li = addMessage(text, 'received');
         if (isListNearBottom()) {
             setTimeout(scrollMessagesToBottom, 0);
@@ -347,7 +415,7 @@ document.getElementById('send-button').addEventListener("touchend", (e) => {
 window.onload = async function(){
     await getUserData();
     socket.emit("get-chat-history");
-    requestHistoryMessages(0,100);
+    // requestHistoryMessages(0,100);
     FIRST_LOAD = true; // Asure true
 }  
 

@@ -50,6 +50,7 @@ body {
     overflow-x: hidden;
     user-select: none;
     box-sizing: border-box;
+    transition: border 0.2s ease;
 }
 
 #messages {
