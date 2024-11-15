@@ -76,14 +76,14 @@
 }
 
 .contact {
-    width: 100%;
-    height: fit-content;
-    padding: 10px;
-    margin: 0;
-    background-color: red;
-    border: none;
-    overflow-wrap: break-word;
-    max-width: 50%;
-    box-sizing: border-box;
-    user-select: none;
+  width: 100%;
+  height: fit-content;
+  padding: 10px;
+  margin: 0;
+  border: none;
+  overflow-wrap: break-word;
+  max-width: 50%;
+  box-sizing: border-box;
+  user-select: none;
+  font-size: medium;
 }
