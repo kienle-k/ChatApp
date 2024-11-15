@@ -72,8 +72,8 @@ async function findUser() {
         resultsContainer.textContent = 'Keine Nutzer gefunden.';
       }
     } catch (error) {
-       console.error('Error:', error);
-       alert('An error occurred while searching for users.');
+       console.error('An error occurred while searching for users:', error);
+    //    alert('An error occurred while searching for users.');
     }
 }
 
