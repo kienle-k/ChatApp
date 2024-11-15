@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="/css/chat_style.css">
     <link rel="stylesheet" href="/css/contacts_style.css">
     <link rel="stylesheet" href="/css/infobar_style.css">
+    <link rel="stylesheet" href="/css/search_user_style.css">
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 
     <title>Echtzeit-Chat</title>
@@ -35,6 +36,21 @@
       </ul>
     </div>
     <div id="contacts-container">
+
+        <div id="search-user">
+          <div id="search-bar">
+            <!-- Inputfor searching user -->
+            <input type="text" placeholder="User suchen" id="user-search-input" />
+            <button type="submit">Suchen</button>
+          </div>
+          <!-- Dropdown for displaying user list -->
+          <div id="drop-down-users">
+            <ul id="user-list">
+              <!-- User list items will be dynamically populated by JS -->
+            </ul>
+          </div>
+        </div>
+
       <ul id="contacts">
         <li class="contact-container">
           <button type="button" class="contact-profile-button">
@@ -78,6 +94,7 @@
         </li>
       </ul>
     </div>
+
     <div id="chat-container">
         <div id="user-info-bar"></div>
         <ul id="messages"></ul>

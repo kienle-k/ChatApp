@@ -25,6 +25,42 @@ const bottomThreshold = 150;
 
 
 
+async function findUser() {
+    const searchName = "jo";//document.getElementById('searchName').value;
+    
+    // Make a POST request to your backend endpoint
+    try {
+      const response = await fetch('/api/find-user', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ search_name: searchName })
+      });
+
+      const data = await response.json();
+
+      // Handle the response and display users
+    //   const resultsContainer = document.getElementById('resultsContainer');
+    //   resultsContainer.innerHTML = '';
+
+    //   if (data.success && data.users.length > 0) {
+    //     data.users.forEach(user => {
+    //       const userDiv = document.createElement('div');
+    //       userDiv.textContent = `ID: ${user.id}, Username: ${user.username}, Email: ${user.email}`;
+    //       resultsContainer.appendChild(userDiv);
+    //     });
+    //   } else {
+    //     resultsContainer.textContent = 'No users found.';
+    //   }
+    } catch (error) {
+       console.error('Error:', error);
+       alert('An error occurred while searching for users.');
+    }
+}
+
+
+
 async function getUserData() {
     try {
         const response = await fetch('/api/get-my-user', {

@@ -16,6 +16,8 @@
     list-style-type: none;
     height: 100%;
     border-radius: 20px;
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
     background-color: #ededed;
     width: 100%;
     margin: 0;
@@ -24,6 +26,7 @@
     overflow-x: hidden;
     user-select: none;
     box-sizing: border-box;
+    position: relative;
 }
 
 .contact-container {

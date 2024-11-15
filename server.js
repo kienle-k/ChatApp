@@ -259,10 +259,10 @@ async function handleMessage(sessionUser, msg) {
 
     console.log(sessionUser, to_user, text);
     
-    if (!sessionUser == null || to_user == null || text == null) {
+    if (sessionUser == null || to_user == null || text == null) {
       console.log("sessionUser, to_user or text of message is null -> not sending message");
       return;
-      throw new Error('Missing required data, no valid message');
+      // throw new Error('Missing required data, no valid message');
     }
     
     const connection = await pool.getConnection();
@@ -296,7 +296,7 @@ async function handleMessage(sessionUser, msg) {
         return {
           id: msg.id,
           success: false, 
-          error: error
+          error: "Internal server error. Could not save message."
         };
     } finally {
         connection.release();
@@ -304,11 +304,41 @@ async function handleMessage(sessionUser, msg) {
 }
 
 
+app.post('/api/find-user', isAuthenticated, async (req, res) => {
+  try {
+      const search_name = req.body.search_name;
+      const sql_cmd = `SELECT id, username, email FROM users WHERE username LIKE '?%'`;
+      const sql_cmd_2 = `SELECT id, username, email FROM users WHERE username LIKE '%?%'`; // More flexibility
+
+      let [found_users] = await connection.query(sql_cmd, [search_name]);
+
+      if (found_users.length == 0){
+        [found_users] = await connection.query(sql_cmd_2, [search_name]);
+      }
+
+      return res.json({ 
+          success: true, 
+          search_name: search_name,
+          users: found_users 
+      });
+      
+  } catch (error) {
+      console.error('Error searching for users:', error);
+      return res.status(500).json({ 
+          success: false, 
+          search_name: search_name,
+          error: 'Error while searching for user',
+      });
+  }
+});
+
+
 app.post('/api/send-message', isAuthenticated, async (req, res) => {
   try {
     console.log(req.session.user, req.body);
-      // Use the authenticated user from session
+
       await handleMessage(req.session.user, req.body);
+
       return res.json({ 
           success: true, 
           message: 'Message sent successfully' 
