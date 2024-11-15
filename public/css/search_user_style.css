@@ -23,14 +23,21 @@
 #search-bar * {
     height: 40px;
     box-sizing: border-box;
-    border: none;
+    border: 0;
 }
   
 #search-bar input {
     width: 65%;
     border-top-left-radius: 10px;
     border-bottom-left-radius: 10px;
+    padding: 5px;
 }
+
+#search-bar input:focus {
+    border: 0;
+    outline: none;
+}
+
 
 #search-bar button {
     width: 35%;
@@ -45,15 +52,32 @@
     top: 100%; /* Position directly below #search-bar */
     left: 0;
     width: 100%; /* Matches the width of the parent */
-    background: white;
+    background: rgba(205, 205, 205, 0.791);
     /* border: 1px solid #ccc; */
-    max-height: 200px; /* Set a max height with scrolling */
+    /* max-height: 200px;  */
     overflow-y: auto; /* Allow scrolling when overflow occurs */
     z-index: 100; /* Ensure it's above other content */
+    display: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
 }
 
 #drop-down-users ul {
     margin: 0;
-    padding: 0;
+    padding: 5px;
+    padding-top: 5px;
+    padding-bottom: 0;
     list-style-type: none;
+    border: 2px solid black;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.search-bar-user {
+    border-radius: 10px;
+    background-color: rgba(14, 163, 165, 0.906);
+    margin-bottom: 5px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
 }

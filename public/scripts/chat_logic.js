@@ -26,8 +26,26 @@ const bottomThreshold = 150;
 
 
 async function findUser() {
-    const searchName = "jo";//document.getElementById('searchName').value;
-    
+
+    const searchName = document.getElementById('user-search-input').value;
+    const ct_wrapper = document.getElementById('drop-down-users');
+    const resultsContainer = document.getElementById('user-list');
+
+
+    if (searchName == ""){
+        console.log("NO SEARCH");
+        resultsContainer.innerHTML = '';
+        ct_wrapper.style.opacity = "0";
+        setTimeout(()=> {
+            ct_wrapper.style.display = "none";
+        }, 250);
+        return;
+    } else {
+        ct_wrapper.style.display = "block";
+        setTimeout(() => {
+            ct_wrapper.style.opacity = "1";
+        }, 10);
+    }
     // Make a POST request to your backend endpoint
     try {
       const response = await fetch('/api/find-user', {
@@ -40,25 +58,28 @@ async function findUser() {
 
       const data = await response.json();
 
-      // Handle the response and display users
-    //   const resultsContainer = document.getElementById('resultsContainer');
-    //   resultsContainer.innerHTML = '';
 
-    //   if (data.success && data.users.length > 0) {
-    //     data.users.forEach(user => {
-    //       const userDiv = document.createElement('div');
-    //       userDiv.textContent = `ID: ${user.id}, Username: ${user.username}, Email: ${user.email}`;
-    //       resultsContainer.appendChild(userDiv);
-    //     });
-    //   } else {
-    //     resultsContainer.textContent = 'No users found.';
-    //   }
+      resultsContainer.innerHTML = '';
+
+      if (data.success && data.users.length > 0) {
+
+        data.users.forEach(user => {
+          const userDiv = document.createElement('div');
+          userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}">${user.username}<br>Email: ${user.email}</button>`;
+          resultsContainer.appendChild(userDiv);
+        });
+      } else {
+        resultsContainer.textContent = 'Keine Nutzer gefunden.';
+      }
     } catch (error) {
        console.error('Error:', error);
        alert('An error occurred while searching for users.');
     }
 }
 
+
+document.getElementById("search-button").addEventListener("click", findUser);
+document.getElementById("user-search-input").addEventListener("input", findUser);
 
 
 async function getUserData() {

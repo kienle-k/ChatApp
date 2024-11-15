@@ -305,23 +305,31 @@ async function handleMessage(sessionUser, msg) {
 
 
 app.post('/api/find-user', isAuthenticated, async (req, res) => {
+  const connection = await pool.getConnection();
+  const search_name = req.body.search_name;
   try {
-      const search_name = req.body.search_name;
-      const sql_cmd = `SELECT id, username, email FROM users WHERE username LIKE '?%'`;
-      const sql_cmd_2 = `SELECT id, username, email FROM users WHERE username LIKE '%?%'`; // More flexibility
-
-      let [found_users] = await connection.query(sql_cmd, [search_name]);
-
-      if (found_users.length == 0){
-        [found_users] = await connection.query(sql_cmd_2, [search_name]);
+      const sql_cmd = `SELECT id, username, email FROM users WHERE username LIKE ?`;
+      const sql_cmd_2 = `SELECT id, username, email FROM users WHERE username LIKE ?`;
+      
+      let [found_users] = await connection.query(sql_cmd, [`${search_name}`]);
+      
+      if (found_users.length == 0) {
+        [found_users] = await connection.query(sql_cmd_2, [`%${search_name}%`]);
       }
 
-      return res.json({ 
-          success: true, 
-          search_name: search_name,
-          users: found_users 
-      });
-      
+      if (found_users.length == 0) {
+        return res.json({ 
+            success: false, 
+            search_name: search_name
+        });
+      } else {
+        return res.json({ 
+            success: true, 
+            search_name: search_name,
+            users: found_users 
+        });
+      }
+
   } catch (error) {
       console.error('Error searching for users:', error);
       return res.status(500).json({ 
@@ -329,6 +337,8 @@ app.post('/api/find-user', isAuthenticated, async (req, res) => {
           search_name: search_name,
           error: 'Error while searching for user',
       });
+  } finally {
+    connection.release();
   }
 });
 
