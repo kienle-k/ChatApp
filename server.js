@@ -83,7 +83,6 @@ async function testConnection() {
 
 
 async function getPasswordHash(password){
-  console.log(password);
   const hashedPassword = await bcrypt.hash(password, 10);
   return hashedPassword;
 }
@@ -106,13 +105,11 @@ app.post('/api/login', async (req, res) => {
     const [users] = await connection.execute(query, [username]); // Search for username (Max 1 time, as registration is else not possible)
     connection.release();
 
-    console.log(users)
 
     if (users.length > 0) {
       const user = users[0];
 
 
-      console.log(password, user.password);
       // Check if the given password matches the hash representation in the database
       if (await verifyPassword(password, user.password)){
         req.session.user = { id: user.id, username: user.username };
@@ -131,9 +128,8 @@ app.post('/api/login', async (req, res) => {
 
 
 function isAuthenticated(req, res, next) {
-  console.log("IS AUTH ???");
   if (req.session && req.session.user) {
-    console.log("Authenticated user:", req.session.user);
+    console.log("Authenticated user: ", req.session.user.username);
     return next();
   } else {
     console.log("User is not authenticated");
@@ -234,7 +230,7 @@ app.post('/register', async (req, res) => {
 
     try {
       await connection.execute(query, [email, username, hashedPassword]);
-      console.log("User registrated");
+      console.log("new User registrated");
       res.status(200).send('Benutzer erfolgreich registriert.');
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY') {
@@ -257,7 +253,7 @@ async function handleMessage(sessionUser, msg) {
     const to_user = msg.to_user;
     const text = msg.text;
 
-    console.log(sessionUser, to_user, text);
+    console.log("RECV MESSAGE: ", sessionUser.username, to_user, text);
     
     if (sessionUser == null || to_user == null || text == null) {
       console.log("sessionUser, to_user or text of message is null -> not sending message");
@@ -282,8 +278,8 @@ async function handleMessage(sessionUser, msg) {
         };
 
         // If the adressed user is currently connected, directly send message
-        console.log("DIRECT SENDING TO:", to_user);
         if (connected_users[to_user]){
+          console.log("RECV ONLINE, redirect via socket possible: ", to_user);
            let to_user_socket = connected_users[to_user];
            to_user_socket.emit('chat-message', broadcastMsg);
         }
@@ -346,7 +342,7 @@ app.post('/api/find-user', isAuthenticated, async (req, res) => {
 
 app.post('/api/send-message', isAuthenticated, async (req, res) => {
   try {
-    console.log(req.session.user, req.body);
+    console.log("RECV MESSAGE: ", req.session.user.username, req.body);
 
       await handleMessage(req.session.user, req.body);
 
@@ -397,7 +393,7 @@ function generateRandomMessages(numMessages) {
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
-    console.log('User connected');
+    console.log('New user socket has connected');
 
     const sessionUser = socket.request.session.user;
     if (sessionUser) {
@@ -413,7 +409,7 @@ io.on('connection', (socket) => {
         // if (sessionUser) {
         //   connected_users[sessionUser.id] = null;
         // }
-        console.log(`User has disconnected.`);
+        console.log(`User socket has disconnected.`);
     });
     
 
@@ -450,7 +446,7 @@ io.on('connection', (socket) => {
 
     // Socket endpoint  für random antworten
     socket.on('random-chat-message', (msg) => {
-        console.log("Msg", msg);
+        console.log("RECV MESSAGE (SEND BACK RANDOM): ", msg);
 
         socket.emit('message confirmation', msg.id);
         
@@ -543,6 +539,7 @@ io.on('connection', (socket) => {
     
     //API to get the last message of every chat (for the left side of the chat screen with different chats)
     socket.on('get-chat-history', async () => {
+      console.log("Sending chat history");
       try {
        
         const sessionUser = socket.request.session.user;
@@ -553,7 +550,7 @@ io.on('connection', (socket) => {
         
         // Validate input
         if (isNaN(user1_id)) {
-          console.log("NO SESSION USER; NOT SENDING CHATS");
+          console.log("No session user -> no data");
           return;
         }
 

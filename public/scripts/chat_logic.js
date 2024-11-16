@@ -102,7 +102,7 @@ async function findUser() {
 
         data.users.forEach(user => {
           const userDiv = document.createElement('div');
-          userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}')">${user.username}<br>Email: ${user.email}</button>`;
+          userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}')">${user.username}</button>`; // <br>Email: ${user.email}
           resultsContainer.appendChild(userDiv);
         });
       } else {

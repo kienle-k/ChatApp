@@ -35,9 +35,9 @@ body {
 
 #messages {
     list-style-type: none;
-    height: 100%;
+    height: calc(100% - 95px);
     /* height: calc(100% - 170px);*/
-    /* max-height: 80%; */
+    max-height: calc(100% - 95px);
     border: 2px solid black;
     border-radius: 20px;
     background-color: #ededed;
@@ -116,13 +116,15 @@ body {
 
 .sent-message {
     justify-self: flex-end;
-    background-color: lightseagreen;
+    /* background-color: lightseagreen; */
+    background-color: rgba(61, 216, 227);
     margin-right: 0;
 }
 
 .received-message {
     justify-self: flex-start;
     background-color: lightblue; 
+    
 }
 
 .new-message {
@@ -175,7 +177,9 @@ body {
 }
 #message-input:focus {
     outline: none; /* Remove the default outline */
-    border: 2px solid lightseagreen;
+    /* border: 2px solid lightseagreen; */
+    background-color: rgba(61, 216, 227);
+
     /* transition: background-color 5s ease, margin-right 5s ease; */
     background-color: #ededed;
 }
@@ -187,7 +191,9 @@ body {
     margin-left: 5px;
     box-sizing: border-box;
     padding: 10px;
-    background: lightseagreen;
+    /* background: lightseagreen; */
+    background-color: rgba(61, 216, 227);
+
     color: white;
     border: none;
     cursor: pointer;
