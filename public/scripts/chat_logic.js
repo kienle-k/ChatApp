@@ -63,14 +63,16 @@ async function addContact(id, name){
 }
 
 async function findUser() {
+    console.log("SEARCH TRIGGER");
 
     const searchName = document.getElementById('user-search-input').value;
     const ct_wrapper = document.getElementById('drop-down-users');
     const resultsContainer = document.getElementById('user-list');
 
+    console.log(searchName, ct_wrapper, resultsContainer);
 
     if (searchName == ""){
-        console.log("NO SEARCH");
+        console.log("NO SEARCH name");
         resultsContainer.innerHTML = '';
         ct_wrapper.style.opacity = "0";
         setTimeout(()=> {
@@ -83,8 +85,15 @@ async function findUser() {
             ct_wrapper.style.opacity = "1";
         }, 10);
     }
+
+    console.log(ct_wrapper.style.display);
+    console.log("OPACITY:", ct_wrapper.style.opacity);
+
+    const computedOpacity = window.getComputedStyle(ct_wrapper).opacity;
+    console.log(`Computed opacity: ${computedOpacity}`);
     // Make a POST request to your backend endpoint
     try {
+      console.log("SKURR; REQESTING USERS");
       const response = await fetch('/api/find-user', {
         method: 'POST',
         headers: {
@@ -95,16 +104,21 @@ async function findUser() {
 
       const data = await response.json();
 
+      console.log("DATA:", data);
 
       resultsContainer.innerHTML = '';
 
       if (data.success && data.users.length > 0) {
 
+        console.log(resultsContainer.childElementCount);
         data.users.forEach(user => {
           const userDiv = document.createElement('div');
           userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}')">${user.username}</button>`; // <br>Email: ${user.email}
           resultsContainer.appendChild(userDiv);
+          console.log("ADDING:", userDiv);
         });
+        console.log(resultsContainer.childElementCount);
+
       } else {
         resultsContainer.textContent = 'Keine Nutzer gefunden.';
       }

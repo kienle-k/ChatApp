@@ -14,7 +14,7 @@ body {
     grid-template-columns: 1fr 2fr; /* Define two columns */
     grid-template-rows: 1fr;
 
-    padding: 10px;
+    padding: 10px !important;
     box-sizing: border-box;
 }
 
@@ -28,6 +28,21 @@ body {
     align-items: center;
     user-select: none;
     grid-column: 2 / 5;
+    grid-row-start: 2 / 3;
+    padding: 10px;
+    box-sizing: border-box;
+    
+}
+
+#contacts-container {
+    width: 100%;
+    height: 90dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    border-radius: 20px;
+    grid-column: 1 / 2;
     grid-row-start: 2 / 3;
     padding: 10px;
     box-sizing: border-box;
@@ -60,7 +75,6 @@ body {
 #messages::-webkit-scrollbar {
     display: none; 
 }
-
 
 
 .message-container {
@@ -148,6 +162,7 @@ body {
     padding-left: 10px;
     padding-right: 10px;
     display: flex;
+    flex-direction: row;
     margin-top: auto;
 }
 
@@ -166,7 +181,7 @@ body {
 #message-input {
     padding: 10px;
     flex-grow: 1;
-    size: 80%;
+    width: 80%;
     height: 55px;
     box-sizing: border-box;
     border-radius: 20px;
