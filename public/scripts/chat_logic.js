@@ -24,13 +24,16 @@ const messagesUL = document.getElementById('messages');
 const bottomThreshold = 150;
 
 
+
 async function addContact(id, name){
 
     const resultsContainer = document.getElementById('user-list');
     const ct_wrapper = document.getElementById('drop-down-users');
+    const user_search_input = document.getElementById('user-search-input');
 
     resultsContainer.innerHTML = '';
     ct_wrapper.style.opacity = "0";
+    user_search_input.value = "";
     setTimeout(()=> {
         ct_wrapper.style.display = "none";
     }, 250);
@@ -56,10 +59,10 @@ async function addContact(id, name){
             <button type="button" class="choose-contact-button" data-id=${id} onclick="choosePersonalChat(${id})">
             <div class="contact">${name}</div>
             </button>
-        </li>`
-    );
-
-
+        </li>`);
+    setTimeout(() => {
+        choosePersonalChat(id);
+    }, 50)
 }
 
 async function findUser() {
@@ -304,6 +307,7 @@ socket.on('chat-message', (msg) => {
         }
     } else {
         console.log("Received message from user that is currently not chatted with");
+        // TODO: MAKE USER HIGHLIGHTED (MESSAGE COUNT)
     }
 });
 

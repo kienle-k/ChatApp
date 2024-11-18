@@ -387,7 +387,17 @@ body{
     border-radius: 20px;
     overflow: hidden;
     background-color: #ffffff;
+    position: relative;
+
 }
+
+.last-message {
+    border: 2px solid gray;
+    background-color: rgba(211, 211, 211, 0.621);
+    padding: 5px;
+    border-radius: 14px;
+}
+
 
 .contact-profile-button {
     width: 60px;
@@ -511,7 +521,7 @@ body{
     height: 100%;
     max-height: 100%;
 
-    /* border: 2px solid black; */
+    border: 2px solid transparent; /*black; */
     border-radius: 20px;
     background-color: #ededed;
     width: 100%;

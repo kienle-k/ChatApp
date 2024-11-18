@@ -30,14 +30,20 @@ socket.on('response-chat-history', (rows) => {
 
     let selected_class;
 
+    let last_msg_text;
+
     for (const message of rows.messages) {
         if (message.group_name == null) {
             if (message.sender_username == MY_USER) {
                 contact_username = message.receiver_username;
                 contact_id = message.receiver_id;
+                last_msg_text = `<b style="color: darkgray">Du:</b><br>${message.message}`;
             } else {
                 contact_username = message.sender_username;
                 contact_id = message.sender_id;
+                last_msg_text = `<b style="color: darkgray">${contact_username}:</b><br>${message.message}`;
+
+
             }
 
             selected_class = "";
@@ -52,6 +58,7 @@ socket.on('response-chat-history', (rows) => {
                   <button type="button" class="choose-contact-button" data-id=${contact_id} onclick="choosePersonalChat(${contact_id})">
                     <div class="contact">${contact_username}</div>
                   </button>
+                  <div class="last-message">${last_msg_text}</div>
                 </li>`
             );
             if (CURRENTLY_CHATTING_WITH_ID == null){

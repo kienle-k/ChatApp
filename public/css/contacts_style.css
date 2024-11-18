@@ -45,7 +45,21 @@
     border-radius: 20px;
     overflow: hidden;
     background-color: #ffffff;
+
+    position: relative;
+
 }
+
+.last-message {
+    position: absolute;
+    bottom: 0px;
+    right: 0px;
+    word-wrap: none;
+    word-break: keep-all;
+    padding: 5px;
+    border: 2px solid gray;
+}
+
 
 .contact-profile-button {
     width: 60px;
@@ -79,6 +93,7 @@
     display: flex;
     align-items: center;
     justify-content: left;
+    margin-bottom: 10px;
 }
 
 .contact {
