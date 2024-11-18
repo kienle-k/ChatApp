@@ -261,6 +261,13 @@ async function handleMessage(sessionUser, msg) {
       // throw new Error('Missing required data, no valid message');
     }
     
+    if (sessionUser.id == to_user){
+      return {
+        id: msg.id,
+        success: true, 
+        info: "Sender == Receiver -> Message will only be saved to database but not broadcasted"
+      };
+    }
     const connection = await pool.getConnection();
     try {
         const query = `
