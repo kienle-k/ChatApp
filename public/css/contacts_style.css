@@ -63,6 +63,7 @@
 
 .contact-profile-button {
     width: 60px;
+    min-width: 60px;
     height: 100%;
     padding: 10px;
     /* background-color:#ffffff; */
@@ -75,11 +76,14 @@
     align-items: center;
     justify-content: center;
     margin-right: 20px;
+    box-sizing: border-box;
 }
 
 .contact-profile-button img {
     height: 50px;
     width: 50px;
+    min-width: 50px;
+
 }
 
 .choose-contact-button {

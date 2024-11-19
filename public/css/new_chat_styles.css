@@ -118,7 +118,6 @@ body{
 
 
 
-
 /* TOP BAR CONTENT */
 
 
@@ -127,7 +126,15 @@ body{
 }
 
 #current-user-profile {
-    background-color: transparent;
+    /* background-color: transparent; */
+    border: 2px solid gray !important;
+    border-radius: 10px;
+}
+
+#current-user-profile img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
 }
 
 #logout-button {
@@ -160,7 +167,7 @@ body{
     align-items: center;
     justify-content: center;
 
-    padding: 3%;
+    padding: 2%;
 }
 
 #home-button img {
@@ -209,24 +216,36 @@ body{
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
+
+    gap: 10px;
 }
 
 
 #current-user-container button {
     /* border: 2px solid purple; */
 
+    width: 90px;
     height: 100%;
-    width: 100px;
-    flex-shrink: 1; 
     box-sizing: border-box;
 
-    padding: 3%;
+    flex-shrink: 1;
+
+    border-radius: 25px;
+}
+
+#current-user-container #logout-button {
+    padding: 2.5%;
+}
+#current-user-container #current-user-profile {
+    padding: 0.5%;
 }
 
 #current-user-container img {
     width: 100%;
     height: 100%;
     object-fit: contain;
+    border-radius: 20px;
+    margin: 0;
 }
 
 
@@ -379,7 +398,7 @@ body{
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: left;
+    justify-content: space-between;
     box-sizing: border-box;
     margin-bottom: 10px;
     padding: 10px;
@@ -392,35 +411,49 @@ body{
 }
 
 .last-message {
-    border: 2px solid gray;
+    /* border: 2px solid gray; */
     background-color: rgba(211, 211, 211, 0.621);
     padding: 5px;
     border-radius: 14px;
+    width: 20%;
+    min-width: 60px;
+    max-width: 20%;    
+    
+    height: 100%;
+    overflow: hidden;
+    /* min-height: 100px; */
 }
 
 
 .contact-profile-button {
-    width: 60px;
-    height: 100%;
-    padding: 10px;
+    min-width: 60px;
+    height: 80px;
+    width: 15%;
+    max-width: 20%;
+    padding: 0;
     background-color: transparent;
-    border: none;
-    border-radius: 50%;
+    border: 2px solid gray;
+    box-sizing: border-box;
+    /* border-radius: 50%; */
     cursor: pointer;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 20px;
+    /* margin-right: 20px; */
+    border-radius: 20px;
+
 }
 
 .contact-profile-button img {
-    height: 50px;
-    width: 50px;
+    height: 100%;
+    width: 100%;
+    object-fit: contain;
+    border-radius: 20px;
 }
 
 .choose-contact-button {
-    width: 100%;
+    width: 30%;
     height: 100%;
     padding: 10px;
     background-color: transparent;
@@ -428,7 +461,7 @@ body{
     cursor: -webkit-grab;
     display: flex;
     align-items: center;
-    justify-content: left;
+    justify-content: center;
 }
 
 .contact {
@@ -488,12 +521,14 @@ body{
     font-size: 1.15em;
     border: 0;
     padding-left: 10px;
-    background-color: #cccccc;
+    /* background-color: #cccccc; */
+    background-color: #ededed;
 }
 
 #message-input:focus {
     outline: none; 
-    background-color: #ededed;
+    background-color: #fcfcfc;
+    border: 2px solid rgba(61, 216, 227);
 }
 
 #send-button {

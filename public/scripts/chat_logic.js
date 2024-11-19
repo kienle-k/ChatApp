@@ -25,7 +25,7 @@ const bottomThreshold = 150;
 
 
 
-async function addContact(id, name){
+async function addContact(id, name, picture_path = null){
 
     const resultsContainer = document.getElementById('user-list');
     const ct_wrapper = document.getElementById('drop-down-users');
@@ -51,18 +51,54 @@ async function addContact(id, name){
     }
 
 
+    // if (message.sender_username == MY_USER) {
+    //     contact_username = message.receiver_username;
+    //     contact_id = message.receiver_id;
+    //     last_msg_text = `<b style="color: darkgray">Du:</b><br>${message.message}`;
+    //     picture_path = message.receiver_picture;
+    // } else {
+    //     contact_username = message.sender_username;
+    //     contact_id = message.sender_id;
+    //     last_msg_text = `<b style="color: darkgray">${contact_username}:</b><br>${message.message}`;
+    //     picture_path = message.sender_picture;
+    // }
+
+    selected_class = "";
+
+    console.log("THE PATH IS", picture_path);
+
+    try {
+        if (!picture_path.includes("/")){
+            picture_path = 'images/profile.jpg';
+        }
+    }catch (error){
+        console.log("EROR");
+        picture_path = 'images/profile.jpg';
+    }
+    console.log("THE PATH IS", picture_path);
+
+            
     contact_list.insertAdjacentHTML('beforeend', 
-        `<li class="contact-container">
+        `<li class="contact-container ${selected_class}">
             <button type="button" class="contact-profile-button">
-            <img src="/images/profile.jpg">
+            <img src="/${picture_path}">
             </button>
             <button type="button" class="choose-contact-button" data-id=${id} onclick="choosePersonalChat(${id})">
             <div class="contact">${name}</div>
             </button>
-        </li>`);
+                        <div class="last-message"></div>
+
+        </li>`
+        
+    );
+
+
+
     setTimeout(() => {
         choosePersonalChat(id);
-    }, 50)
+    }, 50);
+    document.getElementById('message-input').focus();
+
 }
 
 async function findUser() {
@@ -114,9 +150,11 @@ async function findUser() {
       if (data.success && data.users.length > 0) {
 
         console.log(resultsContainer.childElementCount);
+        console.log(data.users);
+
         data.users.forEach(user => {
           const userDiv = document.createElement('div');
-          userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}')">${user.username}</button>`; // <br>Email: ${user.email}
+          userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}', '${user.profile_picture}')">${user.username}</button>`; // <br>Email: ${user.email}
           resultsContainer.appendChild(userDiv);
           console.log("ADDING:", userDiv);
         });
@@ -160,6 +198,8 @@ async function choosePersonalChat(user_id){
     messagesUL.innerHTML = "";
     requestHistoryMessages(0, 100);
     FIRST_LOAD = true;
+
+    document.getElementById('message-input').focus();
 }
 
 
@@ -290,6 +330,38 @@ function addMessage(message, messageType, on_top=false){
 }
 
 
+async function updateLastMessage(from_name, chat_partner_id, text){
+    console.log(from_name, chat_partner_id, text );
+
+    let add_points = "";
+    if (text.length > 9){
+        add_points = "...";
+    }
+    text = text.slice(0, 9);
+    // Add spaces if the length is less than 6
+    while (text.length < 9) {
+        text += " ";
+    }        
+    
+    text += add_points;
+
+    const contactItems = document.querySelectorAll('.contact-container');
+
+    contactItems.forEach(item => {
+        console.log(item);
+        const button = item.querySelector('.choose-contact-button'); // Select the button
+        const contactId = button.getAttribute('data-id');
+        console.log(button);
+        console.log(contactId, chat_partner_id);
+        if (contactId == chat_partner_id){
+            const lastMessageDiv = item.querySelector('.last-message');
+            lastMessageDiv.innerHTML = `<b style="color: darkgray">${from_name}:</b><br>${text}`;
+            return;
+        }
+    });
+}
+
+
 // Wenn eine Nachricht empfangen wird
 socket.on('chat-message', (msg) => {
     console.log("RECEIVED: ", msg);
@@ -300,6 +372,9 @@ socket.on('chat-message', (msg) => {
 
     // TODO make it more logical, change addMessage function, change whole flow
     // DEBUG MODE: ALL MESSAGES ARE PUT IN THE SAME CHAT
+
+    updateLastMessage(from_username, from_user, text);
+
     if (from_user == CURRENTLY_CHATTING_WITH_ID){
         let li = addMessage(text, 'received');
         if (isListNearBottom()) {
@@ -414,6 +489,8 @@ function sendMessage(event) {
     // Approach via socket
     socket.emit('chat-message', { id: msgID, to_user: to_user, to_group: to_group, text: value }); 
     
+    updateLastMessage("Du", to_user, value);
+
     setTimeout(() => {
              document.getElementById('message-input').focus();
     }, 1000);
@@ -427,11 +504,42 @@ document.getElementById('send-button').addEventListener("touchend", (e) => {
 });
     
 
+function fetchProfilePicture() {
+    const profileImageElement = document.getElementById('profileImage');
+    // Make the API request to the backend
+    fetch('/api/get-my-picture')
+      .then(response => response.json()) // Parse the JSON response from the backend
+      .then(data => {
+        // Get the profile picture path from the response
+        const profilePicturePath = data.profile_picture;
+  
+        // Find the image element where the profile picture will be displayed
+       
+  
+        // If the element exists, set its src attribute to the profile picture path
+        if (profileImageElement && profileImageElement != nuöö) {
+          profileImageElement.src = profilePicturePath;
+        } else {
+          profileImageElement.src = '/images/profile.jpg'; 
+        }
+      })
+      .catch(error => {
+        console.error('Error fetching profile picture:', error);
+        // Optionally, set a default image in case of an error
+        profileImageElement.src = '/images/profile.jpg';
+      });
+  }
+  
+
+
+
 
 
 // Load last Messages on window load    
 window.onload = async function(){
     await getUserData();
+    console.log("FETCH PIC");
+    fetchProfilePicture();
     socket.emit("get-chat-history");
     // requestHistoryMessages(0,100);
     FIRST_LOAD = true; // Asure true

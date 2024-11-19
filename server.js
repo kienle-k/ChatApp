@@ -4,6 +4,20 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
+
+const multer = require('multer');
+const path = require('path');
+const crypto = require('crypto');
+
+const fs = require('fs');
+
+const upload_path = 'public/uploads';
+
+if (!fs.existsSync(upload_path)){
+    fs.mkdirSync(upload_path);
+}
+
+
 const port = 3000; // Globale Variable für den Port
 
 
@@ -13,6 +27,21 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+
+
+// Configure multer storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads'); // Set the destination folder for uploaded files
+  },
+  filename: function (req, file, cb) {
+    // Use a hashed filename to avoid filename conflicts
+    const hash = crypto.createHash('sha256').update(file.originalname + Date.now().toString()).digest('hex');
+    cb(null, hash + path.extname(file.originalname)); // Save file with the hash and original extension
+  }
+});
+
+const upload = multer({ storage });
 
 
 let connected_users = [];
@@ -166,11 +195,16 @@ app.get('/logout', (req, res) => {
   return res.sendFile(__dirname + '/public/logout.html');
 });
 
+app.get('/registrated-successfully', (req, res) => {
+  return res.sendFile(__dirname + '/public/registered.html');
+});
+
 
 // Redirect to pretty url when searching for the html
 app.get('/register.html', (req, res) => {
   return res.redirect(301, '/register');
 });
+
 app.get('/index.html', (req, res) => {
   return res.redirect(301, '/');
 });
@@ -179,6 +213,9 @@ app.get('/logout.html', (req, res) => {
   return res.redirect(301, '/logout');
 });
 
+app.get('/registered.html', (req, res) => {
+  return res.redirect(301, '/registrated-successfully');
+});
 
 app.use(express.static('public', {
   index: 'index.html',
@@ -210,26 +247,35 @@ app.post('/api/logout', isAuthenticated, (req, res) => {
 
 
 
-// Registrierung Route
-app.post('/register', async (req, res) => {
+// Registrierung Route, NEW: profile picture upload
+app.post('/register', upload.single('image'), async (req, res) => {
   
   const { email, username, password } = req.body;
-
+  console.log(req.body);
   // Überprüfe, ob alle Felder ausgefüllt sind
   if (!email || !username || !password) {
     return res.status(400).send('Alle Felder sind erforderlich.');
   }
+
+  // If an image is uploaded, get the image path
+  let imagePath = null;
+  if (req.file) {
+    imagePath = path.join('uploads', req.file.filename);
+    console.log(imagePath);
+  }
+
+  console.log(imagePath);
 
   try {
     // Passwort hashen, um es sicher zu speichern
     const hashedPassword = await getPasswordHash(password);
 
     // Daten in die Datenbank einfügen
-    const query = 'INSERT INTO users (email, username, password) VALUES (?, ?, ?)';
+    const query = 'INSERT INTO users (email, username, password, profile_picture) VALUES (?, ?, ?, ?)';
     const connection = await pool.getConnection();
 
     try {
-      await connection.execute(query, [email, username, hashedPassword]);
+      await connection.execute(query, [email, username, hashedPassword, imagePath]);
       console.log("new User registrated");
       res.status(200).send('Benutzer erfolgreich registriert.');
     } catch (err) {
@@ -261,13 +307,7 @@ async function handleMessage(sessionUser, msg) {
       // throw new Error('Missing required data, no valid message');
     }
     
-    if (sessionUser.id == to_user){
-      return {
-        id: msg.id,
-        success: true, 
-        info: "Sender == Receiver -> Message will only be saved to database but not broadcasted"
-      };
-    }
+    
     const connection = await pool.getConnection();
     try {
         const query = `
@@ -283,6 +323,14 @@ async function handleMessage(sessionUser, msg) {
             from_username: sessionUser.username,
             text : text
         };
+
+        if (sessionUser.id == to_user){
+          return {
+            id: msg.id,
+            success: true, 
+            info: "Sender == Receiver -> Message will only be saved to database but not broadcasted"
+          };
+        }
 
         // If the adressed user is currently connected, directly send message
         if (connected_users[to_user]){
@@ -312,8 +360,8 @@ app.post('/api/find-user', isAuthenticated, async (req, res) => {
   const connection = await pool.getConnection();
   const search_name = req.body.search_name;
   try {
-      const sql_cmd = `SELECT id, username, email FROM users WHERE username LIKE ?`;
-      const sql_cmd_2 = `SELECT id, username, email FROM users WHERE username LIKE ?`;
+      const sql_cmd = `SELECT id, username, email, profile_picture FROM users WHERE username LIKE ?`;
+      const sql_cmd_2 = `SELECT id, username, email, profile_picture FROM users WHERE username LIKE ?`;
       
       let [found_users] = await connection.query(sql_cmd, [`${search_name}`]);
       
@@ -373,6 +421,49 @@ app.get('/api/get-my-user', isAuthenticated, async (req, res) => {
     return res.status(401).json({ success: false, error: 'Not authenticated' });
   }
 });
+
+app.get('/api/get-my-picture', isAuthenticated, async (req, res) => {
+  try {
+    const sessionUser = req.session.user;
+    let user_id;
+
+    if (sessionUser) {
+      user_id = parseInt(sessionUser.id); // Get user from session
+    }
+
+    // Validate user ID
+    if (isNaN(user_id)) {
+      return res.status(400).send('Invalid user ID');
+    }
+
+    const connection = await pool.getConnection();
+    try {
+      const [rows] = await connection.query(
+        'SELECT profile_picture FROM users WHERE id=?',
+        [user_id]
+      );
+
+      if (rows.length > 0) {
+        const profilePicture = rows[0].profile_picture;
+        const picturePath = profilePicture ? `/${profilePicture}` : 'images/profile.jpg';
+        res.json({ profile_picture: picturePath });
+      } else {
+        res.status(404).send('User not found');
+      }
+
+    } catch (error) {
+      console.log("Database error:", error);
+      res.status(500).send('Internal server error');
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error("Unhandled error:", error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
 
 
 const words = [
@@ -574,6 +665,8 @@ io.on('connection', (socket) => {
                 cm.receiver_id,
                 cm.receiver_group_id,
                 u.username AS sender_username,
+                u.profile_picture AS sender_picture,
+                u2.profile_picture AS receiver_picture,
                 u2.username AS receiver_username,
                 g.group_name,
                 cm.message,
@@ -603,6 +696,8 @@ io.on('connection', (socket) => {
               receiver_group_id,
               sender_username,
               receiver_username,
+              sender_picture,
+              receiver_picture,
               group_name,
               message,
               sent_at
@@ -610,6 +705,8 @@ io.on('connection', (socket) => {
             WHERE message_rank = 1
             ORDER BY sent_at DESC;
           `, [user1_id, user1_id]);
+
+          console.log(rows);
     
           socket.emit("response-chat-history", ({ success: true, messages: rows }));
         } finally {

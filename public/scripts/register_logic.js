@@ -39,6 +39,11 @@ passwordField.addEventListener('input', function() {
 });
 
 document.getElementById('registerForm').addEventListener('submit', function(event) {
+
+    event.preventDefault();
+
+    const fileInput = document.getElementById('imageInput');
+
     const username = usernameField.value;
     const password = passwordField.value;
     const confirmPassword = confirmPasswordField.value;
@@ -64,20 +69,26 @@ document.getElementById('registerForm').addEventListener('submit', function(even
         errorMessage.textContent = 'Die Passwörter stimmen nicht überein.';
     } else {
         errorMessage.textContent = '';
-        // Die Daten an den Server senden
+        // Handle image processing
+        let formData = new FormData();
+        if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            formData.append('image', file);
+        }
+
+        // Add other form data
+        formData.append('email', document.getElementById('email').value);
+        formData.append('username', username);
+        formData.append('password', password);
+
+        // Send the data to the server
         fetch('/register', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                email: document.getElementById('email').value,
-                username: username,
-                password: password
-            })
+            body: formData // Using FormData instead of JSON to include the image
         }).then(response => {
             if (response.ok) {
-                alert('Registrierung erfolgreich!');
+                // alert('Registrierung erfolgreich!');
+                window.location.href = "/registrated-successfully";
             } else {
                 response.text().then(text => {
                     alert('Fehler: ' + text);
@@ -87,6 +98,5 @@ document.getElementById('registerForm').addEventListener('submit', function(even
             console.error('Fehler:', error);
             alert('Ein Fehler ist aufgetreten. Bitte versuche es erneut.');
         });
-        event.preventDefault(); // Verhindere, dass das Formular die Seite neu lädt
     }
 });
