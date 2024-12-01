@@ -465,6 +465,11 @@ app.get('/api/get-my-picture', isAuthenticated, async (req, res) => {
 
 
 
+SELECT * FROM your_table_name
+ORDER BY RAND()
+LIMIT 1;
+
+
 
 const words = [
         "YOO", "hello", "how are you", "what's up", "let's meet", 

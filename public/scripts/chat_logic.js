@@ -77,6 +77,9 @@ async function addContact(id, name, picture_path = null){
     }
     console.log("THE PATH IS", picture_path);
 
+    if (id == MY_USER_ID && !name.includes("(Du)")){
+        name += " (Du)";
+    }
             
     contact_list.insertAdjacentHTML('beforeend', 
         `<li class="contact-container ${selected_class}">
@@ -154,6 +157,9 @@ async function findUser() {
 
         data.users.forEach(user => {
           const userDiv = document.createElement('div');
+          if (user.id == MY_USER_ID){
+            user.username += " (Du)";
+        }
           userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}', '${user.profile_picture}')">${user.username}</button>`; // <br>Email: ${user.email}
           resultsContainer.appendChild(userDiv);
           console.log("ADDING:", userDiv);
@@ -333,17 +339,17 @@ function addMessage(message, messageType, on_top=false){
 async function updateLastMessage(from_name, chat_partner_id, text){
     console.log(from_name, chat_partner_id, text );
 
-    let add_points = "";
-    if (text.length > 9){
-        add_points = "...";
-    }
-    text = text.slice(0, 9);
-    // Add spaces if the length is less than 6
-    while (text.length < 9) {
-        text += " ";
-    }        
+    // let add_points = "";
+    // if (text.length > 9){
+    //     add_points = "...";
+    // }
+    // text = text.slice(0, 9);
+    // // Add spaces if the length is less than 6
+    // while (text.length < 9) {
+    //     text += " ";
+    // }        
     
-    text += add_points;
+    // text += add_points;
 
     const contactItems = document.querySelectorAll('.contact-container');
 
@@ -517,7 +523,7 @@ function fetchProfilePicture() {
        
   
         // If the element exists, set its src attribute to the profile picture path
-        if (profileImageElement && profileImageElement != nuöö) {
+        if (profileImageElement && profileImageElement != null) {
           profileImageElement.src = profilePicturePath;
         } else {
           profileImageElement.src = '/images/profile.jpg'; 

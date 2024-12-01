@@ -40,17 +40,17 @@ socket.on('response-chat-history', (rows) => {
 
         let txtmessage = message.message;
 
-        let add_points = "";
-        if (txtmessage.length > 9){
-            add_points = "...";
-        }
-        txtmessage = txtmessage.slice(0, 9);
-        // Add spaces if the length is less than 6
-        while (txtmessage.length < 9) {
-            txtmessage += " ";
-        }        
+        // let add_points = "";
+        // if (txtmessage.length > 9){
+        //     add_points = "...";
+        // }
+        // txtmessage = txtmessage.slice(0, 9);
+        // // Add spaces if the length is less than 6
+        // while (txtmessage.length < 9) {
+        //     txtmessage += " ";
+        // }        
         
-        txtmessage += add_points;
+        // txtmessage += add_points;
 
         if (message.group_name == null) {
             if (message.sender_username == MY_USER) {
@@ -102,9 +102,6 @@ socket.on('response-chat-history', (rows) => {
             console.log("bro really thought")
         }
     }
-    // TODO
-    // CJ FU
-    // Logik für das Generieren / Regenerieren der Divs (je nachdem ob nur neu laden / hinzufügen zur liste)
-    // Divs brauchen data-id, um die richtigen chats laden zu können <div class=".." data-id=${chat_partner.id}>
+
 });
 
