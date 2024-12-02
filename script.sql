@@ -62,5 +62,3 @@ CREATE TABLE IF NOT EXISTS `files` (
     FOREIGN KEY (sender_id) REFERENCES `users`(id) ON DELETE CASCADE,
     FOREIGN KEY (receiver_id) REFERENCES `users`(id) ON DELETE CASCADE
 );
-
-
