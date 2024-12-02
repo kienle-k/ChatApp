@@ -4,72 +4,56 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
-
 const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
-
 const fs = require('fs');
 
 const upload_path = 'public/uploads';
 
-if (!fs.existsSync(upload_path)){
-    fs.mkdirSync(upload_path);
+if (!fs.existsSync(upload_path)) {
+  fs.mkdirSync(upload_path);
 }
 
+const port = 3000;
 
-const port = 3000; // Globale Variable für den Port
-
-
-
-// Initialisiere Express
+// Initialize Express
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-
-
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/uploads'); // Set the destination folder for uploaded files
+    cb(null, 'public/uploads');
   },
   filename: function (req, file, cb) {
-    // Use a hashed filename to avoid filename conflicts
     const hash = crypto.createHash('sha256').update(file.originalname + Date.now().toString()).digest('hex');
-    cb(null, hash + path.extname(file.originalname)); // Save file with the hash and original extension
+    cb(null, hash + path.extname(file.originalname));
   }
 });
 
 const upload = multer({ storage });
 
-
 let connected_users = [];
-
 
 // Middleware to parse JSON bodies
 app.use(express.json());
 
 // Custom middleware to protect chat directory
 app.use('/chat', (req, res, next) => {
-  // Block direct access to chat.html
   if (req.path.toLowerCase().endsWith('chat.html')) {
     return res.redirect('/chat');
   }
   next();
 });
 
-
-
 app.use((req, res, next) => {
-  res.set('Cache-Control', 'no-store');  // Prevents caching on all pages
+  res.set('Cache-Control', 'no-store');
   next();
 });
 
-
 app.use(express.static('public'));
-
-
 
 const sessionMiddleware = session({
   secret: 'yourSecretKey',
@@ -86,12 +70,10 @@ io.use((socket, next) => {
   sessionMiddleware(socket.request, socket.request.res || {}, next);
 });
 
-
-
 const dbConfig = {
   host: 'localhost',
   user: 'root',
-  password: 'yourNewPassword', //thisandthat123
+  password: 'yourNewPassword',
   database: 'chatAppDB'
 };
 
@@ -110,19 +92,15 @@ async function testConnection() {
   }
 }
 
-
-async function getPasswordHash(password){
-  const hashedPassword = await bcrypt.hash(password, 10);
-  return hashedPassword;
-}
-
-async function verifyPassword(password, hash){
-  const isMatch = await bcrypt.compare(password, hash);
-  return isMatch;
-}
-
-
 testConnection();
+
+async function getPasswordHash(password) {
+  return await bcrypt.hash(password, 10);
+}
+
+async function verifyPassword(password, hash) {
+  return await bcrypt.compare(password, hash);
+}
 
 // Login endpoint
 app.post('/api/login', async (req, res) => {
@@ -130,17 +108,12 @@ app.post('/api/login', async (req, res) => {
 
   try {
     const connection = await pool.getConnection();
-    let query = 'SELECT id, username, password FROM users WHERE username = ?';
-    const [users] = await connection.execute(query, [username]); // Search for username (Max 1 time, as registration is else not possible)
+    const [users] = await connection.execute('SELECT id, username, password FROM users WHERE username = ?', [username]);
     connection.release();
-
 
     if (users.length > 0) {
       const user = users[0];
-
-
-      // Check if the given password matches the hash representation in the database
-      if (await verifyPassword(password, user.password)){
+      if (await verifyPassword(password, user.password)) {
         req.session.user = { id: user.id, username: user.username };
         return res.json({ success: true, message: 'Logged in successfully' });
       } else {
@@ -154,19 +127,15 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-
-
 function isAuthenticated(req, res, next) {
   if (req.session && req.session.user) {
     console.log("Authenticated user: ", req.session.user.username);
     return next();
   } else {
     console.log("User is not authenticated");
-    // Check if it's an API request
     if (req.path.startsWith('/api/')) {
       return res.status(401).json({ error: 'Not authenticated' });
     } else {
-      // For non-API routes, redirect to home
       return res.redirect('/');
     }
   }
@@ -177,11 +146,11 @@ app.get('/chat', isAuthenticated, (req, res) => {
   return res.sendFile(__dirname + '/public/chat.html');
 });
 
-
-// Endpoints for pages
+// Page endpoints
 app.get('/register', (req, res) => {
   return res.sendFile(__dirname + '/public/register.html');
 });
+
 app.get('/login', (req, res) => {
   return res.sendFile(__dirname + '/public/index.html');
 });
@@ -198,8 +167,7 @@ app.get('/user-settings', isAuthenticated, (req, res) => {
   return res.sendFile(__dirname + '/public/user-settings.html');
 });
 
-// Redirect to pretty url when searching for the html
-
+// Redirect to pretty URLs
 app.get('/user-settings.html', isAuthenticated, (req, res) => {
   return res.redirect(301, '/user-settings');
 });
@@ -220,9 +188,9 @@ app.get('/registered.html', (req, res) => {
   return res.redirect(301, '/registrated-successfully');
 });
 
+// Static middleware
 app.use(express.static('public', {
   index: 'index.html',
-  // Exclude the chat directory from static serving
   setHeaders: (res, path) => {
     if (path.includes('/chat')) {
       return res.status(403).end('Forbidden');
@@ -232,8 +200,8 @@ app.use(express.static('public', {
 
 // Logout endpoint
 app.post('/api/logout', isAuthenticated, (req, res) => {
-  sessionUser = req.session.user;
-  if (sessionUser && connected_users[sessionUser.id]){
+  const sessionUser = req.session.user;
+  if (sessionUser && connected_users[sessionUser.id]) {
     connected_users[sessionUser.id].disconnect();
     connected_users[sessionUser.id] = null;
   }
@@ -241,186 +209,125 @@ app.post('/api/logout', isAuthenticated, (req, res) => {
   req.session.destroy((err) => {
     if (err) {
       return res.status(500).json({ error: 'Failed to logout' });
-    }else{
+    } else {
       return res.json({ success: true, message: 'Logged out successfully' });
     }
   });
 });
 
-
-
-
-// Registrierung Route, NEW: profile picture upload
+// Registration endpoint with profile picture upload
 app.post('/register', upload.single('image'), async (req, res) => {
-  
   const { email, username, password } = req.body;
-  console.log(req.body);
-  // Überprüfe, ob alle Felder ausgefüllt sind
+
   if (!email || !username || !password) {
-    return res.status(400).send('Alle Felder sind erforderlich.');
+    return res.status(400).send('All fields are required.');
   }
 
-  // If an image is uploaded, get the image path
   let imagePath = null;
   if (req.file) {
     imagePath = path.join('uploads', req.file.filename);
-    console.log(imagePath);
   }
 
-  console.log(imagePath);
-
   try {
-    // Passwort hashen, um es sicher zu speichern
     const hashedPassword = await getPasswordHash(password);
-
-    // Daten in die Datenbank einfügen
-    const query = 'INSERT INTO users (email, username, password, profile_picture) VALUES (?, ?, ?, ?)';
     const connection = await pool.getConnection();
 
     try {
-      await connection.execute(query, [email, username, hashedPassword, imagePath]);
-      console.log("new User registrated");
-      res.status(200).send('Benutzer erfolgreich registriert.');
+      await connection.execute('INSERT INTO users (email, username, password, profile_picture) VALUES (?, ?, ?, ?)', [email, username, hashedPassword, imagePath]);
+      console.log("New user registered");
+      res.status(200).send('User successfully registered.');
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY') {
-        res.status(400).send('Email oder Benutzername ist bereits vergeben.');
+        res.status(400).send('Email or username is already taken.');
       } else {
-        console.error('Fehler beim Einfügen in die Datenbank:', err);
-        res.status(500).send('Ein Fehler ist aufgetreten.');
+        console.error('Error inserting into database:', err);
+        res.status(500).send('An error occurred.');
       }
     } finally {
-      connection.release(); // Verbindung freigeben
+      connection.release();
     }
   } catch (err) {
-    console.error('Fehler beim Hashen des Passworts:', err);
-    res.status(500).send('Ein Fehler ist aufgetreten.');
+    console.error('Error hashing password:', err);
+    res.status(500).send('An error occurred.');
   }
 });
 
-
 async function handleMessage(sessionUser, msg) {
-    const to_user = msg.to_user;
-    const text = msg.text;
+  const to_user = msg.to_user;
+  const text = msg.text;
 
-    console.log("RECV MESSAGE: ", sessionUser.username, to_user, text);
-    
-    if (sessionUser == null || to_user == null || text == null) {
-      console.log("sessionUser, to_user or text of message is null -> not sending message");
-      return;
-      // throw new Error('Missing required data, no valid message');
+  if (!sessionUser || !to_user || !text) {
+    console.log("Missing sessionUser, to_user, or text in message");
+    return;
+  }
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.execute('INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at) VALUES (?, ?, ?, NOW())', [sessionUser.id, to_user, text]);
+    const broadcastMsg = {
+      from_user: sessionUser.id,
+      from_username: sessionUser.username,
+      text: text
+    };
+
+    if (connected_users[to_user]) {
+      console.log("Recipient is online, sending via socket: ", to_user);
+      connected_users[to_user].emit('chat-message', broadcastMsg);
     }
-    
-    
-    const connection = await pool.getConnection();
-    try {
-        const query = `
-            INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at)
-            VALUES (?, ?, ?, NOW())
-        `;
-        
-        await connection.execute(query, [sessionUser.id, to_user, text]);
-        
-        // Include sender information in broadcast
-        const broadcastMsg = {
-            from_user: sessionUser.id,
-            from_username: sessionUser.username,
-            text : text
-        };
 
-        if (sessionUser.id == to_user){
-          return {
-            id: msg.id,
-            success: true, 
-            info: "Sender == Receiver -> Message will only be saved to database but not broadcasted"
-          };
-        }
-
-        // If the adressed user is currently connected, directly send message
-        if (connected_users[to_user]){
-          console.log("RECV ONLINE, redirect via socket possible: ", to_user);
-           let to_user_socket = connected_users[to_user];
-           to_user_socket.emit('chat-message', broadcastMsg);
-        }
-        
-        return { 
-          id: msg.id,
-          success: true
-        };
-    } catch (error) {
-        console.error('Error saving message:', error);
-        return {
-          id: msg.id,
-          success: false, 
-          error: "Internal server error. Could not save message."
-        };
-    } finally {
-        connection.release();
-    }
+    return {
+      id: msg.id,
+      success: true
+    };
+  } catch (error) {
+    console.error('Error saving message:', error);
+    return {
+      id: msg.id,
+      success: false,
+      error: "Internal server error. Could not save message."
+    };
+  } finally {
+    connection.release();
+  }
 }
 
-
 app.post('/api/find-user', isAuthenticated, async (req, res) => {
-  const connection = await pool.getConnection();
   const search_name = req.body.search_name;
+  const connection = await pool.getConnection();
   try {
-      const sql_cmd = `SELECT id, username, email, profile_picture FROM users WHERE username LIKE ?`;
-      const sql_cmd_2 = `SELECT id, username, email, profile_picture FROM users WHERE username LIKE ?`;
-      
-      let [found_users] = await connection.query(sql_cmd, [`${search_name}`]);
-      
-      if (found_users.length == 0) {
-        [found_users] = await connection.query(sql_cmd_2, [`%${search_name}%`]);
-      }
+    let [found_users] = await connection.query('SELECT id, username, email, profile_picture FROM users WHERE username LIKE ?', [search_name]);
 
-      if (found_users.length == 0) {
-        return res.json({ 
-            success: false, 
-            search_name: search_name
-        });
-      } else {
-        return res.json({ 
-            success: true, 
-            search_name: search_name,
-            users: found_users 
-        });
-      }
+    if (found_users.length === 0) {
+      [found_users] = await connection.query('SELECT id, username, email, profile_picture FROM users WHERE username LIKE ?', [`%${search_name}%`]);
+    }
 
+    if (found_users.length === 0) {
+      return res.json({ success: false, search_name: search_name });
+    } else {
+      return res.json({ success: true, search_name: search_name, users: found_users });
+    }
   } catch (error) {
-      console.error('Error searching for users:', error);
-      return res.status(500).json({ 
-          success: false, 
-          search_name: search_name,
-          error: 'Error while searching for user',
-      });
+    console.error('Error searching for users:', error);
+    return res.status(500).json({ success: false, search_name: search_name, error: 'Error while searching for user' });
   } finally {
     connection.release();
   }
 });
 
-
 app.post('/api/send-message', isAuthenticated, async (req, res) => {
   try {
-    console.log("RECV MESSAGE: ", req.session.user.username, req.body);
-
-      await handleMessage(req.session.user, req.body);
-
-      return res.json({ 
-          success: true, 
-          message: 'Message sent successfully' 
-      });
+    const result = await handleMessage(req.session.user, req.body);
+    return res.json({ success: true, message: 'Message sent successfully' });
   } catch (error) {
-      console.error('Error processing message:', error);
-      return res.status(500).json({ 
-          success: false, 
-          error: 'Failed to process message' 
-      });
+    console.error('Error processing message:', error);
+    return res.status(500).json({ success: false, error: 'Failed to process message' });
   }
 });
 
 app.get('/api/get-my-user', isAuthenticated, async (req, res) => {
   if (req.session.user) {
     return res.status(200).json({ success: true, username: req.session.user.username, id: req.session.user.id });
-  }else{
+  } else {
     return res.status(401).json({ success: false, error: 'Not authenticated' });
   }
 });
@@ -428,34 +335,23 @@ app.get('/api/get-my-user', isAuthenticated, async (req, res) => {
 app.get('/api/get-my-info', isAuthenticated, async (req, res) => {
   try {
     const sessionUser = req.session.user;
-    let user_id;
+    const user_id = parseInt(sessionUser.id);
 
-    if (sessionUser) {
-      user_id = parseInt(sessionUser.id); // Get user from session
-    }
-
-    // Validate user ID
     if (isNaN(user_id)) {
       return res.status(400).send('Invalid user ID');
     }
 
     const connection = await pool.getConnection();
     try {
-      const [rows] = await connection.query(
-        'SELECT username, email, profile_picture FROM users WHERE id=?',
-        [user_id]
-      );
+      const [rows] = await connection.query('SELECT username, email, profile_picture FROM users WHERE id=?', [user_id]);
 
       if (rows.length > 0) {
-        const username = rows[0].username;
-        const email = rows[0].email;
-        const profilePicture = rows[0].profile_picture;
-        const picturePath = profilePicture ? `/${profilePicture}` : 'images/profile.jpg';
-        res.json({ username: username, email: email, profile_picture: picturePath });
+        const { username, email, profile_picture } = rows[0];
+        const picturePath = profile_picture ? `/${profile_picture}` : 'images/profile.jpg';
+        res.json({ username, email, profile_picture: picturePath });
       } else {
         res.status(404).send('User not found');
       }
-
     } catch (error) {
       console.log("Database error:", error);
       res.status(500).send('Internal server error');
@@ -468,308 +364,189 @@ app.get('/api/get-my-info', isAuthenticated, async (req, res) => {
   }
 });
 
-
-
 // Route to update user information
 app.post('/api/update-my-info', upload.single('profile_picture'), (req, res) => {
   const { username, email, password } = req.body;
   const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
 
-  // Example logic for updating user info; replace with your database logic
   console.log('Username:', username);
   console.log('Email:', email);
   console.log('Password:', password);
   if (profilePicture) {
-      console.log('Profile Picture:', profilePicture);
+    console.log('Profile Picture:', profilePicture);
   }
 
-  // Respond with success
   res.json({ message: 'User info updated successfully!' });
 });
 
-
-
-
-const words = [
-        "YOO", "hello", "how are you", "what's up", "let's meet", 
-        "check this out", "long time no see", "see you soon", 
-        "I'm busy", "sounds good", "why not", "okay", "let's go", 
-        "goodbye", "talk later", "yes", "no", "maybe"
-];
-function generateRandomMessages(numMessages) {    
-    const result = [];
-    
-    for (let i = 0; i < numMessages; i++) {
-        const fromUser = Math.random() > 0.5 ? "Karl" : "Kalle"; // Randomly choose the sender
-        const toUser = fromUser === "Karl" ? "Kalle" : "Karl"; // Ensure the recipient is the other user
-        const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 }) // Random length of the message (1 to 3 words)
-            .map(() => words[Math.floor(Math.random() * words.length)]) // Randomly select words
-            .join(" "); // Join words into a sentence
-        
-        result.push({ from_user: fromUser, to_user: toUser, text: randomText });
-    }
-    
-    return result;
-}
-
-
-// WebSocket-Verbindung
+// WebSocket connection
 io.on('connection', (socket) => {
-    console.log('New user socket has connected');
+  console.log('New user socket has connected');
 
-    const sessionUser = socket.request.session.user;
+  const sessionUser = socket.request.session.user;
+  if (sessionUser) {
+    connected_users[sessionUser.id] = socket;
+  } else {
+    socket.disconnect();
+    return;
+  }
+
+  socket.on('disconnect', () => {
+    console.log(`User socket has disconnected.`);
     if (sessionUser) {
-      connected_users[sessionUser.id] = socket;
-    } else {
-      socket.disconnect();
-      return;
+      delete connected_users[sessionUser.id];
     }
+  });
 
-    // Verbindung trennen
-    socket.on('disconnect', () => {
-        // const sessionUser = socket.request.session.user;
-        // if (sessionUser) {
-        //   connected_users[sessionUser.id] = null;
-        // }
-        console.log(`User socket has disconnected.`);
-    });
-    
-
-    // Message input über Socket
-    // socket.emit('chat-message', { id: msgID, to_user: to_user, to_group: to_group, text: value });
-
-    socket.on('chat-message', async (msg) => {
-        // const sessionUser = socket.request.session.user;
-        // if (!sessionUser) {
-        //   console.log("No session user");
-        //     socket.emit('message-confirmation', { 
-        //         success: false, 
-        //         error: 'Not authenticated' 
-        //     });
-        //     return;
-        // }
-        // More logic and a middleware wrapper needed for session user check, so skip and maybe implement later
-        
-        try {
-            let result = await handleMessage(sessionUser, msg);
-  
-            socket.emit('message-confirmation', result);
-
-        } catch (error) {
-            socket.emit('message-confirmation', { 
-                id: msg.id,
-                success: false, 
-                error: 'Failed to save message',
-                error_message: error
-            });
-        }
-    });
-    
-
-    // Socket endpoint  für random antworten
-    socket.on('random-chat-message', (msg) => {
-        console.log("RECV MESSAGE (SEND BACK RANDOM): ", msg);
-
-        socket.emit('message confirmation', msg.id);
-        
-        setTimeout(() => {
-            const randomText = Array.from({ length: Math.floor(Math.random() * 3) + 1 })
-            .map(() => words[Math.floor(Math.random() * words.length)]) 
-            .join(" ");
-            socket.emit('chat-message', randomText);
-        }, 2500);
-    });
-
-
-    // Socket für Nachrichtenverlauf mit bestimmtem User
-    socket.on('get-history', async (data) => {
-      try {
-        // Ensure user IDs and limit are integers
-
-        const { user2_id, number_of_messages, start_at_id } = data;
-    
-        // Validate input
-        if (isNaN(user2_id)) {
-          return;
-        }
-
-        const sessionUser = socket.request.session.user;
-        let user1_id;
-        if (sessionUser) {
-          user1_id = parseInt(sessionUser.id); // GET USER FROM SESSION
-        }
-        
-        // Validate input
-        if (isNaN(user1_id)) {
-          return;
-        }
-    
-        // Get connection from pool
-        const connection = await pool.getConnection();
-    
-        try {
-          // console.log(user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id);
-          // Query to get messages between two users
-          // const [messages] = await connection.execute(
-          let [messages] = await connection.query(
-            `SELECT 
-                m.message_id,
-                m.sender_id,
-                m.receiver_id,
-                m.receiver_group_id,
-                m.message,
-                m.sent_at,
-                sender.username AS sender_username,
-                receiver.username AS receiver_username
-            FROM chat_messages m
-            JOIN users sender ON m.sender_id = sender.id
-            LEFT JOIN users receiver ON m.receiver_id = receiver.id
-            WHERE 
-                (m.sender_id = ? AND m.receiver_id = ?)
-                OR 
-                (m.sender_id = ? AND m.receiver_id = ?)
-            ORDER BY m.sent_at DESC
-            LIMIT ?
-            OFFSET ?`,
-
-            [user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id]
-          );
-
-          // console.log(messages);
-
-          // Add fake messages if none could be loaded / none are there
-          // if (messages.length == 0){
-          //   messages = generateRandomMessages(number_of_messages);
-          // }
-
-          socket.emit("response-history", {
-            success: true,
-            messages: messages.reverse() // Reverse to get chronological order
-          });
-    
-        } finally {
-          connection.release(); // Always release the connection
-        }
-    
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-      }
-    });
-
-
-
-    
-    //API to get the last message of every chat (for the left side of the chat screen with different chats)
-    socket.on('get-chat-history', async () => {
-      console.log("Sending chat history");
-      try {
-       
-        const sessionUser = socket.request.session.user;
-        let user1_id;
-        if (sessionUser) {
-          user1_id = parseInt(sessionUser.id); 
-        }
-        
-        // Validate input
-        if (isNaN(user1_id)) {
-          console.log("No session user -> no data");
-          return;
-        }
-
-        // Get connection from pool
-        const connection = await pool.getConnection();
-
-        try {
-          // Query to get the last message of each chat
-          const [rows] = await connection.execute(`
-            WITH LastMessages AS (
-              SELECT
-                cm.message_id,
-                cm.sender_id,
-                cm.receiver_id,
-                cm.receiver_group_id,
-                u.username AS sender_username,
-                u.profile_picture AS sender_picture,
-                u2.profile_picture AS receiver_picture,
-                u2.username AS receiver_username,
-                g.group_name,
-                cm.message,
-                cm.sent_at,
-                CASE
-                  WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id
-                  ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))
-                END AS conversation_id,
-                ROW_NUMBER() OVER (
-                  PARTITION BY
-                    CASE
-                      WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id
-                      ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))
-                    END
-                  ORDER BY cm.sent_at DESC
-                ) AS message_rank
-              FROM chat_messages cm
-              JOIN users u ON cm.sender_id = u.id
-              LEFT JOIN users u2 ON cm.receiver_id = u2.id
-              LEFT JOIN \`groups\` g ON cm.receiver_group_id = g.group_id
-              WHERE cm.sender_id = ? OR cm.receiver_id = ?
-            )
-            SELECT
-              message_id,
-              sender_id,
-              receiver_id,
-              receiver_group_id,
-              sender_username,
-              receiver_username,
-              sender_picture,
-              receiver_picture,
-              group_name,
-              message,
-              sent_at
-            FROM LastMessages
-            WHERE message_rank = 1
-            ORDER BY sent_at DESC;
-          `, [user1_id, user1_id]);
-
-          console.log(rows);
-    
-          socket.emit("response-chat-history", ({ success: true, messages: rows }));
-        } finally {
-          // Always release the connection back to the pool
-          connection.release();
-        }
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-        socket.emit("response-chat-history", ({ success: false, error: error }));
-      }
-    });
-
-});
-
-// Server starten
-server.listen(port, () => {
-  console.log(`Server läuft auf http://localhost:${port}`);
-});
-
-// Route für zufälligen Chat
-app.get('/random-chat', async (req, res) => {
+  socket.on('chat-message', async (msg) => {
     try {
-        const connection = await pool.getConnection();
-        const [rows] = await connection.query('SELECT id, username FROM users ORDER BY RAND() LIMIT 1');
-        connection.release();
-
-        if (rows.length > 0) {
-            const user = rows[0];
-            res.json({ success: true, user });
-        } else {
-            res.json({ success: false, error: 'No users found' });
-        }
+      const result = await handleMessage(sessionUser, msg);
+      socket.emit('message-confirmation', result);
     } catch (error) {
-        console.error('Error fetching random user:', error);
-        res.status(500).json({ success: false, error: 'Failed to fetch random user' });
+      socket.emit('message-confirmation', {
+        id: msg.id,
+        success: false,
+        error: 'Failed to save message',
+        error_message: error
+      });
     }
+  });
+
+  socket.on('get-history', async (data) => {
+    try {
+      const { user2_id, number_of_messages, start_at_id } = data;
+
+      if (isNaN(user2_id)) {
+        return;
+      }
+
+      const user1_id = parseInt(sessionUser.id);
+
+      if (isNaN(user1_id)) {
+        return;
+      }
+
+      const connection = await pool.getConnection();
+      try {
+        let [messages] = await connection.query(
+          `SELECT 
+            m.message_id,
+            m.sender_id,
+            m.receiver_id,
+            m.message,
+            m.sent_at,
+            sender.username AS sender_username,
+            receiver.username AS receiver_username
+          FROM chat_messages m
+          JOIN users sender ON m.sender_id = sender.id
+          LEFT JOIN users receiver ON m.receiver_id = receiver.id
+          WHERE 
+            (m.sender_id = ? AND m.receiver_id = ?)
+            OR 
+            (m.sender_id = ? AND m.receiver_id = ?)
+          ORDER BY m.sent_at DESC
+          LIMIT ?
+          OFFSET ?`,
+          [user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id]
+        );
+
+        socket.emit("response-history", {
+          success: true,
+          messages: messages.reverse()
+        });
+      } finally {
+        connection.release();
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  });
+
+  socket.on('get-chat-history', async () => {
+    console.log("Sending chat history");
+    try {
+      const user1_id = parseInt(sessionUser.id);
+
+      if (isNaN(user1_id)) {
+        console.log("No session user -> no data");
+        return;
+      }
+
+      const connection = await pool.getConnection();
+      try {
+        const [rows] = await connection.execute(
+          `WITH LastMessages AS (
+            SELECT
+              cm.message_id,
+              cm.sender_id,
+              cm.receiver_id,
+              cm.receiver_group_id,
+              u.username AS sender_username,
+              u.profile_picture AS sender_picture,
+              u2.profile_picture AS receiver_picture,
+              u2.username AS receiver_username,
+              cm.message,
+              cm.sent_at,
+              ROW_NUMBER() OVER (
+                PARTITION BY
+                  CASE
+                    WHEN cm.receiver_group_id IS NOT NULL THEN cm.receiver_group_id
+                    ELSE CONCAT(LEAST(cm.sender_id, cm.receiver_id), '-', GREATEST(cm.sender_id, cm.receiver_id))
+                  END
+                ORDER BY cm.sent_at DESC
+              ) AS message_rank
+            FROM chat_messages cm
+            JOIN users u ON cm.sender_id = u.id
+            LEFT JOIN users u2 ON cm.receiver_id = u2.id
+            WHERE cm.sender_id = ? OR cm.receiver_id = ?
+          )
+          SELECT
+            message_id,
+            sender_id,
+            receiver_id,
+            receiver_group_id,
+            sender_username,
+            receiver_username,
+            sender_picture,
+            receiver_picture,
+            message,
+            sent_at
+          FROM LastMessages
+          WHERE message_rank = 1
+          ORDER BY sent_at DESC;
+        `, [user1_id, user1_id]);
+
+        socket.emit("response-chat-history", { success: true, messages: rows });
+      } finally {
+        connection.release();
+      }
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      socket.emit("response-chat-history", { success: false, error: error });
+    }
+  });
 });
 
-// Server starten
+// Start the server
 server.listen(port, () => {
-  console.log(`Server läuft auf http://localhost:${port}`);
+  console.log(`Server is running at http://localhost:${port}`);
+});
+
+// Route for random chat
+app.get('/random-chat', async (req, res) => {
+  try {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query('SELECT id, username FROM users ORDER BY RAND() LIMIT 1');
+    connection.release();
+
+    if (rows.length > 0) {
+      const user = rows[0];
+      res.json({ success: true, user });
+    } else {
+      res.json({ success: false, error: 'No users found' });
+    }
+  } catch (error) {
+    console.error('Error fetching random user:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch random user' });
+  }
 });

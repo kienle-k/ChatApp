@@ -714,3 +714,22 @@ opacity: 0.7;
     /* END CHAT HISTORY STYLING */
 
 /* END CHAT STYLING*/
+
+#random-chat-button {
+    background-color: #4CAF50; /* Green background */
+    border: none; /* Remove borders */
+    color: white; /* White text */
+    padding: 15px 32px; /* Some padding */
+    text-align: center; /* Centered text */
+    text-decoration: none; /* Remove underline */
+    display: inline-block; /* Make the button inline-block */
+    font-size: 16px; /* Increase font size */
+    margin: 10px 2px; /* Some margin */
+    cursor: pointer; /* Pointer/hand icon */
+    border-radius: 12px; /* Rounded corners */
+    transition: background-color 0.3s ease; /* Smooth transition for background color */
+}
+
+#random-chat-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
