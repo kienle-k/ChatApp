@@ -32,7 +32,7 @@ h2 {
     text-align: center;
     color: #333;
 }
-
+ 
 form {
     display: flex;
     flex-direction: column;
@@ -47,6 +47,10 @@ label {
 button,
 input {
     box-sizing: border-box;
+}
+
+button {
+    font-size: 0.9em;
 }
 
 /* End */
@@ -65,7 +69,7 @@ button[type="submit"] {
     width: 100%;
     margin-top: 20px;
     padding: 10px;
-    background-color: #4CAF50;
+    background-color: rgba(61, 216, 227);
     color: white;
     border: none;
     border-radius: 4px;
@@ -74,7 +78,8 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-    background-color: #45a049;
+    background-color: rgba(61, 216, 227);
+    /* background-color: #45a049; */
 }
 
 #error-message {
@@ -89,7 +94,7 @@ button[type="submit"]:hover {
     width: 100%; /* 60%; */
     /* margin-right: 20px; */
 }
-.requirements-container {
+#requirements-container {
     width: 300px;
     background-color: #ffffff;
     padding: 20px;
@@ -99,7 +104,15 @@ button[type="submit"]:hover {
     top: 50%;
     transform: translateY(-50%);
     right: -330px; /* 20px */
+    /* opacity: 0; */
+    /* z-index: -5; */
 }
+/* 
+input[type="password"]:focus #requirements-container {
+    opacity: 1; 
+    z-index: 5;  
+} */
+
 .requirements-container h3 {
     margin-top: 0;
     text-align: center;
@@ -118,9 +131,16 @@ button[type="submit"]:hover {
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .backtologin-button {
-    margin-top: 20px;
     background-color: #f0f0f0;
     border: 1px solid #ccc;
-    padding: 5px 10px;
     cursor: pointer;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px;
+    /* background-color: rgba(61, 216, 227); */
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
 }

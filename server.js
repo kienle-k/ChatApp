@@ -4,6 +4,20 @@ const http = require('http');
 const { Server } = require('socket.io');
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcrypt');
+
+const multer = require('multer');
+const path = require('path');
+const crypto = require('crypto');
+
+const fs = require('fs');
+
+const upload_path = 'public/uploads';
+
+if (!fs.existsSync(upload_path)){
+    fs.mkdirSync(upload_path);
+}
+
+
 const port = 3000; // Globale Variable für den Port
 
 
@@ -13,6 +27,21 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
+
+
+// Configure multer storage
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads'); // Set the destination folder for uploaded files
+  },
+  filename: function (req, file, cb) {
+    // Use a hashed filename to avoid filename conflicts
+    const hash = crypto.createHash('sha256').update(file.originalname + Date.now().toString()).digest('hex');
+    cb(null, hash + path.extname(file.originalname)); // Save file with the hash and original extension
+  }
+});
+
+const upload = multer({ storage });
 
 
 let connected_users = [];
@@ -83,7 +112,6 @@ async function testConnection() {
 
 
 async function getPasswordHash(password){
-  console.log(password);
   const hashedPassword = await bcrypt.hash(password, 10);
   return hashedPassword;
 }
@@ -106,13 +134,11 @@ app.post('/api/login', async (req, res) => {
     const [users] = await connection.execute(query, [username]); // Search for username (Max 1 time, as registration is else not possible)
     connection.release();
 
-    console.log(users)
 
     if (users.length > 0) {
       const user = users[0];
 
 
-      console.log(password, user.password);
       // Check if the given password matches the hash representation in the database
       if (await verifyPassword(password, user.password)){
         req.session.user = { id: user.id, username: user.username };
@@ -131,9 +157,8 @@ app.post('/api/login', async (req, res) => {
 
 
 function isAuthenticated(req, res, next) {
-  console.log("IS AUTH ???");
   if (req.session && req.session.user) {
-    console.log("Authenticated user:", req.session.user);
+    console.log("Authenticated user: ", req.session.user.username);
     return next();
   } else {
     console.log("User is not authenticated");
@@ -149,14 +174,9 @@ function isAuthenticated(req, res, next) {
 
 // Secure chat route
 app.get('/chat', isAuthenticated, (req, res) => {
-  return res.sendFile(__dirname + '/public/chat/chat.html');
+  return res.sendFile(__dirname + '/public/chat.html');
 });
 
-
-// Catch-all route for chat directory attempts
-app.get('/chat/*', (req, res) => {
-  return res.redirect('/chat');
-});
 
 // Endpoints for pages
 app.get('/register', (req, res) => {
@@ -170,11 +190,24 @@ app.get('/logout', (req, res) => {
   return res.sendFile(__dirname + '/public/logout.html');
 });
 
+app.get('/registrated-successfully', (req, res) => {
+  return res.sendFile(__dirname + '/public/registered.html');
+});
+
+app.get('/user-settings', isAuthenticated, (req, res) => {
+  return res.sendFile(__dirname + '/public/user-settings.html');
+});
 
 // Redirect to pretty url when searching for the html
+
+app.get('/user-settings.html', isAuthenticated, (req, res) => {
+  return res.redirect(301, '/user-settings');
+});
+
 app.get('/register.html', (req, res) => {
   return res.redirect(301, '/register');
 });
+
 app.get('/index.html', (req, res) => {
   return res.redirect(301, '/');
 });
@@ -183,6 +216,9 @@ app.get('/logout.html', (req, res) => {
   return res.redirect(301, '/logout');
 });
 
+app.get('/registered.html', (req, res) => {
+  return res.redirect(301, '/registrated-successfully');
+});
 
 app.use(express.static('public', {
   index: 'index.html',
@@ -214,27 +250,36 @@ app.post('/api/logout', isAuthenticated, (req, res) => {
 
 
 
-// Registrierung Route
-app.post('/register', async (req, res) => {
+// Registrierung Route, NEW: profile picture upload
+app.post('/register', upload.single('image'), async (req, res) => {
   
   const { email, username, password } = req.body;
-
+  console.log(req.body);
   // Überprüfe, ob alle Felder ausgefüllt sind
   if (!email || !username || !password) {
     return res.status(400).send('Alle Felder sind erforderlich.');
   }
+
+  // If an image is uploaded, get the image path
+  let imagePath = null;
+  if (req.file) {
+    imagePath = path.join('uploads', req.file.filename);
+    console.log(imagePath);
+  }
+
+  console.log(imagePath);
 
   try {
     // Passwort hashen, um es sicher zu speichern
     const hashedPassword = await getPasswordHash(password);
 
     // Daten in die Datenbank einfügen
-    const query = 'INSERT INTO users (email, username, password) VALUES (?, ?, ?)';
+    const query = 'INSERT INTO users (email, username, password, profile_picture) VALUES (?, ?, ?, ?)';
     const connection = await pool.getConnection();
 
     try {
-      await connection.execute(query, [email, username, hashedPassword]);
-      console.log("User registrated");
+      await connection.execute(query, [email, username, hashedPassword, imagePath]);
+      console.log("new User registrated");
       res.status(200).send('Benutzer erfolgreich registriert.');
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY') {
@@ -257,13 +302,14 @@ async function handleMessage(sessionUser, msg) {
     const to_user = msg.to_user;
     const text = msg.text;
 
-    console.log(sessionUser, to_user, text);
+    console.log("RECV MESSAGE: ", sessionUser.username, to_user, text);
     
-    if (!sessionUser == null || to_user == null || text == null) {
+    if (sessionUser == null || to_user == null || text == null) {
       console.log("sessionUser, to_user or text of message is null -> not sending message");
       return;
-      throw new Error('Missing required data, no valid message');
+      // throw new Error('Missing required data, no valid message');
     }
+    
     
     const connection = await pool.getConnection();
     try {
@@ -281,9 +327,18 @@ async function handleMessage(sessionUser, msg) {
             text : text
         };
 
+        if (sessionUser.id == to_user){
+          return {
+            id: msg.id,
+            success: true, 
+            info: "Sender == Receiver -> Message will only be saved to database but not broadcasted"
+          };
+        }
+
         // If the adressed user is currently connected, directly send message
         if (connected_users[to_user]){
-           let to_user_socket = connected_users[sessionUser.id];
+          console.log("RECV ONLINE, redirect via socket possible: ", to_user);
+           let to_user_socket = connected_users[to_user];
            to_user_socket.emit('chat-message', broadcastMsg);
         }
         
@@ -296,7 +351,7 @@ async function handleMessage(sessionUser, msg) {
         return {
           id: msg.id,
           success: false, 
-          error: error
+          error: "Internal server error. Could not save message."
         };
     } finally {
         connection.release();
@@ -304,11 +359,51 @@ async function handleMessage(sessionUser, msg) {
 }
 
 
+app.post('/api/find-user', isAuthenticated, async (req, res) => {
+  const connection = await pool.getConnection();
+  const search_name = req.body.search_name;
+  try {
+      const sql_cmd = `SELECT id, username, email, profile_picture FROM users WHERE username LIKE ?`;
+      const sql_cmd_2 = `SELECT id, username, email, profile_picture FROM users WHERE username LIKE ?`;
+      
+      let [found_users] = await connection.query(sql_cmd, [`${search_name}`]);
+      
+      if (found_users.length == 0) {
+        [found_users] = await connection.query(sql_cmd_2, [`%${search_name}%`]);
+      }
+
+      if (found_users.length == 0) {
+        return res.json({ 
+            success: false, 
+            search_name: search_name
+        });
+      } else {
+        return res.json({ 
+            success: true, 
+            search_name: search_name,
+            users: found_users 
+        });
+      }
+
+  } catch (error) {
+      console.error('Error searching for users:', error);
+      return res.status(500).json({ 
+          success: false, 
+          search_name: search_name,
+          error: 'Error while searching for user',
+      });
+  } finally {
+    connection.release();
+  }
+});
+
+
 app.post('/api/send-message', isAuthenticated, async (req, res) => {
   try {
-    console.log(req.session.user, req.body);
-      // Use the authenticated user from session
+    console.log("RECV MESSAGE: ", req.session.user.username, req.body);
+
       await handleMessage(req.session.user, req.body);
+
       return res.json({ 
           success: true, 
           message: 'Message sent successfully' 
@@ -329,6 +424,70 @@ app.get('/api/get-my-user', isAuthenticated, async (req, res) => {
     return res.status(401).json({ success: false, error: 'Not authenticated' });
   }
 });
+
+app.get('/api/get-my-info', isAuthenticated, async (req, res) => {
+  try {
+    const sessionUser = req.session.user;
+    let user_id;
+
+    if (sessionUser) {
+      user_id = parseInt(sessionUser.id); // Get user from session
+    }
+
+    // Validate user ID
+    if (isNaN(user_id)) {
+      return res.status(400).send('Invalid user ID');
+    }
+
+    const connection = await pool.getConnection();
+    try {
+      const [rows] = await connection.query(
+        'SELECT username, email, profile_picture FROM users WHERE id=?',
+        [user_id]
+      );
+
+      if (rows.length > 0) {
+        const username = rows[0].username;
+        const email = rows[0].email;
+        const profilePicture = rows[0].profile_picture;
+        const picturePath = profilePicture ? `/${profilePicture}` : 'images/profile.jpg';
+        res.json({ username: username, email: email, profile_picture: picturePath });
+      } else {
+        res.status(404).send('User not found');
+      }
+
+    } catch (error) {
+      console.log("Database error:", error);
+      res.status(500).send('Internal server error');
+    } finally {
+      connection.release();
+    }
+  } catch (error) {
+    console.error("Unhandled error:", error);
+    res.status(500).send('Internal server error');
+  }
+});
+
+
+
+// Route to update user information
+app.post('/api/update-my-info', upload.single('profile_picture'), (req, res) => {
+  const { username, email, password } = req.body;
+  const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
+
+  // Example logic for updating user info; replace with your database logic
+  console.log('Username:', username);
+  console.log('Email:', email);
+  console.log('Password:', password);
+  if (profilePicture) {
+      console.log('Profile Picture:', profilePicture);
+  }
+
+  // Respond with success
+  res.json({ message: 'User info updated successfully!' });
+});
+
+
 
 
 const words = [
@@ -356,7 +515,7 @@ function generateRandomMessages(numMessages) {
 
 // WebSocket-Verbindung
 io.on('connection', (socket) => {
-    console.log('User connected');
+    console.log('New user socket has connected');
 
     const sessionUser = socket.request.session.user;
     if (sessionUser) {
@@ -372,7 +531,7 @@ io.on('connection', (socket) => {
         // if (sessionUser) {
         //   connected_users[sessionUser.id] = null;
         // }
-        console.log(`User has disconnected.`);
+        console.log(`User socket has disconnected.`);
     });
     
 
@@ -409,7 +568,7 @@ io.on('connection', (socket) => {
 
     // Socket endpoint  für random antworten
     socket.on('random-chat-message', (msg) => {
-        console.log("Msg", msg);
+        console.log("RECV MESSAGE (SEND BACK RANDOM): ", msg);
 
         socket.emit('message confirmation', msg.id);
         
@@ -502,6 +661,7 @@ io.on('connection', (socket) => {
     
     //API to get the last message of every chat (for the left side of the chat screen with different chats)
     socket.on('get-chat-history', async () => {
+      console.log("Sending chat history");
       try {
        
         const sessionUser = socket.request.session.user;
@@ -512,7 +672,7 @@ io.on('connection', (socket) => {
         
         // Validate input
         if (isNaN(user1_id)) {
-          console.log("NO SESSION USER; NOT SENDING CHATS");
+          console.log("No session user -> no data");
           return;
         }
 
@@ -529,6 +689,8 @@ io.on('connection', (socket) => {
                 cm.receiver_id,
                 cm.receiver_group_id,
                 u.username AS sender_username,
+                u.profile_picture AS sender_picture,
+                u2.profile_picture AS receiver_picture,
                 u2.username AS receiver_username,
                 g.group_name,
                 cm.message,
@@ -558,6 +720,8 @@ io.on('connection', (socket) => {
               receiver_group_id,
               sender_username,
               receiver_username,
+              sender_picture,
+              receiver_picture,
               group_name,
               message,
               sent_at
@@ -565,6 +729,8 @@ io.on('connection', (socket) => {
             WHERE message_rank = 1
             ORDER BY sent_at DESC;
           `, [user1_id, user1_id]);
+
+          console.log(rows);
     
           socket.emit("response-chat-history", ({ success: true, messages: rows }));
         } finally {

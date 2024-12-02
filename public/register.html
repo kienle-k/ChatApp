@@ -12,6 +12,10 @@
         <div class="form-container">
             <h2>Registrieren</h2>
             <form id="registerForm" method="POST" action="/register">
+                
+                <label for="imageInput">Profilbild hochladen</label>
+                <input type="file" id="imageInput" accept="image/*" />
+
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
                 
@@ -27,13 +31,13 @@
                 <input type="password" id="confirm-password" name="confirm-password" required>
                 
                 <p id="error-message" style="color: red;"></p>
-                
+                 
                 <button type="submit">Registrieren</button>
                 
                 <button type="button" onclick="window.location.href='/'" class="backtologin-button">Zum Login</button>            
             </form>
         </div>
-        <div class="requirements-container">
+        <div id="requirements-container">
             <h3>Anforderungen</h3>
             <ul class="requirements">
                 <li>Benutzername muss zwischen 5 und 30 Zeichen lang sein.</li>

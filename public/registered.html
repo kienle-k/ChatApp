@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrierung abgeschlossen</title>
+    <link rel="stylesheet" href="/css/logout_styles.css">
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+    <div id="logout-container">
+        <h2>Sie haben sich erfolgreich registriert!</h2>
+        <button id="loginButton" onclick="window.location.href = '/';">Jetzt einloggen</button>
+    </div>
+     <script>
+        window.onload = function(){
+            document.getElementById("logout-container").style.opacity = "1";
+        }
+     </script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Up - Chat</title>
+
+    <link rel="stylesheet" href="/css/new_chat_styles.css">
+
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+</head>
+<body>
+
+    <div id="profile-pic-modal" style="display:none">
+        <div id="profile-pic-display">
+        </div>
+    </div>
+
+
+    <div id="top-bar">
+        <div id="home-button-container">
+            <a id="home-button" href="/chat/chat.html">
+                <img src="/images/appIcon.png" alt="LinkUp">
+            </a>
+            <div id="app-name-container">
+                <img src="/images/appName.png">
+            </div>
+        </div>
+
+        <div id="current-user-container">
+            <button type="button" id="current-user-profile" onclick="window.location.href='/user-settings'">
+                <img src="/images/profile.jpg" id="profileImage" alt="My Profile">
+            </button>
+
+            <button type="button" id="logout-button">
+                <img src="/images/logout.png" alt="Logout">
+            </button>
+        </div>
+    </div>
+
+    <div id="main-content">
+
+        <div id="contacts-window">
+
+            <div id="search-user">
+
+                <div id="search-bar">
+                  <input type="text" placeholder="Username" id="user-search-input"/>
+                  <button id="search-button">Suchen</button>
+                </div>
+
+                <div id="drop-down-users">
+                  <ul id="user-list"></ul>
+                </div>
+
+              </div>
+      
+            <ul id="contacts">
+            </ul>
+
+        </div>
+
+
+        <div id="chat-window">
+
+            <div id="chat-container">
+                <div id="user-info-bar"></div>
+                <ul id="messages"></ul>
+            </div>
+
+            <div id="send-container">
+
+                <form id="chat-form">
+                    <input id="message-input" autocomplete="off"><button id="send-button">Senden</button>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/scripts/chat_logic.js"></script>
+<script src="/scripts/contacts_logic.js"></script>
