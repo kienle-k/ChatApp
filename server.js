@@ -74,12 +74,14 @@ const dbConfig = {
   host: 'localhost',
   user: 'root',
   password: 'yourNewPassword',
-  database: 'chatAppDB'
+  database: 'chatAppDB',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 };
 
 // Create connection pool
 const pool = mysql.createPool(dbConfig);
-
 // Test database connection
 async function testConnection() {
   try {

@@ -238,9 +238,8 @@ async function updateSelectedChatDisplay() {
         }
     }  
 }
-
-async function choosePersonalChat(user_id){
-    if (CURRENTLY_CHATTING_WITH_ID == user_id){
+async function choosePersonalChat(user_id) {
+    if (CURRENTLY_CHATTING_WITH_ID == user_id) {
         const tmp = document.getElementById("messages").style.border;
         document.getElementById("messages").style.border = "2px solid lightseagreen";
         setTimeout(() => {
@@ -249,16 +248,16 @@ async function choosePersonalChat(user_id){
         return;
     }
     CURRENTLY_CHATTING_WITH_ID = user_id;
+    CURRENT_CHAT_GROUP = null; // Setze die aktuelle Chat-Gruppe auf null, da es sich um einen persönlichen Chat handelt
 
     updateSelectedChatDisplay();
     
-    messagesUL.innerHTML = "";
-    requestHistoryMessages(0, 100);
+    messagesUL.innerHTML = ""; // Leere die Nachrichtenliste
+    requestHistoryMessages(0, 100); // Fordere die Chat-Historie an
     FIRST_LOAD = true;
 
-    document.getElementById('message-input').focus();
+    document.getElementById('message-input').focus(); // Fokussiere das Eingabefeld für Nachrichten
 }
-
 
 document.getElementById("search-button").addEventListener("click", findUser);
 document.getElementById("user-search-input").addEventListener("input", findUser);

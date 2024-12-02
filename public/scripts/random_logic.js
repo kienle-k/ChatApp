@@ -4,7 +4,7 @@ document.getElementById('random-chat-button').addEventListener('click', async ()
         const data = await response.json();
         if (data.success) {
             alert(`Starting chat with ${data.user.username}`);
-            // Hier kannst du den Benutzer zur Chat-Seite weiterleiten oder den Chat starten
+            choosePersonalChat(data.user.id); // Starte den Chat mit der zufälligen Person
         } else {
             alert('Failed to start random chat');
         }
