@@ -61,4 +61,12 @@ CREATE TABLE IF NOT EXISTS `files` (
     FOREIGN KEY (receiver_id) REFERENCES `users`(id) ON DELETE CASCADE
 );
 
-
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'password',
+    database: 'chatapp',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});

@@ -749,3 +749,27 @@ io.on('connection', (socket) => {
 server.listen(port, () => {
   console.log(`Server läuft auf http://localhost:${port}`);
 });
+
+// Route für zufälligen Chat
+app.get('/random-chat', async (req, res) => {
+    try {
+        const connection = await pool.getConnection();
+        const [rows] = await connection.query('SELECT id, username FROM users ORDER BY RAND() LIMIT 1');
+        connection.release();
+
+        if (rows.length > 0) {
+            const user = rows[0];
+            res.json({ success: true, user });
+        } else {
+            res.json({ success: false, error: 'No users found' });
+        }
+    } catch (error) {
+        console.error('Error fetching random user:', error);
+        res.status(500).json({ success: false, error: 'Failed to fetch random user' });
+    }
+});
+
+// Server starten
+server.listen(port, () => {
+  console.log(`Server läuft auf http://localhost:${port}`);
+});

@@ -16,7 +16,6 @@
         </div>
     </div>
 
-
     <div id="top-bar">
         <div id="home-button-container">
             <a id="home-button" href="/chat/chat.html">
@@ -60,7 +59,6 @@
 
         </div>
 
-
         <div id="chat-window">
 
             <div id="chat-container">
@@ -77,9 +75,27 @@
             </div>
         </div>
     </div>
+
+    <button id="random-chat-button">Start Random Chat</button>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/scripts/chat_logic.js"></script>
+    <script src="/scripts/contacts_logic.js"></script>
+    <script>
+        document.getElementById('random-chat-button').addEventListener('click', async () => {
+            try {
+                const response = await fetch('/random-chat');
+                const data = await response.json();
+                if (data.success) {
+                    alert(`Starting chat with ${data.user.username}`);
+                    // Hier kannst du den Benutzer zur Chat-Seite weiterleiten oder den Chat starten
+                } else {
+                    alert('Failed to start random chat');
+                }
+            } catch (error) {
+                console.error('Error starting random chat:', error);
+            }
+        });
+    </script>
 </body>
 </html>
-
-<script src="/socket.io/socket.io.js"></script>
-<script src="/scripts/chat_logic.js"></script>
-<script src="/scripts/contacts_logic.js"></script>
