@@ -174,14 +174,9 @@ function isAuthenticated(req, res, next) {
 
 // Secure chat route
 app.get('/chat', isAuthenticated, (req, res) => {
-  return res.sendFile(__dirname + '/public/chat/chat.html');
+  return res.sendFile(__dirname + '/public/chat.html');
 });
 
-
-// Catch-all route for chat directory attempts
-app.get('/chat/*', (req, res) => {
-  return res.redirect('/chat');
-});
 
 // Endpoints for pages
 app.get('/register', (req, res) => {
@@ -199,8 +194,16 @@ app.get('/registrated-successfully', (req, res) => {
   return res.sendFile(__dirname + '/public/registered.html');
 });
 
+app.get('/user-settings', isAuthenticated, (req, res) => {
+  return res.sendFile(__dirname + '/public/user-settings.html');
+});
 
 // Redirect to pretty url when searching for the html
+
+app.get('/user-settings.html', isAuthenticated, (req, res) => {
+  return res.redirect(301, '/user-settings');
+});
+
 app.get('/register.html', (req, res) => {
   return res.redirect(301, '/register');
 });
@@ -422,7 +425,7 @@ app.get('/api/get-my-user', isAuthenticated, async (req, res) => {
   }
 });
 
-app.get('/api/get-my-picture', isAuthenticated, async (req, res) => {
+app.get('/api/get-my-info', isAuthenticated, async (req, res) => {
   try {
     const sessionUser = req.session.user;
     let user_id;
@@ -439,14 +442,16 @@ app.get('/api/get-my-picture', isAuthenticated, async (req, res) => {
     const connection = await pool.getConnection();
     try {
       const [rows] = await connection.query(
-        'SELECT profile_picture FROM users WHERE id=?',
+        'SELECT username, email, profile_picture FROM users WHERE id=?',
         [user_id]
       );
 
       if (rows.length > 0) {
+        const username = rows[0].username;
+        const email = rows[0].email;
         const profilePicture = rows[0].profile_picture;
         const picturePath = profilePicture ? `/${profilePicture}` : 'images/profile.jpg';
-        res.json({ profile_picture: picturePath });
+        res.json({ username: username, email: email, profile_picture: picturePath });
       } else {
         res.status(404).send('User not found');
       }
@@ -463,6 +468,24 @@ app.get('/api/get-my-picture', isAuthenticated, async (req, res) => {
   }
 });
 
+
+
+// Route to update user information
+app.post('/api/update-my-info', upload.single('profile_picture'), (req, res) => {
+  const { username, email, password } = req.body;
+  const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
+
+  // Example logic for updating user info; replace with your database logic
+  console.log('Username:', username);
+  console.log('Email:', email);
+  console.log('Password:', password);
+  if (profilePicture) {
+      console.log('Profile Picture:', profilePicture);
+  }
+
+  // Respond with success
+  res.json({ message: 'User info updated successfully!' });
+});
 
 
 

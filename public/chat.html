@@ -10,6 +10,13 @@
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 </head>
 <body>
+
+    <div id="profile-pic-modal" style="display:none">
+        <div id="profile-pic-display">
+        </div>
+    </div>
+
+
     <div id="top-bar">
         <div id="home-button-container">
             <a id="home-button" href="/chat/chat.html">
@@ -21,7 +28,7 @@
         </div>
 
         <div id="current-user-container">
-            <button type="button" id="current-user-profile">
+            <button type="button" id="current-user-profile" onclick="window.location.href='/user-settings'">
                 <img src="/images/profile.jpg" id="profileImage" alt="My Profile">
             </button>
 

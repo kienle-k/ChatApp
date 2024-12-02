@@ -24,6 +24,77 @@ const messagesUL = document.getElementById('messages');
 const bottomThreshold = 150;
 
 
+const bigProfileModal = document.getElementById('profile-pic-modal');
+const bigProfileDisplay = document.getElementById('profile-pic-display');
+
+
+bigProfileModal.addEventListener("click", function(){ bigProfileModal.style.display="none"; });
+
+const contact_list = document.getElementById("contacts");
+
+
+// async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class){
+//     contact_list.insertAdjacentHTML('beforeend', 
+//         `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' onclick="choosePersonalChat(${contact_id})">
+//             <button type="button" class="contact-profile-button" onclick="showBigProfilePic(${contact_id})">
+//                 <img src='/${picture_path}'>
+//             </button>
+//             <button type="button" class="choose-contact-button" data-id=${contact_id}>
+//                 <div class="contact">${contact_username}</div>
+//             </button>
+//             <div class="last-message">${last_msg_text}</div>
+//         </li>` 
+//     );
+// }
+
+async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class){
+    contact_list.insertAdjacentHTML('beforeend', 
+        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' onclick="choosePersonalChat(${contact_id})">
+            <button type="button" class="contact-profile-button" onclick="showBigProfilePic(${contact_id})">
+                <img src='/${picture_path}'>
+            </button>
+            <button type="button" class="choose-contact-button" data-id=${contact_id}>
+                <div class="contact">${contact_username}</div>
+            </button>
+            <div class="last-message">${last_msg_text}</div>
+        </li>` 
+    );
+}
+
+
+
+function showBigProfilePic(id){
+    console.log("OPENING IMG");
+    // Check if contact already exists
+
+    for (let child of contact_list.children) {
+        console.log(child);
+ 
+        if (child.getAttribute('data-id') == id) {
+            src = child.getAttribute('data-imgsrc');
+            break; // Exit function after finding the match
+        }
+    }
+    console.log(src);
+
+    if (src) { 
+       
+        bigProfileDisplay.innerHTML = '';
+        
+        bigProfileModal.style.display = "block";
+
+        // Create a new image element
+        const img = document.createElement('img');
+        img.src = src; // Set the image source
+        img.alt = "Profile Picture"; // Set alt text for accessibility
+        img.classList.add('big-profile-pic');
+
+        bigProfileDisplay.appendChild(img);
+    }
+        
+}
+
+
 
 async function addContact(id, name, picture_path = null){
 
@@ -38,13 +109,9 @@ async function addContact(id, name, picture_path = null){
         ct_wrapper.style.display = "none";
     }, 250);
 
-    const contact_list = document.getElementById("contacts");
-
     // Check if contact already exists
     for (let child of contact_list.children) {
-        const contactButton = child.querySelector('.choose-contact-button');
-    
-        if (contactButton && contactButton.getAttribute('data-id') == id) {
+        if (child.getAttribute('data-id') == id) {
             choosePersonalChat(id);
             return; // Exit function after finding the match
         }
@@ -80,23 +147,8 @@ async function addContact(id, name, picture_path = null){
     if (id == MY_USER_ID && !name.includes("(Du)")){
         name += " (Du)";
     }
-            
-    contact_list.insertAdjacentHTML('beforeend', 
-        `<li class="contact-container ${selected_class}">
-            <button type="button" class="contact-profile-button">
-            <img src="/${picture_path}">
-            </button>
-            <button type="button" class="choose-contact-button" data-id=${id} onclick="choosePersonalChat(${id})">
-            <div class="contact">${name}</div>
-            </button>
-                        <div class="last-message"></div>
-
-        </li>`
-        
-    );
-
-
-
+    addContactToList(picture_path, id, name, "", selected_class)     
+    
     setTimeout(() => {
         choosePersonalChat(id);
     }, 50);
@@ -176,7 +228,6 @@ async function findUser() {
 }
 
 async function updateSelectedChatDisplay() {
-    const contact_list = document.getElementById("contacts");
 
     // Check if contact already exists
     for (let child of contact_list.children) {
@@ -513,7 +564,7 @@ document.getElementById('send-button').addEventListener("touchend", (e) => {
 function fetchProfilePicture() {
     const profileImageElement = document.getElementById('profileImage');
     // Make the API request to the backend
-    fetch('/api/get-my-picture')
+    fetch('/api/get-my-info')
       .then(response => response.json()) // Parse the JSON response from the backend
       .then(data => {
         // Get the profile picture path from the response

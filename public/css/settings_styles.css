@@ -1,0 +1,129 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.settings-container {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 90%;
+    max-width: 600px; /* Wider on desktop */
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Back Button */
+.back-btn {
+    background-color: transparent;
+    color: #555;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+.back-btn:hover {
+    color: #007bff;
+}
+
+/* Profile Section */
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-section img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+}
+
+.upload-btn {
+    background-color: rgba(61, 216, 227);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.upload-btn:hover {
+    background-color: rgb(29, 162, 172);
+}
+
+/* Form Section */
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.settings-form label {
+    font-weight: bold;
+    color: #555;
+}
+
+.settings-form input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.settings-form input:focus {
+    border-color: rgba(61, 216, 227);
+    outline: none;
+}
+
+.save-btn {
+    background-color: rgba(61, 216, 227);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.save-btn:hover {
+    background-color: rgb(41, 141, 148);
+}
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .settings-container {
+        padding: 15px;
+        max-width: 90%;
+    }
+
+    .profile-section img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .upload-btn, .save-btn {
+        font-size: 14px;
+    }
+}

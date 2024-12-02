@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Settings</title>
+    <link rel="stylesheet" href="css/settings_styles.css">
+</head>
+<body>
+    <div class="settings-container">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <div class="profile-section">
+            <img src="/images/profile.png" alt="Profile Picture" id="profile-picture" />
+            <input type="file" id="profile-upload" accept="image/*" hidden>
+            <button class="upload-btn" onclick="triggerUpload()">Change Picture</button>
+        </div>
+        <form class="settings-form">
+            <label for="username">Username</label>
+            <input type="text" id="username" name="username" placeholder="Your Username" />
+
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Your Email" />
+
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="New Password" />
+
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm Password" />
+
+            <button type="submit" class="save-btn">Save Changes</button>
+        </form>
+    </div>
+
+    <script>
+        // Go back function
+        function goBack() {
+            window.history.back();
+        }
+
+        // Trigger file upload
+        function triggerUpload() {
+            document.getElementById('profile-upload').click();
+        }
+
+        // Preview selected image
+        document.getElementById('profile-upload').addEventListener('change', function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('profile-picture').src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+  
+
+
+        // Load user data on page load
+        async function loadData() {
+            const usernameElement = document.getElementById('username');
+            const emailElement = document.getElementById('email');
+            const profileImageElement = document.getElementById('profile-picture');
+            try {
+                const response = await fetch('/api/get-my-info');
+                const data = await response.json();
+
+                usernameElement.value = data.username;
+                emailElement.value = data.email;
+                profileImageElement.src = data.profile_picture || '/images/profile.png';
+            } catch (error) {
+                console.error('Error fetching profile data:', error);
+                profileImageElement.src = '/images/profile.png';
+            }
+        }
+
+        // Submit form data to the backend
+        document.querySelector('.settings-form').addEventListener('submit', async function (event) {
+            event.preventDefault(); // Prevent page refresh
+
+            const username = document.getElementById('username').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const confirmPassword = document.getElementById('confirm-password').value.trim();
+            const profileUpload = document.getElementById('profile-upload').files[0]; // Get the uploaded file
+
+            if (password !== confirmPassword) {
+                alert("Passwords do not match!");
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('email', email);
+            formData.append('password', password);
+            if (profileUpload) {
+                formData.append('profile_picture', profileUpload); // Append the file to the request
+            }
+
+            try {
+                const response = await fetch('/api/update-my-info', {
+                    method: 'POST',
+                    body: formData, // Use FormData for file uploads
+                });
+
+                if (response.ok) {
+                    alert("Settings updated successfully!");
+                } else {
+                    const error = await response.json();
+                    alert("Failed to update settings: " + error.message);
+                }
+            } catch (error) {
+                console.error("Error updating settings:", error);
+                alert("An error occurred while updating settings.");
+            }
+        });
+
+
+        window.onload = loadData;
+
+    </script>
+</body>
+</html>
