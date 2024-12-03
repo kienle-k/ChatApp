@@ -33,3 +33,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       document.getElementById("error-message").textContent = "An error occurred. Please try again.";
     }
   });
+
+window.onload = function(){
+  document.getElementById("login-container").style.opacity = "1";
+}
