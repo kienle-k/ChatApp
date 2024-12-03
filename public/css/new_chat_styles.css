@@ -371,8 +371,9 @@ opacity: 0.7;
 }
 
 #user-search-input {
-    width: 70%;
+    width: 60%;
     height: 100%;
+    border-radius: 2px;
     border-top-left-radius: 16px;
     box-sizing: border-box;
     border: 0;
@@ -382,10 +383,11 @@ opacity: 0.7;
 }
 
 #search-button {
-    width: 30%;
+    width: 25%;
     height: 100%;
     box-sizing: border-box;
     border-radius: 0;
+    border-radius: 2px;
     border-top-right-radius: 16px;
     border: 0;
 
@@ -396,7 +398,8 @@ opacity: 0.7;
     display: inline-block; /* Make the button inline-block */
     text-wrap: nowrap;
     font-size: 12px; /* Increase font size */
-    margin: 10px 2px; /* Some margin */
+    margin: 10px 0px; /* Some margin */
+    margin-left: 4px;
     cursor: pointer; /* Pointer/hand icon */
     transition: background-color 0.3s ease; /* Smooth transition for background color */
 

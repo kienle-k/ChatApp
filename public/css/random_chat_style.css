@@ -8,15 +8,16 @@
     display: inline-block; /* Make the button inline-block */
     text-wrap: nowrap;
     font-size: 12px; /* Increase font size */
-    margin: 10px 2px; /* Some margin */
+    margin: 10px 0px; /* Some margin */
+    margin-left: 4px;
     cursor: pointer; /* Pointer/hand icon */
     border-radius: 12px; /* Rounded corners */
     transition: background-color 0.3s ease; /* Smooth transition for background color */
 
-    width: 30%;
+    width: 25%;
     height: 100%;
     box-sizing: border-box;
-    border-radius: 0;
+    border-radius: 2px;
     border: 0;
 }
 
