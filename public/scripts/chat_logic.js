@@ -117,19 +117,6 @@ async function addContact(id, name, picture_path = null){
         }
     }
 
-
-    // if (message.sender_username == MY_USER) {
-    //     contact_username = message.receiver_username;
-    //     contact_id = message.receiver_id;
-    //     last_msg_text = `<b style="color: darkgray">Du:</b><br>${message.message}`;
-    //     picture_path = message.receiver_picture;
-    // } else {
-    //     contact_username = message.sender_username;
-    //     contact_id = message.sender_id;
-    //     last_msg_text = `<b style="color: darkgray">${contact_username}:</b><br>${message.message}`;
-    //     picture_path = message.sender_picture;
-    // }
-
     selected_class = "";
 
     console.log("THE PATH IS", picture_path);
@@ -147,7 +134,7 @@ async function addContact(id, name, picture_path = null){
     if (id == MY_USER_ID && !name.includes("(Du)")){
         name += " (Du)";
     }
-    addContactToList(picture_path, id, name, "", selected_class)     
+    addContactToList(picture_path, id, name, "", selected_class);     
     
     setTimeout(() => {
         choosePersonalChat(id);

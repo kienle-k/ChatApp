@@ -73,7 +73,7 @@ io.use((socket, next) => {
 const dbConfig = {
   host: 'localhost',
   user: 'root',
-  password: 'yourNewPassword',
+  password: 'thisandthat123',
   database: 'chatAppDB',
   waitForConnections: true,
   connectionLimit: 10,
@@ -538,7 +538,7 @@ server.listen(port, () => {
 app.get('/random-chat', async (req, res) => {
   try {
     const connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT id, username FROM users ORDER BY RAND() LIMIT 1');
+    const [rows] = await connection.query('SELECT id, username, profile_picture FROM users ORDER BY RAND() LIMIT 1');
     connection.release();
 
     if (rows.length > 0) {
