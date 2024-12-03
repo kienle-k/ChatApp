@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registrierung</title>
     <link rel="stylesheet" href="/css/register_style.css">
-    <link rel="icon" href="/images/favicon.ico" type="image/x-icon"
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 </head>
 <body>
     <div class="register-container" id="register-container">
@@ -24,11 +24,17 @@
                 <p id="username-error-message" style="color: red;"></p>
                 
                 <label for="password">Passwort:</label>
-                <input type="password" id="password" name="password" required>
+                <div class="password-container">
+                    <input type="password" id="password" name="password" required>
+                    <button type="button" id="toggle-password" class="toggle-password">👁️</button>
+                </div>
                 <p id="password-error-message" style="color: red;"></p>
                 
                 <label for="confirm-password">Passwort wiederholen:</label>
-                <input type="password" id="confirm-password" name="confirm-password" required>
+                <div class="password-container">
+                    <input type="password" id="confirm-password" name="confirm-password" required>
+                    <button type="button" id="toggle-confirm-password" class="toggle-password">👁️</button>
+                </div>
                 
                 <p id="error-message" style="color: red;"></p>
                  
@@ -49,11 +55,6 @@
             </ul>
         </div>
     </div>
-    <script>
-        window.onload = function(){
-            document.getElementById("register-container").style.opacity = "1";
-        }
-    </script>
     <script src="scripts/register_logic.js"></script>
 </body>
 </html>
