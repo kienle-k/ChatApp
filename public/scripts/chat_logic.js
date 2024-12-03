@@ -26,6 +26,7 @@ const bottomThreshold = 150;
 
 const bigProfileModal = document.getElementById('profile-pic-modal');
 const bigProfileDisplay = document.getElementById('profile-pic-display');
+const bigProfileInfo = document.getElementById('profile-text');
 
 
 bigProfileModal.addEventListener("click", function(){ bigProfileModal.style.display="none"; });
@@ -49,7 +50,7 @@ const contact_list = document.getElementById("contacts");
 
 async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class){
     contact_list.insertAdjacentHTML('beforeend', 
-        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' onclick="choosePersonalChat(${contact_id})">
+        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' data-username='${contact_username}' onclick="choosePersonalChat(${contact_id})">
             <button type="button" class="contact-profile-button" onclick="showBigProfilePic(${contact_id})">
                 <img src='/${picture_path}'>
             </button>
@@ -67,11 +68,15 @@ function showBigProfilePic(id){
     console.log("OPENING IMG");
     // Check if contact already exists
 
+    let src;
+    let name;
+
     for (let child of contact_list.children) {
         console.log(child);
  
         if (child.getAttribute('data-id') == id) {
             src = child.getAttribute('data-imgsrc');
+            name = child.getAttribute('data-username');
             break; // Exit function after finding the match
         }
     }
@@ -80,6 +85,7 @@ function showBigProfilePic(id){
     if (src) { 
        
         bigProfileDisplay.innerHTML = '';
+        bigProfileInfo.innerText = name + "\n-\n-\n-\n-\n-\n-";
         
         bigProfileModal.style.display = "block";
 
@@ -513,6 +519,11 @@ function sendMessage(event) {
     let to_user = CURRENTLY_CHATTING_WITH_ID;
 
     let to_group = CURRENT_CHAT_GROUP;
+
+
+    if (!to_user && !to_group){
+        return;
+    }
 
     let value = input.value;
 

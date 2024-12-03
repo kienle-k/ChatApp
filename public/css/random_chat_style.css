@@ -2,10 +2,11 @@
     /* background-color: #4CAF50;  Green background */
     border: none; /* Remove borders */
     color: rgb(0, 0, 0); /* White text */
-    padding: 15px 32px; /* Some padding */
+    padding: 0;/*15px 32px; /* Some padding */
     text-align: center; /* Centered text */
     text-decoration: none; /* Remove underline */
     display: inline-block; /* Make the button inline-block */
+    text-wrap: nowrap;
     font-size: 12px; /* Increase font size */
     margin: 10px 2px; /* Some margin */
     cursor: pointer; /* Pointer/hand icon */

@@ -366,20 +366,74 @@ app.get('/api/get-my-info', isAuthenticated, async (req, res) => {
   }
 });
 
-// Route to update user information
-app.post('/api/update-my-info', upload.single('profile_picture'), (req, res) => {
+// Route to update user information by ID
+app.post('/api/update-my-info', upload.single('profile_picture'), async (req, res) => {
   const { username, email, password } = req.body;
-  const profilePicture = req.file ? `/uploads/${req.file.filename}` : null;
 
-  console.log('Username:', username);
-  console.log('Email:', email);
-  console.log('Password:', password);
-  if (profilePicture) {
-    console.log('Profile Picture:', profilePicture);
+  const sessionUser = req.session.user;
+    const user_id = parseInt(sessionUser.id);
+
+    if (isNaN(user_id)) {
+      return res.status(400).send('Invalid user ID');
+    }
+
+    let imagePath = null;
+    if (req.file) {
+      imagePath = path.join('uploads', req.file.filename);
+    }
+
+  try {
+    const connection = await pool.getConnection();
+    let query = 'UPDATE users SET';
+    const updates = [];
+    const values = [];
+
+    // Add fields to update if provided
+    if (username) {
+      updates.push('username = ?');
+      values.push(username);
+    }
+    if (email) {
+      updates.push('email = ?');
+      values.push(email);
+    }
+    if (password) {
+      const hashedPassword = await getPasswordHash(password);
+      updates.push('password = ?');
+      values.push(hashedPassword);
+    }
+    if (imagePath) {
+      updates.push('profile_picture = ?');
+      values.push(imagePath);
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).send('No fields provided for update.');
+    }
+
+    query += ` ${updates.join(', ')} WHERE id = ?`;
+    values.push(user_id);
+
+    try {
+      const [result] = await connection.execute(query, values);
+      if (result.affectedRows === 0) {
+        return res.status(404).send('User not found.');
+      }
+      console.log('User info updated successfully');
+      res.status(200).send('User info updated successfully!');
+    } catch (err) {
+      console.error('Error updating user:', err);
+      res.status(500).send('An error occurred.');
+    } finally {
+      connection.release();
+    }
+  } catch (err) {
+    console.error('Error connecting to database:', err);
+    res.status(500).send('An error occurred.');
   }
-
-  res.json({ message: 'User info updated successfully!' });
 });
+
+
 
 // WebSocket connection
 io.on('connection', (socket) => {
