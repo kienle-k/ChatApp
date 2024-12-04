@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Link Up - Chat</title>
 
-    <link rel="stylesheet" href="/css/new_chat_styles.css">
-    <link rel="stylesheet" href="/css/random_chat_style.css">
+    <link rel="stylesheet" href="/css/hide_images.css" id="hide-images">
+    <link rel="stylesheet" href="/css/main_lightmode.css" id="theme-styles">
+    <link rel="stylesheet" href="/css/switch_css.css">
+    
 
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 </head>
 <body>
+
 
     <div id="profile-pic-modal" style="display:none">
         <div id="profile-wrapper">
@@ -27,6 +30,11 @@
             <div id="app-name-container">
                 <img src="/images/appName.png">
             </div>
+            <div class="switch-container">
+                <input type="checkbox" id="switch-checkbox">
+                <span class="slider" id="slider"></span>
+              </div>
+              
         </div>
 
         <div id="current-user-container">
@@ -48,8 +56,10 @@
 
                 <div id="search-bar">
                   <input type="text" placeholder="Username" id="user-search-input"/>
-                  <button id="random-chat-button">Start Random Chat</button>
-                  <button id="search-button">Suchen</button>
+                  <!-- <button id="random-chat-button">Random Chat</button>
+                  <button id="search-button">Suchen</button>                   -->
+                  <button id="random-chat-button"><img src="/images/shuffle2.png"/></button>
+                  <button id="search-button"><img src="/images/search.png"/></button>
                   
                 </div>
 
@@ -74,18 +84,19 @@
             <div id="send-container">
 
                 <form id="chat-form">
-                    <input id="message-input" autocomplete="off"><button id="send-button">Senden</button>
+                    <input id="message-input" autocomplete="off"><button id="send-button"><img src="/images/send2.png"/></button>
                 </form>
 
             </div>
         </div>
     </div>
 
-    <div id="search-user"></div>
+    <!-- <div id="search-user"></div> -->
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="/scripts/chat_logic.js"></script>
     <script src="/scripts/contacts_logic.js"></script>
     <script src="/scripts/random_logic.js"></script>
+    <script src="/scripts/switch_logic.js"></script>
 </body>
 </html>

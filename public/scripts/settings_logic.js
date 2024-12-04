@@ -25,6 +25,8 @@ document.getElementById('profile-upload').addEventListener('change', function (e
 
 // Load user data on page load
 async function loadData() {
+    // First allow image display after loading
+    document.getElementById("hide-images").href = "";
     const usernameElement = document.getElementById('username');
     const emailElement = document.getElementById('email');
     const profileImageElement = document.getElementById('profile-picture');
@@ -83,6 +85,55 @@ document.querySelector('.settings-form').addEventListener('submit', async functi
         alert("An error occurred while updating settings.");
     }
 });
+
+
+const bigProfileModal = document.getElementById('profile-pic-modal');
+const bigProfileDisplay = document.getElementById('profile-pic-display');
+const bigProfileInfo = document.getElementById('profile-text');
+const emailInput = document.getElementById('email');
+const usernameInput = document.getElementById('username');
+
+
+function showBigProfilePic(){
+
+    // Get image source
+    let src = document.getElementById("profile-picture").src;
+
+    if (src) { 
+       
+        bigProfileDisplay.innerHTML = '';
+        bigProfileInfo.innerHTML = `<div><b>${usernameInput.value}</b></div>
+                                    <div>${emailInput.value}</div>`;
+        
+        bigProfileModal.style.display = "block";
+
+        // Create a new image element
+        const img = document.createElement('img');
+        img.src = src; // Set the image source
+        img.alt = "Profile Picture"; // Set alt text for accessibility
+        img.classList.add('big-profile-pic');
+
+        bigProfileDisplay.appendChild(img);
+    }
+        
+}
+
+
+const link = document.getElementById("doc-styles");
+
+const darkmode = JSON.parse(localStorage.getItem("darkmode"));
+
+if (darkmode == true) {
+    console.log("Darkmode turned ON.");
+    link.href = "/css/settings_dark.css";
+} else {
+    DARKMODE = false;
+    console.log("Darkmode turned OFF.");
+    link.href = "/css/settings_light.css"; 
+}
+
+
+
 
 
 window.onload = loadData;

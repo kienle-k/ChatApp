@@ -66,7 +66,7 @@ socket.on('response-chat-history', (rows) => {
             if (CURRENTLY_CHATTING_WITH_ID == null){
                 CURRENTLY_CHATTING_WITH_ID = contact_id;
                 messagesUL.innerHTML = "";
-                choosePersonalChat(CURRENTLY_CHATTING_WITH_ID);
+                choosePersonalChat(CURRENTLY_CHATTING_WITH_ID, showHighlight=false);
                 updateSelectedChatDisplay();
                 FIRST_LOAD = true;
                 requestHistoryMessages(0, 100);

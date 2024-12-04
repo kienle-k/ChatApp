@@ -371,16 +371,16 @@ app.post('/api/update-my-info', upload.single('profile_picture'), async (req, re
   const { username, email, password } = req.body;
 
   const sessionUser = req.session.user;
-    const user_id = parseInt(sessionUser.id);
+  const user_id = parseInt(sessionUser.id);
 
-    if (isNaN(user_id)) {
-      return res.status(400).send('Invalid user ID');
-    }
+  if (isNaN(user_id)) {
+    return res.status(400).send('Invalid user ID');
+  }
 
-    let imagePath = null;
-    if (req.file) {
-      imagePath = path.join('uploads', req.file.filename);
-    }
+  let imagePath = null;
+  if (req.file) {
+    imagePath = path.join('uploads', req.file.filename);
+  }
 
   try {
     const connection = await pool.getConnection();
@@ -583,16 +583,22 @@ io.on('connection', (socket) => {
   });
 });
 
-// Start the server
-server.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
-});
 
 // Route for random chat
-app.get('/random-chat', async (req, res) => {
+app.get('/random-chat', isAuthenticated, async (req, res) => {
+
+  const sessionUser = req.session.user;
+  const user_id = parseInt(sessionUser.id);
+
+  if (isNaN(user_id)) {
+    return res.status(400).send('Invalid user ID');
+  }
+  
   try {
     const connection = await pool.getConnection();
-    const [rows] = await connection.query('SELECT id, username, profile_picture FROM users ORDER BY RAND() LIMIT 1');
+    const [rows] = await connection.query('SELECT id, username, profile_picture FROM users WHERE id != ? ORDER BY RAND() LIMIT 1',
+      [user_id]
+    );
     connection.release();
 
     if (rows.length > 0) {
@@ -605,4 +611,12 @@ app.get('/random-chat', async (req, res) => {
     console.error('Error fetching random user:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch random user' });
   }
+});
+
+
+
+
+// Start the server
+server.listen(port, () => {
+  console.log(`Server is running at http://localhost:${port}`);
 });
