@@ -48,7 +48,7 @@ const contact_list = document.getElementById("contacts");
 //     );
 // }
 
-async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class){
+async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class) {
     contact_list.insertAdjacentHTML('beforeend', 
         `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' data-username='${contact_username}' onclick="choosePersonalChat(${contact_id})">
             <button type="button" class="contact-profile-button" onclick="showBigProfilePic(${contact_id})">
@@ -60,8 +60,23 @@ async function addContactToList(picture_path, contact_id, contact_username, last
             <div class="last-message">${last_msg_text}</div>
         </li>` 
     );
+
+    // Return the last inserted contact element
+    return contact_list.lastElementChild;
 }
 
+
+function isContactLoaded(id){
+    if (id == null){
+        return false;
+    }
+    for (let child of contact_list.children) {
+        if (child.getAttribute('data-id') == id) {
+            return true;
+        }
+    }
+
+}
 
 
 function showBigProfilePic(id){
@@ -77,6 +92,7 @@ function showBigProfilePic(id){
         if (child.getAttribute('data-id') == id) {
             src = child.getAttribute('data-imgsrc');
             name = child.getAttribute('data-username');
+            email = "Email@email.email" // child.getAttribute('data-email');
             break; // Exit function after finding the match
         }
     }
@@ -85,7 +101,8 @@ function showBigProfilePic(id){
     if (src) { 
        
         bigProfileDisplay.innerHTML = '';
-        bigProfileInfo.innerText = name + "\n-\n-\n-\n-\n-\n-";
+        bigProfileInfo.innerHTML = `<div><b>${name}</b></div>
+                                    <div>${email}</div>`;
         
         bigProfileModal.style.display = "block";
 
@@ -102,7 +119,7 @@ function showBigProfilePic(id){
 
 
 
-async function addContact(id, name, picture_path = null){
+async function addContact(id, name, picture_path = null, showHightlight=true){
 
     const resultsContainer = document.getElementById('user-list');
     const ct_wrapper = document.getElementById('drop-down-users');
@@ -118,8 +135,8 @@ async function addContact(id, name, picture_path = null){
     // Check if contact already exists
     for (let child of contact_list.children) {
         if (child.getAttribute('data-id') == id) {
-            choosePersonalChat(id);
-            return; // Exit function after finding the match
+            choosePersonalChat(id, showHightlight);
+            return false, child; // Exit function after finding the match, return false as no contact was added, and the contact div
         }
     }
 
@@ -140,12 +157,14 @@ async function addContact(id, name, picture_path = null){
     if (id == MY_USER_ID && !name.includes("(Du)")){
         name += " (Du)";
     }
-    addContactToList(picture_path, id, name, "", selected_class);     
+    const new_contact_div = addContactToList(picture_path, id, name, "", selected_class);     
     
     setTimeout(() => {
-        choosePersonalChat(id);
+        choosePersonalChat(id, showHightlight);
     }, 50);
     document.getElementById('message-input').focus();
+
+    return true, new_contact_div;
 
 }
 
@@ -201,13 +220,19 @@ async function findUser() {
         console.log(data.users);
 
         data.users.forEach(user => {
-          const userDiv = document.createElement('div');
-          if (user.id == MY_USER_ID){
-            user.username += " (Du)";
-        }
-          userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}', '${user.profile_picture}')">${user.username}</button>`; // <br>Email: ${user.email}
-          resultsContainer.appendChild(userDiv);
-          console.log("ADDING:", userDiv);
+            const userDiv = document.createElement('div');
+            if (user.id == MY_USER_ID){
+                user.username += " (Du)";
+            }
+
+            let img_path = "/images/plus2.png";
+            if (isContactLoaded(user.id)){
+                img_path = "/images/done.png";
+            }
+            console.log(img_path);
+            userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}', '${user.profile_picture}')"><img src="${img_path}"/>${user.username}</button>`; // <br>Email: ${user.email}
+            resultsContainer.appendChild(userDiv);
+            console.log("ADDING:", userDiv);
         });
         console.log(resultsContainer.childElementCount);
 
@@ -221,7 +246,7 @@ async function findUser() {
 }
 
 async function updateSelectedChatDisplay() {
-
+    console.log("UPDATGING");
     // Check if contact already exists
     for (let child of contact_list.children) {
         const contactButton = child.querySelector('.choose-contact-button');
@@ -231,13 +256,18 @@ async function updateSelectedChatDisplay() {
         }
     }  
 }
-async function choosePersonalChat(user_id) {
-    if (CURRENTLY_CHATTING_WITH_ID == user_id) {
-        const tmp = document.getElementById("messages").style.border;
-        document.getElementById("messages").style.border = "2px solid lightseagreen";
+
+async function choosePersonalChat(user_id, showHightlight=true) {
+    if (showHightlight) {
+        messages_div = document.getElementById("messages");
+        messages_div.style.border = "2px solid lightseagreen";
+        messages_div.style.backgroundColor = "rgba(32, 178, 170, 0.2)";
         setTimeout(() => {
-            document.getElementById("messages").style.border = tmp;
-        }, 500);
+            messages_div.style.border = "2px solid transparent";
+            messages_div.style.backgroundColor = "#ededed";
+        }, 250);
+    }
+    if (user_id == CURRENTLY_CHATTING_WITH_ID){
         return;
     }
     CURRENTLY_CHATTING_WITH_ID = user_id;

@@ -85,4 +85,37 @@ document.querySelector('.settings-form').addEventListener('submit', async functi
 });
 
 
+const bigProfileModal = document.getElementById('profile-pic-modal');
+const bigProfileDisplay = document.getElementById('profile-pic-display');
+const bigProfileInfo = document.getElementById('profile-text');
+const emailInput = document.getElementById('email');
+const usernameInput = document.getElementById('username');
+
+
+function showBigProfilePic(){
+
+    // Get image source
+    let src = document.getElementById("profile-picture").src;
+
+    if (src) { 
+       
+        bigProfileDisplay.innerHTML = '';
+        bigProfileInfo.innerHTML = `<div><b>${usernameInput.value}</b></div>
+                                    <div>${emailInput.value}</div>`;
+        
+        bigProfileModal.style.display = "block";
+
+        // Create a new image element
+        const img = document.createElement('img');
+        img.src = src; // Set the image source
+        img.alt = "Profile Picture"; // Set alt text for accessibility
+        img.classList.add('big-profile-pic');
+
+        bigProfileDisplay.appendChild(img);
+    }
+        
+}
+
+
+
 window.onload = loadData;

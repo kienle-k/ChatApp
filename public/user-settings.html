@@ -9,10 +9,17 @@
 
 </head>
 <body>
+    <div id="profile-pic-modal" style="display:none" onclick="this.style.display='none'">
+        <div id="profile-wrapper">
+            <div id="profile-pic-display"></div>
+            <div id="profile-text"></div>
+        </div>
+    </div>
+
     <div class="settings-container">
         <button class="back-btn" onclick="goBack()">← Back</button>
         <div class="profile-section">
-            <img src="/images/profile.jpg" alt="Profile Picture" id="profile-picture" />
+            <img src="/images/profile.jpg" alt="Profile Picture" id="profile-picture" onclick="showBigProfilePic()"/>
             <input type="file" id="profile-upload" accept="image/*" hidden>
             <button class="upload-btn" onclick="triggerUpload()">Change Picture</button>
         </div>

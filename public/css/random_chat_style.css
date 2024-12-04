@@ -5,7 +5,9 @@
     padding: 0;/*15px 32px; /* Some padding */
     text-align: center; /* Centered text */
     text-decoration: none; /* Remove underline */
-    display: inline-block; /* Make the button inline-block */
+    display: flex; 
+    align-items: center;
+    justify-content: center;
     text-wrap: nowrap;
     font-size: 12px; /* Increase font size */
     margin: 10px 0px; /* Some margin */
@@ -20,6 +22,14 @@
     border-radius: 2px;
     border: 0;
 }
+
+
+#random-chat-button img {
+    width: 70%; /* Adjust image size relative to button */
+    height: 70%; /* Adjust image size relative to button */
+    object-fit: contain; /* Ensure the image scales properly */
+}
+
 
 #random-chat-button:hover {
     /* background-color: #45a049; /* Darker green on hover */
