@@ -260,7 +260,11 @@ async function handleMessage(sessionUser, msg) {
 
   if (!sessionUser || !to_user || !text) {
     console.log("Missing sessionUser, to_user, or text in message");
-    return;
+    return {
+      id: msg.id,
+      success: false,
+      message: "Kein eingeloggter User vorhanden"
+    };
   }
 
   const connection = await pool.getConnection();
@@ -279,19 +283,21 @@ async function handleMessage(sessionUser, msg) {
 
     return {
       id: msg.id,
-      success: true
+      success: true,
+      message: "Nachricht gesendet."
     };
   } catch (error) {
     console.error('Error saving message:', error);
     return {
       id: msg.id,
       success: false,
-      error: "Internal server error. Could not save message."
+      message: "Interner Serverfeher. Nachricht konnte nicht gesendet werden."
     };
   } finally {
     connection.release();
   }
 }
+
 
 app.post('/api/find-user', isAuthenticated, async (req, res) => {
   const search_name = req.body.search_name;
@@ -319,7 +325,7 @@ app.post('/api/find-user', isAuthenticated, async (req, res) => {
 app.post('/api/send-message', isAuthenticated, async (req, res) => {
   try {
     const result = await handleMessage(req.session.user, req.body);
-    return res.json({ success: true, message: 'Message sent successfully' });
+    return result; //res.json({ success: true, message: 'Message sent successfully' });
   } catch (error) {
     console.error('Error processing message:', error);
     return res.status(500).json({ success: false, error: 'Failed to process message' });
@@ -462,7 +468,7 @@ io.on('connection', (socket) => {
       socket.emit('message-confirmation', {
         id: msg.id,
         success: false,
-        error: 'Failed to save message',
+        message: 'Serverfehler. Nachricht konnte nicht gespeichert werden.',
         error_message: error
       });
     }

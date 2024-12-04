@@ -581,12 +581,13 @@ background-color: #332755;
 }
 .search-bar-user {
     border-radius: 16px;
-    background-color: rgba(113, 62, 189, 0.9);
+    background-color: rgba(66, 36, 112, 0.594);
     margin-bottom: 5px;
     padding: 10px;
     width: 100%;
     height: 70px;
     border: 0;
+    color: rgba(255,255,255,0.9);
     box-shadow: 0px 0px 4px rgba(205, 205, 205, 0.791);
     box-sizing: border-box;
     font-size: 1.1em;
@@ -651,6 +652,10 @@ background-color: #332755;
     border: 2px solid rgb(76, 56, 97); 
 }
 
+.contact-container:hover {
+    border: 2px solid rgb(123, 115, 160);
+}
+
 .contact-container * {
     cursor: pointer;
 }
@@ -696,6 +701,10 @@ background-color: #332755;
     flex-shrink: 0;
 }
 
+.contact-profile-button:hover {
+    border: 2px solid rgb(123, 115, 160)
+}
+
 .contact-profile-button img {
     width: 100%;
     height: 100%;
@@ -739,6 +748,7 @@ background-color: #332755;
 
 .selected-chat-user {
     background-color: #352858;
+    border: 2px solid rgb(123, 115, 160);
     box-shadow: 0px 0px 4px rgb(106, 103, 103);
 }
 

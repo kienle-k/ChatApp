@@ -92,7 +92,7 @@ const contact_list = document.getElementById("contacts");
 async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class) {
     contact_list.insertAdjacentHTML('beforeend', 
         `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' data-username='${contact_username}' onclick="choosePersonalChat(${contact_id})">
-            <button type="button" class="contact-profile-button" onclick="showBigProfilePic(${contact_id})">
+            <button type="button" class="contact-profile-button" onclick="event.stopPropagation(); showBigProfilePic(${contact_id});">
                 <img src='/${picture_path}'>
             </button>
             <button type="button" class="choose-contact-button" data-id=${contact_id}>
@@ -523,15 +523,19 @@ socket.on('chat-message', (msg) => {
 
 // // Wenn eine Nachricht als bestätigt zurückkommt
 socket.on('message-confirmation', (output) => {
-    let msgID = output.id;
-    // Suchen der Nachricht mit der erhaltenen msgID
-    const li = pending_messages[msgID];
-    if (li) {
-        const msg = li.querySelector("div");
-        msg.classList.remove('pending-message'); // Entfernt den Pending-Status
-        msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
-        console.log("Message confirmed sent: " + msgID);
-        delete pending_messages[msgID]; // Entferne das Pending-Tracking
+    if (output.success == true){
+        let msgID = output.id;
+        // Suchen der Nachricht mit der erhaltenen msgID
+        const li = pending_messages[msgID];
+        if (li) {
+            const msg = li.querySelector("div");
+            msg.classList.remove('pending-message'); // Entfernt den Pending-Status
+            msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
+            console.log("Message confirmed sent: " + msgID);
+            delete pending_messages[msgID]; // Entferne das Pending-Tracking
+        }
+    } else {
+        alert(output.message);
     }
 });
 
