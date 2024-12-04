@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Logout</title>
-    <link rel="stylesheet" href="/css/logout_styles.css">
+    <link rel="stylesheet" href="/css/logout/logout_base.css">
+    <link rel="stylesheet" href="/css/logout/logout_light.css" id="doc-styles">
+
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 </head>
 <body>
@@ -12,10 +14,6 @@
         <h2>Sie wurden erfolgreich ausgeloggt!</h2>
         <button id="loginButton" onclick="window.location.href = '/';">Zum Login</button>
     </div>
-     <script>
-        window.onload = function(){
-            document.getElementById("logout-container").style.opacity = "1";
-        }
-     </script>
+     <script src="scripts/logged_out_logic.js"></script>
 </body>
 </html>

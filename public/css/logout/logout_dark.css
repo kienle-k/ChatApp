@@ -1,0 +1,26 @@
+
+
+body {
+    background-color: #08030d;
+    color: rgba(255,255,255,0.9);
+
+}
+
+#logout-container{
+    background-color: #161124;
+    box-shadow: 0 0 10px rgba(126, 118, 118, 0.1);
+}
+
+button {
+    background-color: #352858;
+    border: 2px solid rgb(123, 115, 160);;
+    color: white;
+    border: none;
+}
+
+button:hover {
+    background-color: rgb(90, 91, 181);
+}
+
+
+

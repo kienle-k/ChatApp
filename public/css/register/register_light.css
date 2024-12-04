@@ -1,0 +1,48 @@
+body {
+    background-color: #f0f0f0;
+}
+
+.register-container {
+    background-color: #ffffff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h2 {
+    color: #333;
+}
+
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+    border: 1px solid #ccc;
+}
+
+button[type="submit"] {
+    background-color: rgba(61, 216, 227);
+    color: white;
+    border: none;
+}
+
+button[type="submit"]:hover {
+    background-color: rgba(61, 216, 227);
+    /* background-color: #45a049; */
+}
+
+
+#requirements-container {
+    background-color: #ffffff;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);  
+}
+
+.requirements li {
+    background: #f1f1f1;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+.backtologin-button {
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    /* background-color: rgba(61, 216, 227); */
+    color: white;
+    border: none;
+}

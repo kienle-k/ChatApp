@@ -1,0 +1,260 @@
+
+
+
+
+
+#random-chat-button {
+    /* background-color: #4CAF50;  Green background */
+    border: none; /* Remove borders */
+    color: rgb(0, 0, 0); /* White text */
+    border: 0;
+    background-color: lightgray;
+}
+
+
+
+#random-chat-button:hover {
+    /* background-color: #45a049; /* Darker green on hover */
+    background-color: gray;
+}
+
+
+
+
+
+#profile-pic-modal {
+    border: none;
+    background-color: rgba(50,50,50,0.8);
+}
+
+
+#profile-wrapper #profile-pic-display{
+    background-color: aquamarine;
+    border-radius: 20px;
+    box-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+
+}
+
+
+
+#profile-wrapper #profile-text {
+    color: white;
+    text-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+}
+
+
+
+
+
+/* TOP BAR CONTENT */
+
+
+#top-bar button {
+    border: none;
+}
+
+#current-user-profile {
+    /* background-color: transparent; */
+    border: 2px solid rgb(115, 163, 178) !important;
+}
+
+
+#logout-button {
+    /* background-color: rgba(61, 216, 227); */
+    background-color: #ededed;
+    border: 2px solid rgb(115, 163, 178) !important;
+}
+
+
+
+
+
+
+/* END TOP BAR */
+
+
+
+/* CONTACTS STYLING */
+
+
+    /* SEARCH BAR STYLING */
+
+
+#search-bar {
+    /* border: 2px solid black; */
+    background-color: rgba(61, 216, 227);
+}
+
+#search-bar input:focus {
+    outline: none;
+}
+
+#user-search-input {
+    border: 0;
+    border: 0;
+    padding-right: 15px;
+}
+
+#search-button {
+    border: 0;
+    color: rgb(0, 0, 0); /* White text */
+    background-color: lightgray;
+}
+
+
+
+#search-button:hover {
+    /* background-color: #45a049; /* Darker green on hover */
+    background-color: gray;
+}
+
+
+#drop-down-users {
+    background-color: rgba(205, 205, 205, 0.791);
+}
+
+
+#user-list {
+    border: 2px solid darkgray;
+}
+
+
+.search-bar-user {
+    background-color: rgba(61, 216, 227, 0.9);
+    border: 0;
+    box-shadow: 0px 0px 4px rgba(205, 205, 205, 0.791);
+
+}
+
+
+    /* END SEARCH BAR STYLING */
+
+
+    /* CONTACTS STYLING */
+    
+#contacts {
+    background-color: #ededed;
+    /* border: 2px solid black; */
+}
+
+.contact-container {
+    background-color: #ffffff;
+    border: 2px solid white;
+}
+
+.contact-container:hover {
+    border: 2px solid gray;
+}
+
+
+
+.last-message {
+    /* border: 2px solid gray; */
+    background-color: rgba(241, 241, 241, 1);
+    border: 2px solid lightgray;
+}
+
+
+
+
+.contact-profile-button {
+    background-color: transparent;
+    border: 2px solid lightgray;
+}
+
+.contact-profile-button:hover {
+    border: 2px solid rgb(89, 160, 214);
+}
+
+
+
+.choose-contact-button {
+    background-color: transparent;
+    border: none;
+}
+
+.contact {
+  border: none;
+}
+
+.selected-chat-user {
+    background-color: transparent;
+    border: 2px solid gray;
+    box-shadow: 0px 0px 4px rgb(106, 103, 103);
+}
+
+    /* END CONTACTS STYLING */
+
+
+/* END CONTACTS STYLING */
+
+
+/* CHAT STYLING */
+
+
+    /* SEND CONTAINER STYLING */
+
+
+
+
+#message-input {
+    border: 0;
+    background-color: #ededed;
+}
+
+#message-input:focus {
+    outline: none; 
+    background-color: #fcfcfc;
+    border: 2px solid rgba(61, 216, 227);
+}
+
+#send-button {
+    border: 2px solid transparent;
+    background-color: #ededed;
+    color: white;
+}
+
+
+
+    /* END SEND CONTAINER STYLING */
+
+
+    /* CHAT HISTORY STYLING */
+
+    
+#messages {
+    border: 2px solid transparent; /*black; */
+    background-color: #ededed;
+}
+
+
+
+
+
+
+
+.message {
+    border: none;
+}
+
+.pending-message {
+    background-color: lightgray;
+}
+
+
+
+.sent-message {
+    /* background-color: lightseagreen; */
+    background-color: rgba(61, 216, 227);
+}
+
+.received-message {
+    background-color: lightblue; 
+    
+}
+
+
+    /* END CHAT HISTORY STYLING */
+
+/* END CHAT STYLING*/
+

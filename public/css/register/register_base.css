@@ -1,6 +1,5 @@
 body {
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -9,16 +8,11 @@ body {
 }
 
 .register-container {
-    background-color: #ffffff;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 
-    /* New */
     width: 40%;
     min-width: 300px;
-    /* width: 300px; */
-    /* End new */
 
     display: flex;
     justify-content: center;
@@ -30,7 +24,6 @@ body {
 
 h2 {
     text-align: center;
-    color: #333;
 }
  
 form {
@@ -43,7 +36,7 @@ label {
     font-weight: bold;
 }
 
-/* New */
+
 button,
 input {
     box-sizing: border-box;
@@ -53,15 +46,14 @@ button {
     font-size: 0.9em;
 }
 
-/* End */
+
 
 input[type="text"],
 input[type="email"],
 input[type="password"] {
-    width: 100%; /* New */
+    width: 100%;
     padding: 10px;
     margin-top: 5px;
-    border: 1px solid #ccc;
     border-radius: 4px;
 }
 
@@ -69,18 +61,11 @@ button[type="submit"] {
     width: 100%;
     margin-top: 20px;
     padding: 10px;
-    background-color: rgba(61, 216, 227);
-    color: white;
-    border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;
 }
 
-button[type="submit"]:hover {
-    background-color: rgba(61, 216, 227);
-    /* background-color: #45a049; */
-}
 
 #error-message {
     margin-top: 10px;
@@ -91,27 +76,18 @@ button[type="submit"]:hover {
 
 
 .form-container {
-    width: 100%; /* 60%; */
-    /* margin-right: 20px; */
+    width: 100%; 
 }
 #requirements-container {
     width: 300px;
-    background-color: #ffffff;
     padding: 20px;
     border-radius: 12px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    position: absolute; /* fixed; */ 
+    position: absolute; 
     top: 50%;
     transform: translateY(-50%);
-    right: -330px; /* 20px */
-    /* opacity: 0; */
-    /* z-index: -5; */
+    right: -330px; 
 }
-/* 
-input[type="password"]:focus #requirements-container {
-    opacity: 1; 
-    z-index: 5;  
-} */
+
 
 .requirements-container h3 {
     margin-top: 0;
@@ -126,20 +102,13 @@ input[type="password"]:focus #requirements-container {
 .requirements li {
     margin-bottom: 10px;
     padding: 8px;
-    background: #f1f1f1;
     border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 .backtologin-button {
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
     cursor: pointer;
     width: 100%;
     margin-top: 20px;
     padding: 10px;
-    /* background-color: rgba(61, 216, 227); */
-    color: white;
-    border: none;
     border-radius: 4px;
     cursor: pointer;
     font-weight: bold;

@@ -125,11 +125,11 @@ const darkmode = JSON.parse(localStorage.getItem("darkmode"));
 
 if (darkmode == true) {
     console.log("Darkmode turned ON.");
-    link.href = "/css/settings_dark.css";
+    link.href = "/css/user_settings/settings_dark.css";
 } else {
     DARKMODE = false;
     console.log("Darkmode turned OFF.");
-    link.href = "/css/settings_light.css"; 
+    link.href = "/css/user_settings/settings_light.css"; 
 }
 
 

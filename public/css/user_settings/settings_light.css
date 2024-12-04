@@ -1,0 +1,122 @@
+/* General Styles */
+body {
+    background-color: #f9f9f9;
+}
+
+
+
+
+.settings-container {
+    background: #fff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+
+/* Back Button */
+.back-btn {
+    background-color: transparent;
+    color: #555;
+    border: none;
+}
+
+.back-btn:hover {
+    color: #007bff;
+}
+
+
+.profile-section img {
+    border: 3px solid #ddd;
+}
+
+.upload-btn {
+    background-color: rgba(61, 216, 227);
+    color: white;
+    border: none;
+}
+
+.upload-btn:hover {
+    background-color: rgb(29, 162, 172);
+}
+
+
+
+.settings-form label {
+    color: #555;
+}
+
+.settings-form input {
+    border: 2px solid #ddd;
+    background-color: white;
+}
+
+.settings-form input:focus {
+    border-color: rgba(61, 216, 227);
+    outline: none;
+}
+
+
+
+.settings-form #username {
+    color: rgb(21, 26, 101);
+}
+
+.save-btn {
+    background-color: rgba(61, 216, 227);
+    color: white;
+    border: none;
+}
+
+.save-btn:hover {
+    background-color: rgb(41, 141, 148);
+}
+
+
+
+#profile-pic-modal {
+    border: none;
+    background-color: rgba(50,50,50,0.8);
+}
+
+
+#profile-wrapper #profile-pic-display{
+    background-color: aquamarine;
+    box-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+
+}
+
+
+
+#profile-wrapper #profile-text {
+    color: white;
+    text-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+}
+
+
+
+
+
+
+
+
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .settings-container {
+        padding: 15px;
+        max-width: 90%;
+    }
+
+    .profile-section img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .upload-btn, .save-btn {
+        font-size: 14px;
+    }
+}
+
+
+
+
+
