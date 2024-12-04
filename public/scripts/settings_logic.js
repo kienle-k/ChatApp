@@ -133,7 +133,32 @@ if (darkmode == true) {
 }
 
 
+async function loadUserSettings() {
+    try {
+        const response = await fetch('/api/get-user-settings', {
+            method: 'GET',
+            credentials: 'include' // Include cookies/session for authenticated requests
+        });
 
+        if (response.ok) {
+            const data = await response.json();
+            if (data.success) {
+                const user = data.user;
+                document.getElementById('username').value = user.username;
+                document.getElementById('email').value = user.email;
+                // Füge hier weitere Felder hinzu, falls erforderlich
+            } else {
+                console.error('Failed to load user settings:', data.error);
+            }
+        } else {
+            console.error('Failed to fetch user settings:', await response.json());
+        }
+    } catch (error) {
+        console.error('Error fetching user settings:', error);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadUserSettings);
 
 
 window.onload = loadData;

@@ -614,6 +614,16 @@ app.get('/random-chat', isAuthenticated, async (req, res) => {
 });
 
 
+//user settings 
+app.get('/api/get-user-settings', isAuthenticated, async (req, res) => {
+  try {
+    const user = await getUserById(req.session.user.id); // Funktion, die die Benutzerdaten aus der Datenbank abruft
+    res.json({ success: true, user });
+  } catch (error) {
+    console.error('Error fetching user settings:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch user settings' });
+  }
+});
 
 
 // Start the server
