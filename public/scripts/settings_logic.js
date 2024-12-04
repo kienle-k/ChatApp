@@ -36,10 +36,10 @@ async function loadData() {
 
         usernameElement.value = data.username;
         emailElement.value = data.email;
-        profileImageElement.src = data.profile_picture || '/images/profile.jpg';
+        profileImageElement.src = data.profile_picture || '/images/profile.png';
     } catch (error) {
         console.error('Error fetching profile data:', error);
-        profileImageElement.src = '/images/profile.jpg';
+        profileImageElement.src = '/images/profile.png';
     }
 }
 

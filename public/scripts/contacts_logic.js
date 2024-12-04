@@ -57,7 +57,7 @@ socket.on('response-chat-history', (rows) => {
             console.log(picture_path);
 
             if (picture_path == null){
-                picture_path = 'images/profile.jpg';
+                picture_path = 'images/profile.png';
             }
 
             // Insert new contact into display list

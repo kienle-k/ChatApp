@@ -3,8 +3,11 @@
     position: relative;
     display: inline-block;
     width: 60px;
+    min-width: 45px;
     height: 34px;
-    flex-shrink: 0;
+    z-index: 0;
+    /* flex-shrink: 0; */
+
   }
   
   /* Style the checkbox (visually hidden but clickable) */
@@ -22,6 +25,7 @@
   
   /* Style the slider (background of the switch) */
   #slider {
+
     position: absolute;
     cursor: pointer;
     top: 0;

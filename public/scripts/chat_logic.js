@@ -3,6 +3,47 @@ const socket = io();
 
 
 
+
+DARKMODE = false;
+
+function check_and_setup_darkmode(){
+    const switchCheckbox = document.getElementById("switch-checkbox");
+    const link = document.getElementById("theme-styles");
+
+    switchCheckbox.addEventListener("change", function() {
+        console.log("CHECKCHECK");
+    if (switchCheckbox.checked) {
+        console.log("Darkmode turned ON.");
+        localStorage.setItem("darkmode", true);
+        DARKMODE = true;
+        link.href = "/css/main_darkmode.css";  // Update with the path of the new stylesheet
+        document.getElementById("messages").style.backgroundColor = "#161124";
+    } else {
+        DARKMODE = false;
+        console.log("Darkmode turned OFF.");
+        localStorage.setItem("darkmode", false);
+        link.href = "/css/main_lightmode.css";  // Update with the path of the new stylesheet
+        document.getElementById("messages").style.backgroundColor = "#ededed";
+    }
+    });
+
+    const darkmode = JSON.parse(localStorage.getItem("darkmode"));
+    console.log("Stored Darkmode:", darkmode);
+
+    if (darkmode == true){
+        switchCheckbox.checked = true;
+    } else {
+        switchCheckbox.checked = false;
+    }
+
+    switchCheckbox.dispatchEvent(new Event('change'));
+}
+
+
+check_and_setup_darkmode();
+
+
+
 var FIRST_LOAD = true; //Flag for scrolling down when loading the first time -> will be set to zero after first load
 
 
@@ -146,11 +187,11 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
 
     try {
         if (!picture_path.includes("/")){
-            picture_path = 'images/profile.jpg';
+            picture_path = 'images/profile.png';
         }
     }catch (error){
         console.log("EROR");
-        picture_path = 'images/profile.jpg';
+        picture_path = 'images/profile.png';
     }
     console.log("THE PATH IS", picture_path);
 
@@ -259,7 +300,6 @@ async function updateSelectedChatDisplay() {
 
 
 
-DARKMODE = false;
 
 
 async function choosePersonalChat(user_id, showHightlight=true) {
@@ -618,52 +658,18 @@ function fetchProfilePicture() {
         if (profileImageElement && profileImageElement != null) {
           profileImageElement.src = profilePicturePath;
         } else {
-          profileImageElement.src = '/images/profile.jpg'; 
+          profileImageElement.src = '/images/profile.png'; 
         }
       })
       .catch(error => {
         console.error('Error fetching profile picture:', error);
         // Optionally, set a default image in case of an error
-        profileImageElement.src = '/images/profile.jpg';
+        profileImageElement.src = '/images/profile.png';
       });
   }
   
 
 
-function check_and_setup_darkmode(){
-    const switchCheckbox = document.getElementById("switch-checkbox");
-    const link = document.getElementById("theme-styles");
-
-    switchCheckbox.addEventListener("change", function() {
-        console.log("CHECKCHECK");
-    if (switchCheckbox.checked) {
-        console.log("Darkmode turned ON.");
-        localStorage.setItem("darkmode", true);
-        DARKMODE = true;
-        link.href = "/css/main_darkmode.css";  // Update with the path of the new stylesheet
-        document.getElementById("messages").style.backgroundColor = "#161124";
-    } else {
-        DARKMODE = false;
-        console.log("Darkmode turned OFF.");
-        localStorage.setItem("darkmode", false);
-        link.href = "/css/main_lightmode.css";  // Update with the path of the new stylesheet
-        document.getElementById("messages").style.backgroundColor = "#ededed";
-    }
-    });
-
-    const darkmode = JSON.parse(localStorage.getItem("darkmode"));
-    console.log("Stored Darkmode:", darkmode);
-
-    if (darkmode == true){
-        switchCheckbox.checked = true;
-    } else {
-        switchCheckbox.checked = false;
-    }
-
-    switchCheckbox.dispatchEvent(new Event('change'));
-}
-
-check_and_setup_darkmode();
 
 // Load last Messages on window load    
 window.onload = async function(){

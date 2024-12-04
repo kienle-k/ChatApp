@@ -30,6 +30,10 @@ body{
 
 }
 
+body * {
+    transition: background-color 0.5s ease, border 0.5s ease;
+}
+
 
 
 #random-chat-button {
@@ -160,7 +164,7 @@ opacity: 0.7;
 #top-bar {
     /* border: 2px solid green; */
 
-    width: 100%;
+    width: calc(100% - 20px);
     height: 70px;
     min-height: 70px;
 
@@ -169,9 +173,10 @@ opacity: 0.7;
     display: flex;
     flex-direction: row;
     align-items: center;
+    justify-content: space-between;
 
-    padding-left: 10px;
-    padding-right: 10px;
+    /* padding-left: 10px;
+    padding-right: 10px; */
 
 }
 
@@ -288,16 +293,20 @@ opacity: 0.7;
 }
 
 #logout-button {
-    background-color: rgba(61, 216, 227);
+    /* background-color: rgba(61, 216, 227); */
+    background-color: #ededed;
+    border: 2px solid rgb(115, 163, 178) !important;
     border-radius: 10px;
 }
 
 #home-button-container {
-    width: 50%;
+    width: fit-content;
+    max-width: 50%;
     height: 100%;
     max-height: 100%;
     box-sizing: border-box;
     overflow: hidden;
+    margin: 0;
 
     display: flex;
     flex-direction: row;
@@ -364,7 +373,8 @@ opacity: 0.7;
 #current-user-container {
     /* border: 2px solid green; */
 
-    width: 50%;
+    width: fit-content;
+    max-width: 50%;
     height: 100%;
     max-height: 100%;
     box-sizing: border-box;
@@ -374,6 +384,8 @@ opacity: 0.7;
     flex-direction: row;
     align-items: center;
     justify-content: flex-end;
+
+    margin: 0;
 
     gap: 10px;
 }
@@ -461,6 +473,7 @@ opacity: 0.7;
     border: 0;
     padding-left: 15px;
     padding-right: 15px;
+    font-size: 1.1em;
 
 }
 

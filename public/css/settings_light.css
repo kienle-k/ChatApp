@@ -10,6 +10,12 @@ body {
     min-height: 100vh;
 }
 
+
+
+body * {
+    letter-spacing: 1.3px;
+}
+
 .settings-container {
     background: #fff;
     border-radius: 15px;
@@ -30,7 +36,7 @@ body {
     background-color: transparent;
     color: #555;
     border: none;
-    font-size: 16px;
+    font-size: 20px;
     cursor: pointer;
     text-align: left;
     padding: 0;
@@ -50,8 +56,8 @@ body {
 }
 
 .profile-section img {
-    width: 120px;
-    height: 120px;
+    width: 150px;
+    height: 150px;
     border-radius: 50%;
     object-fit: cover;
     border: 3px solid #ddd;
@@ -90,7 +96,8 @@ body {
 
 .settings-form input {
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 2px solid #ddd;
+    background-color: white;
     border-radius: 8px;
     font-size: 14px;
     width: 100%;
@@ -103,6 +110,14 @@ body {
     outline: none;
 }
 
+
+
+
+
+.settings-form #username {
+    color: rgb(21, 26, 101);
+}
+
 .save-btn {
     background-color: rgba(61, 216, 227);
     color: white;
@@ -112,6 +127,8 @@ body {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s;
+    margin-top: 10px;
+
 }
 
 .save-btn:hover {

@@ -6,10 +6,13 @@ document.getElementById('toggle-password').addEventListener('click', function ()
     this.textContent = type === 'password' ? '👁️' : '🙈';
 });
 
-document.getElementById('toggle-confirm-password').addEventListener('click', function () {
-    const confirmPasswordField = document.getElementById('confirm-password');
-    const type = confirmPasswordField.getAttribute('type') === 'password' ? 'text' : 'password';
-    confirmPasswordField.setAttribute('type', type);
-    this.textContent = type === 'password' ? '👁️' : '🙈';
-});
+const confirm_passwd = document.getElementById('toggle-confirm-password');
+if (confirm_passwd != null){
+    confirm_passwd.addEventListener('click', function () {
+        const confirmPasswordField = document.getElementById('confirm-password');
+        const type = confirmPasswordField.getAttribute('type') === 'password' ? 'text' : 'password';
+        confirmPasswordField.setAttribute('type', type);
+        this.textContent = type === 'password' ? '👁️' : '🙈';
+    });
+}
 
