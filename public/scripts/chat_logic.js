@@ -237,7 +237,7 @@ async function findUser() {
         console.log(resultsContainer.childElementCount);
 
       } else {
-        resultsContainer.textContent = 'Keine Nutzer gefunden.';
+        resultsContainer.innerHTML = '<div id="no-users">Keine Nutzer gefunden.</div>';
       }
     } catch (error) {
        console.error('An error occurred while searching for users:', error);
@@ -257,6 +257,11 @@ async function updateSelectedChatDisplay() {
     }  
 }
 
+
+
+DARKMODE = false;
+
+
 async function choosePersonalChat(user_id, showHightlight=true) {
     if (showHightlight) {
         messages_div = document.getElementById("messages");
@@ -264,7 +269,11 @@ async function choosePersonalChat(user_id, showHightlight=true) {
         messages_div.style.backgroundColor = "rgba(32, 178, 170, 0.2)";
         setTimeout(() => {
             messages_div.style.border = "2px solid transparent";
-            messages_div.style.backgroundColor = "#ededed";
+            if (!DARKMODE){
+                messages_div.style.backgroundColor = "#ededed";
+            }else{
+                messages_div.style.backgroundColor = "#161124";
+            }
         }, 250);
     }
     if (user_id == CURRENTLY_CHATTING_WITH_ID){
@@ -616,17 +625,52 @@ function fetchProfilePicture() {
   
 
 
+function check_and_setup_darkmode(){
+    const switchCheckbox = document.getElementById("switch-checkbox");
+    const link = document.getElementById("theme-styles");
 
+    switchCheckbox.addEventListener("change", function() {
+        console.log("CHECKCHECK");
+    if (switchCheckbox.checked) {
+        console.log("Darkmode turned ON.");
+        localStorage.setItem("darkmode", true);
+        DARKMODE = true;
+        link.href = "/css/main_darkmode.css";  // Update with the path of the new stylesheet
+        document.getElementById("messages").style.backgroundColor = "#161124";
+    } else {
+        DARKMODE = false;
+        console.log("Darkmode turned OFF.");
+        localStorage.setItem("darkmode", false);
+        link.href = "/css/main_lightmode.css";  // Update with the path of the new stylesheet
+        document.getElementById("messages").style.backgroundColor = "#ededed";
+    }
+    });
 
+    const darkmode = JSON.parse(localStorage.getItem("darkmode"));
+    console.log("Stored Darkmode:", darkmode);
+
+    if (darkmode == true){
+        switchCheckbox.checked = true;
+    } else {
+        switchCheckbox.checked = false;
+    }
+
+    switchCheckbox.dispatchEvent(new Event('change'));
+}
+
+check_and_setup_darkmode();
 
 // Load last Messages on window load    
 window.onload = async function(){
+    document.getElementById("hide-images").href = "";
+
     await getUserData();
     console.log("FETCH PIC");
     fetchProfilePicture();
     socket.emit("get-chat-history");
     // requestHistoryMessages(0,100);
     FIRST_LOAD = true; // Asure true
+
 }  
 
 // Automatic reload when scrolled to the top

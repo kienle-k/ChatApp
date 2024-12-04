@@ -1,0 +1,58 @@
+/* Style the switch container */
+.switch-container {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+    flex-shrink: 0;
+  }
+  
+  /* Style the checkbox (visually hidden but clickable) */
+  #switch-checkbox {
+    opacity: 0;
+    width: 100%; /* Full width of container */
+    height: 100%; /* Full height of container */
+    position: absolute; /* Make it fill the container */
+    top: 0;
+    left: 0;
+    cursor: pointer; /* Ensure it still has a pointer on hover */
+    z-index: 2; /* Ensure it is above the background */
+    margin: 0;
+  }
+  
+  /* Style the slider (background of the switch) */
+  #slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 34px;
+  }
+  
+  /* The circle inside the slider */
+  #slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    border-radius: 50%;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    transition: 0.4s;
+  }
+  
+  /* When the checkbox is checked, change the slider's background and circle position */
+  #switch-checkbox:checked + #slider {
+    background-color: #4CAF50; /* Green when active */
+    background-color: #26163d; /* Green when active */
+  }
+  
+  #switch-checkbox:checked + #slider:before {
+    transform: translateX(26px); /* Move the circle to the right */
+  }
+  

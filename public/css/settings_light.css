@@ -1,0 +1,223 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.settings-container {
+    background: #fff;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    width: 90%;
+    max-width: 600px; /* Wider on desktop */
+    height: 90%;
+    max-height: 90%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+
+/* Back Button */
+.back-btn {
+    background-color: transparent;
+    color: #555;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    text-align: left;
+    padding: 0;
+    margin-bottom: 10px;
+}
+
+.back-btn:hover {
+    color: #007bff;
+}
+
+/* Profile Section */
+.profile-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.profile-section img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ddd;
+    cursor: pointer;
+}
+
+.upload-btn {
+    background-color: rgba(61, 216, 227);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 8px 15px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.upload-btn:hover {
+    background-color: rgb(29, 162, 172);
+}
+
+/* Form Section */
+.settings-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.settings-form label {
+    font-weight: bold;
+    color: #555;
+    margin: 0px;
+    margin-top: 10px;
+    padding: 0;
+}
+
+.settings-form input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+    width: 100%;
+    box-sizing: border-box;
+    transition: border-color 0.3s;
+}
+
+.settings-form input:focus {
+    border-color: rgba(61, 216, 227);
+    outline: none;
+}
+
+.save-btn {
+    background-color: rgba(61, 216, 227);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.save-btn:hover {
+    background-color: rgb(41, 141, 148);
+}
+
+
+
+#profile-pic-modal {
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    border: none;
+    background-color: rgba(50,50,50,0.8);
+    z-index: 200;
+    position: absolute;
+}
+
+#profile-wrapper {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 300px;
+    max-width: 100%;
+    max-height: 100%;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    gap: 25px;
+    padding: 0;
+    
+}
+
+#profile-wrapper #profile-pic-display{
+    /* top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px;
+    height: 300px;
+    max-width: 100%;
+    max-height: 100%; */
+    width: 50%;
+    height: 300px;
+    max-width: 50%;
+    background-color: aquamarine;
+    overflow: hidden; /* Ensures anything outside the div is cropped */
+    /* position: relative; */
+    border-radius: 20px;
+    box-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+
+}
+
+#profile-pic-display .big-profile-pic {
+    width: 100%; /* Make the image cover the div */
+    height: 100%;
+    object-fit: cover; /* Ensures the image fills and crops */
+    object-position: center; /* Centers the image within the div */
+    display: block; /* Removes any extra space below the image */ 
+}
+
+#profile-wrapper #profile-text {
+    font-size: 2em;
+    color: white;
+    text-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+    width: 50%;
+    height: 300px;
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 5px;
+    box-sizing: border-box;
+
+}
+
+
+
+
+
+
+
+
+
+/* Responsive Design */
+@media (max-width: 600px) {
+    .settings-container {
+        padding: 15px;
+        max-width: 90%;
+    }
+
+    .profile-section img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .upload-btn, .save-btn {
+        font-size: 14px;
+    }
+}
+
+
+
+
+

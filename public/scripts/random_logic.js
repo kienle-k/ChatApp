@@ -1,3 +1,8 @@
+
+
+
+
+
 async function highlightRandom(element, time_ms, ignore_bg=false) {
     const colors = [
         "red", "orange", "yellow", "green", "blue", "indigo", "violet"
@@ -30,7 +35,11 @@ async function highlightRandom(element, time_ms, ignore_bg=false) {
 
     // End with no border or a specific final color
     element.style.border = "2px solid transparent";
-    element.style.backgroundColor = "#ededed";
+    if (!DARKMODE){
+        element.style.backgroundColor = "#ededed";
+    } else {
+        element.style.backgroundColor = "#161124";
+    }
 
 }
 

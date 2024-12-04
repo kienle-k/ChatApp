@@ -25,6 +25,8 @@ document.getElementById('profile-upload').addEventListener('change', function (e
 
 // Load user data on page load
 async function loadData() {
+    // First allow image display after loading
+    document.getElementById("hide-images").href = "";
     const usernameElement = document.getElementById('username');
     const emailElement = document.getElementById('email');
     const profileImageElement = document.getElementById('profile-picture');
@@ -115,6 +117,22 @@ function showBigProfilePic(){
     }
         
 }
+
+
+const link = document.getElementById("doc-styles");
+
+const darkmode = JSON.parse(localStorage.getItem("darkmode"));
+
+if (darkmode == true) {
+    console.log("Darkmode turned ON.");
+    link.href = "/css/settings_dark.css";
+} else {
+    DARKMODE = false;
+    console.log("Darkmode turned OFF.");
+    link.href = "/css/settings_light.css"; 
+}
+
+
 
 
 
