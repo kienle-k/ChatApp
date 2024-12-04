@@ -100,3 +100,8 @@ document.getElementById('registerForm').addEventListener('submit', function(even
         });
     }
 });
+
+window.onload = function(){
+    document.getElementById("register-container").style.opacity = "1";
+}
+

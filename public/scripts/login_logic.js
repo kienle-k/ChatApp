@@ -34,6 +34,9 @@ document.getElementById("loginForm").addEventListener("submit", async function (
     }
   });
 
+window.onload = function(){
+  document.getElementById("login-container").style.opacity = "1";
+}
 
 // const link = document.getElementById("doc-styles");
 
