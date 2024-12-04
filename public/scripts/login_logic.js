@@ -33,3 +33,18 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       document.getElementById("error-message").textContent = "An error occurred. Please try again.";
     }
   });
+
+
+// const link = document.getElementById("doc-styles");
+
+// const darkmode = JSON.parse(localStorage.getItem("darkmode"));
+
+// if (darkmode == true) {
+//     console.log("Darkmode turned ON.");
+//     link.href = "/css/login_dark.css";
+// } else {
+//     DARKMODE = false;
+//     console.log("Darkmode turned OFF.");
+//     link.href = "/css/login_light.css"; 
+// }
+

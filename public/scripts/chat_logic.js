@@ -265,8 +265,13 @@ DARKMODE = false;
 async function choosePersonalChat(user_id, showHightlight=true) {
     if (showHightlight) {
         messages_div = document.getElementById("messages");
-        messages_div.style.border = "2px solid lightseagreen";
-        messages_div.style.backgroundColor = "rgba(32, 178, 170, 0.2)";
+        if (!DARKMODE){
+            messages_div.style.border = "2px solid lightseagreen";
+            messages_div.style.backgroundColor = "rgba(32, 178, 170, 0.1)";
+        }else {
+            messages_div.style.border = "2px solid rgb(106, 81, 145)";
+            messages_div.style.backgroundColor = "rgba(106, 81, 145, 0.2)";
+        }
         setTimeout(() => {
             messages_div.style.border = "2px solid transparent";
             if (!DARKMODE){
