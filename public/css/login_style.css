@@ -41,9 +41,10 @@ button {
     cursor: pointer;
 }
 
+/*
 button:hover {
     background-color: rgba(61, 216, 227);
-}
+} */
 
 #error-message {
     color: red;
