@@ -620,6 +620,26 @@ app.get('/random-chat', isAuthenticated, async (req, res) => {
 });
 
 
+async function getUserById(id){ 
+  try {
+    const connection = await pool.getConnection();
+    const [rows] = await connection.query('SELECT * FROM users WHERE id = ? LIMIT 1',
+      [id]
+    );
+    connection.release();
+
+    if (rows.length > 0) {
+      const user = rows[0];
+      return user;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error('Error fetching random user:', error);
+    return null;
+  }
+}
+
 //user settings 
 app.get('/api/get-user-settings', isAuthenticated, async (req, res) => {
   try {

@@ -1,25 +1,44 @@
 body {
     background-color: #08030d;
-    color: rgba(255,255,255,0.9);
+    color: rgba(250,250,250,0.8);
 
 }
 
 .login-container {
     background-color: #161124;
-    box-shadow: 0 0 10px rgba(214, 207, 207, 0.547);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-
+ 
 
 input {
-    background-color: #6c5d95;
-    border: 1px solid rgb(123, 115, 160);
+    border: 2px solid #352051;
+    background-color: #170925;
+    color: rgba(255,255,255,0.8);
 }
 
-button {
-    background-color: #352858;
-    border: 2px solid rgb(123, 115, 160);
-    color: white;
+input:focus {
+    border: 2px solid rgb(135, 94, 175);
+    outline: none;
+}
+
+label {
+    color: #b5acbf;
+}
+
+button:not(.toggle-password) {
+    background-color: rgba(77, 63, 127, 0.87);
+    color: rgba(250,250,250,0.8);
     border: none;
+    transition: background-color 0.2s ease;
 }
 
+button:not(.toggle-password):hover {
+    background-color: rgba(56, 46, 92, 0.87);
+    /* box-shadow: 0px 0px 4px white; */
+}
+
+button:not(.toggle-password):active {
+    background-color: rgba(51, 45, 70, 0.87);
+
+}

@@ -14,10 +14,17 @@
     <div class="register-container" id="register-container">
         <div class="form-container">
             <h2>Registrieren</h2>
+
+            <div class="profile-section"> 
+                <img src="/images/profile.png" alt="Profile Picture" id="profile-picture" onclick="showBigProfilePic()"/>
+                <input type="file" id="profile-upload" accept="image/*" hidden>
+                <button class="upload-btn" onclick="triggerUpload()">Profilbild hochladen</button>
+            </div>
+
             <form id="registerForm" method="POST" action="/register">
                 
-                <label for="imageInput">Profilbild hochladen</label>
-                <input type="file" id="imageInput" accept="image/*" />
+                <!-- <label for="imageInput">Profilbild hochladen</label>
+                <input type="file" id="imageInput" accept="image/*" /> -->
 
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
@@ -29,14 +36,14 @@
                 <label for="password">Passwort:</label>
                 <div class="password-container">
                     <input type="password" id="password" name="password" required>
-                    <button type="button" id="toggle-password" class="toggle-password">👁️</button>
+                    <button type="button" id="toggle-password" class="toggle-password">🙈</button>
                 </div>
                 <p id="password-error-message" style="color: red;"></p>
                 
                 <label for="confirm-password">Passwort wiederholen:</label>
                 <div class="password-container">
                     <input type="password" id="confirm-password" name="confirm-password" required>
-                    <button type="button" id="toggle-confirm-password" class="toggle-password">👁️</button>
+                    <button type="button" id="toggle-confirm-password" class="toggle-password">🙈</button>
                 </div>
                 
                 <p id="error-message" style="color: red;"></p>

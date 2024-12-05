@@ -6,41 +6,7 @@ const socket = io();
 
 DARKMODE = false;
 
-function check_and_setup_darkmode(){
-    const switchCheckbox = document.getElementById("switch-checkbox");
-    const link = document.getElementById("theme-styles");
 
-    switchCheckbox.addEventListener("change", function() {
-        console.log("CHECKCHECK");
-    if (switchCheckbox.checked) {
-        console.log("Darkmode turned ON.");
-        localStorage.setItem("darkmode", true);
-        DARKMODE = true;
-        link.href = "/css/chat/dark_styles.css";  // Update with the path of the new stylesheet
-        document.getElementById("messages").style.backgroundColor = "#161124";
-    } else {
-        DARKMODE = false;
-        console.log("Darkmode turned OFF.");
-        localStorage.setItem("darkmode", false);
-        link.href = "/css/chat/light_styles.css";  // Update with the path of the new stylesheet
-        document.getElementById("messages").style.backgroundColor = "#ededed";
-    }
-    });
-
-    const darkmode = JSON.parse(localStorage.getItem("darkmode"));
-    console.log("Stored Darkmode:", darkmode);
-
-    if (darkmode == true){
-        switchCheckbox.checked = true;
-    } else {
-        switchCheckbox.checked = false;
-    }
-
-    switchCheckbox.dispatchEvent(new Event('change'));
-}
-
-
-check_and_setup_darkmode();
 
 
 
@@ -75,6 +41,9 @@ bigProfileModal.addEventListener("click", function(){ bigProfileModal.style.disp
 const contact_list = document.getElementById("contacts");
 
 
+
+
+
 // async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class){
 //     contact_list.insertAdjacentHTML('beforeend', 
 //         `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' onclick="choosePersonalChat(${contact_id})">
@@ -89,9 +58,104 @@ const contact_list = document.getElementById("contacts");
 //     );
 // }
 
+
+
+
+
+
+let CONTACTS_DISPLAYED = false;
+let CONTACT_WINDOW_LOCKED = true;
+
+function setContacts(value){
+    if (!CONTACT_WINDOW_LOCKED){
+        console.log("Contacts displayed until now:", CONTACTS_DISPLAYED);
+        if (value == false){
+            document.getElementById("contacts-window").classList.add("hidden-mobile-window");
+            document.getElementById("chat-window").classList.remove("hidden-mobile-window");
+        } else {
+            document.getElementById("contacts-window").classList.remove("hidden-mobile-window");
+            document.getElementById("chat-window").classList.add("hidden-mobile-window");
+        }
+        CONTACTS_DISPLAYED = !CONTACTS_DISPLAYED;
+        console.log("Contacts displayed from now:", CONTACTS_DISPLAYED);
+    }
+
+}
+
+function setContactsForce(value){
+    CONTACT_WINDOW_LOCKED = false;
+    console.log("FORCING");
+    setContacts(value);
+}
+
+function choosePersonalChatwSwitchWindow(id, name, pic){
+    choosePersonalChat(id, name, pic);
+    setContactsForce(false);
+}
+
+
+
+
+
+function check_and_setup_darkmode(){
+    const switchCheckbox = document.getElementById("switch-checkbox");
+const link = document.getElementById("theme-styles");
+    switchCheckbox.addEventListener("change", function() {
+        console.log("CHECKCHECK");
+    if (switchCheckbox.checked) {
+        console.log("Darkmode turned ON.");
+        localStorage.setItem("darkmode", true);
+        DARKMODE = true;
+        link.href = "/css/chat/dark_styles.css";  // Update with the path of the new stylesheet
+        document.getElementById("messages").style.backgroundColor = "#161124";
+    } else {
+        DARKMODE = false;
+        console.log("Darkmode turned OFF.");
+        localStorage.setItem("darkmode", false);
+        link.href = "/css/chat/light_styles.css";  // Update with the path of the new stylesheet
+        document.getElementById("messages").style.backgroundColor = "#ededed";
+    }
+    });
+
+    const darkmode = JSON.parse(localStorage.getItem("darkmode"));
+    console.log("Stored Darkmode:", darkmode);
+
+    if (darkmode == true){
+        switchCheckbox.checked = true;
+    } else {
+        switchCheckbox.checked = false;
+    }
+
+    switchCheckbox.dispatchEvent(new Event('change'));
+}
+
+function set_darkmode(value){
+    const switchCheckbox = document.getElementById("switch-checkbox");
+    const link = document.getElementById("theme-styles");
+    DARKMODE = value;
+    if (value == true){
+        switchCheckbox.checked = true;
+    } else {
+        switchCheckbox.checked = false;
+    }
+
+    switchCheckbox.dispatchEvent(new Event('change'));
+}
+
+
+check_and_setup_darkmode();
+
+
+
+
+
+
+
+
+
 async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class) {
     contact_list.insertAdjacentHTML('beforeend', 
-        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' data-username='${contact_username}' onclick="choosePersonalChat(${contact_id})">
+        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' data-username='${contact_username}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
             <button type="button" class="contact-profile-button" onclick="event.stopPropagation(); showBigProfilePic(${contact_id});">
                 <img src='/${picture_path}'>
             </button>
@@ -145,7 +209,7 @@ function showBigProfilePic(id){
         bigProfileInfo.innerHTML = `<div><b>${name}</b></div>
                                     <div>${email}</div>`;
         
-        bigProfileModal.style.display = "block";
+        bigProfileModal.style.display = "flex";
 
         // Create a new image element
         const img = document.createElement('img');
@@ -176,7 +240,7 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
     // Check if contact already exists
     for (let child of contact_list.children) {
         if (child.getAttribute('data-id') == id) {
-            choosePersonalChat(id, showHightlight);
+            choosePersonalChat(id, name, picture_path, showHightlight);
             return false, child; // Exit function after finding the match, return false as no contact was added, and the contact div
         }
     }
@@ -201,7 +265,7 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
     const new_contact_div = addContactToList(picture_path, id, name, "", selected_class);     
     
     setTimeout(() => {
-        choosePersonalChat(id, showHightlight);
+        choosePersonalChat(id, name, picture_path, showHightlight);
     }, 50);
     document.getElementById('message-input').focus();
 
@@ -302,7 +366,20 @@ async function updateSelectedChatDisplay() {
 
 
 
-async function choosePersonalChat(user_id, showHightlight=true) {
+async function choosePersonalChat(user_id, username, picture_path=null, showHightlight=true) {
+
+    document.getElementById("contact-info").innerText = username;
+    console.log("PICTURE PATH", picture_path);
+    if (picture_path != null){
+        console.log("ADDING PIC", picture_path);
+        document.getElementById("user-image-img").src = picture_path;
+        document.getElementById("user-image-img").onclick = function() {
+            showBigProfilePic(user_id);
+        };
+        
+    }
+    
+
     if (showHightlight) {
         messages_div = document.getElementById("messages");
         if (!DARKMODE){
@@ -339,6 +416,13 @@ async function choosePersonalChat(user_id, showHightlight=true) {
 document.getElementById("search-button").addEventListener("click", findUser);
 document.getElementById("user-search-input").addEventListener("input", findUser);
 
+
+
+function openSettingsPage(){
+    settingsTab = window.open('/user-settings', '_blank');
+    settingsTab.opener = window;
+    settingsTab.focus();
+}
 
 async function getUserData() {
     try {
@@ -675,17 +759,18 @@ function fetchProfilePicture() {
 
 
 
+
+
+
 // Load last Messages on window load    
 window.onload = async function(){
     document.getElementById("hide-images").href = "";
-
     await getUserData();
     console.log("FETCH PIC");
     fetchProfilePicture();
     socket.emit("get-chat-history");
     // requestHistoryMessages(0,100);
     FIRST_LOAD = true; // Asure true
-
 }  
 
 // Automatic reload when scrolled to the top
@@ -726,9 +811,9 @@ try {
 
 
 
-// socket.on('disconnect', () => {
-//     console.log('Socket disconnected, reloading the page...');
+socket.on('disconnect', () => {
+    console.log('Socket disconnected, reloading the page...');
     
-//     // Optionally, you can check the reason or do other actions before reloading
-//     window.location.reload();  // Reload the page
-// });
+    // Optionally, you can check the reason or do other actions before reloading
+    window.location.reload();  // Reload the page
+});

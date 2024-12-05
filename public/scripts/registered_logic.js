@@ -9,7 +9,6 @@ window.onload = function(){
         console.log("Darkmode turned ON.");
         link.href = "/css/logout/logout_dark.css";
     } else {
-        DARKMODE = false;
         console.log("Darkmode turned OFF.");
         link.href = "/css/logout/logout_light.css"; 
     }

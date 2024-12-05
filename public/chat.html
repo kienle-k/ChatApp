@@ -14,7 +14,7 @@
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 </head>
 <body>
-
+ 
 
     <div id="profile-pic-modal" style="display:none">
         <div id="profile-wrapper">
@@ -28,7 +28,7 @@
             <a id="home-button" href="/chat/chat.html">
                 <img src="/images/logo.png" alt="LinkUp">
             </a>
-            <div id="app-name-container">
+            <div id="app-name-container" onclick="set_darkmode(!DARKMODE)">
                 <img src="/images/name.png">
             </div>
 
@@ -41,7 +41,7 @@
           </div>
 
         <div id="current-user-container">
-            <button type="button" id="current-user-profile" onclick="window.location.href='/user-settings'">
+            <button type="button" id="current-user-profile" onclick="openSettingsPage()">
                 <img src="/images/profile.png" id="profileImage" alt="My Profile">
             </button>
 
@@ -58,6 +58,8 @@
             <div id="search-user">
 
                 <div id="search-bar">
+                  <!-- <button class="toggle-contacts-btn" id="contacts-window-toggler" onclick="toggleContacts()">?</button> -->
+
                   <input type="text" placeholder="Username" id="user-search-input"/>
                   <!-- <button id="random-chat-button">Random Chat</button>
                   <button id="search-button">Suchen</button>                   -->
@@ -80,7 +82,11 @@
         <div id="chat-window">
 
             <div id="chat-container">
-                <div id="user-info-bar"></div>
+                <div id="user-info-bar">
+                    <button id="chat-window-toggler" class="toggle-contacts" onclick="setContactsForce(true)"><img src="images/contacts.png"></button>
+                    <div id="user-image"><img id="user-image-img" src="images/profile.png"></div>
+                    <div id="contact-info">Chat</div>
+                </div>
                 <ul id="messages"></ul>
             </div>
 

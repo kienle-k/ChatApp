@@ -1,3 +1,8 @@
+
+DARKMODE = false;
+
+
+
 const switchCheckbox = document.getElementById("switch-checkbox");
 const link = document.getElementById("theme-styles");
 
@@ -17,4 +22,7 @@ switchCheckbox.addEventListener("change", function() {
      document.getElementById("messages").style.backgroundColor = "#ededed";
   }
 });
+
+
+
 

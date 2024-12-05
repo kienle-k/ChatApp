@@ -9,15 +9,21 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
-button {
+button:not(.toggle-password) {
     background-color: rgba(61, 216, 227);
     color: white;
     border: none;
+    transition: background-color 0.2s ease;
 }
 
-button:hover {
-    background-color: rgba(61, 216, 227);
+button:not(.toggle-password):hover {
+    background-color: rgba(50, 164, 173, 0.914);
+    /* box-shadow: 0px 0px 4px white; */
 }
 
+button:not(.toggle-password):active {
+    background-color: rgba(53, 143, 149, 0.85);
+
+}
 
 

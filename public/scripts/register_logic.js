@@ -112,7 +112,6 @@ window.onload = function(){
         console.log("Darkmode turned ON.");
         link.href = "/css/register/register_dark.css";
     } else {
-        DARKMODE = false;
         console.log("Darkmode turned OFF.");
         link.href = "/css/register/register_light.css"; 
     }

@@ -5,7 +5,7 @@ body {
 
 .register-container {
     background-color: #161124;
-    box-shadow: 0 0 10px rgba(107, 93, 93, 0.807);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 
@@ -13,39 +13,39 @@ body {
 input[type="text"],
 input[type="email"],
 input[type="password"] {
-    border: 1px solid rgb(122, 107, 156);
-    background-color: #352858;
+    border: 2px solid #352051;
+    background-color: #170925;
+    color: rgba(255,255,255,0.8);
 }
 
-button {
-    color: white;
-}
-
-button[type="submit"] {
-    background-color: #352858;
-    border: 2px solid rgb(123, 115, 160);;
+button:not(.toggle-password) {
+    background-color: rgba(77, 63, 127, 0.87);
+    color: rgba(250,250,250,0.8);
     border: none;
+    transition: background-color 0.2s ease;
 }
 
-button[type="submit"]:hover {
-    background-color: rgb(64, 44, 123)
+button:not(.toggle-password):hover {
+    background-color: rgba(56, 46, 92, 0.87);
+    /* box-shadow: 0px 0px 4px white; */
+}
+
+button:not(.toggle-password):active {
+    background-color: rgba(51, 45, 70, 0.87);
+
 }
 
 
 #requirements-container {
-    background-color: rgb(57, 45, 93);
+    background-color: #161124;
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);  
 }
 
 .requirements li {
-    background: #352858;
+    background-color: #352858;
     border: 2px solid rgb(123, 115, 160);
     box-shadow: 0 1px 3px rgba(198, 197, 201, 0.55);
 }
-.backtologin-button {
-    background-color: #352858;
-    border: 2px solid rgb(123, 115, 160);
-    /* background-color: rgba(61, 216, 227); */
-    color: white;
-    border: none;
-}
+
+
+

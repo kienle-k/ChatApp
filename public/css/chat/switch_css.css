@@ -1,4 +1,10 @@
 /* Style the switch container */
+
+
+
+
+
+
 .switch-container {
     position: relative;
     display: inline-block;
@@ -53,11 +59,20 @@
   
   /* When the checkbox is checked, change the slider's background and circle position */
   #switch-checkbox:checked + #slider {
-    background-color: #4CAF50; /* Green when active */
-    background-color: #26163d; /* Green when active */
+    /* background-color: #4CAF50; */
+    background-color: #26163d; 
   }
   
   #switch-checkbox:checked + #slider:before {
     transform: translateX(26px); /* Move the circle to the right */
   }
   
+
+
+  @media (max-width: 600px) {
+    .switch-container {
+        opacity: 0;
+        overflow: hidden;
+        width: 0;
+    }
+  }

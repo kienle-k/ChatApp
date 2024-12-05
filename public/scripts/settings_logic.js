@@ -1,6 +1,10 @@
 // Go back function
 function goBack() {
-    window.location.href = '/chat';
+    if (window.opener) {
+        window.opener.focus(); // Focus the original tab
+    }
+    window.close(); // Close the current tab
+    // window.location.href = '/chat';
     // window.history.back();
 }
 
@@ -119,18 +123,7 @@ function showBigProfilePic(){
 }
 
 
-const link = document.getElementById("doc-styles");
 
-const darkmode = JSON.parse(localStorage.getItem("darkmode"));
-
-if (darkmode == true) {
-    console.log("Darkmode turned ON.");
-    link.href = "/css/user_settings/settings_dark.css";
-} else {
-    DARKMODE = false;
-    console.log("Darkmode turned OFF.");
-    link.href = "/css/user_settings/settings_light.css"; 
-}
 
 
 async function loadUserSettings() {
@@ -161,4 +154,17 @@ async function loadUserSettings() {
 document.addEventListener('DOMContentLoaded', loadUserSettings);
 
 
-window.onload = loadData;
+window.onload = function(){
+    loadData();
+    const link = document.getElementById("doc-styles");
+
+    const darkmode = JSON.parse(localStorage.getItem("darkmode"));
+
+    if (darkmode == true) {
+        console.log("Darkmode turned ON.");
+        link.href = "/css/user_settings/settings_dark.css";
+    } else {
+        console.log("Darkmode turned OFF.");
+        link.href = "/css/user_settings/settings_light.css"; 
+    }
+}
