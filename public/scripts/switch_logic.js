@@ -13,13 +13,13 @@ switchCheckbox.addEventListener("change", function() {
     localStorage.setItem("darkmode", true);
     DARKMODE = true;
     link.href = "/css/chat/dark_styles.css";  // Update with the path of the new stylesheet
-    document.getElementById("messages").style.backgroundColor = "#161124";
+    // document.getElementById("messages").style.backgroundColor = "#161124";
   } else {
     DARKMODE = false;
     console.log("Darkmode turned OFF.");
     localStorage.setItem("darkmode", false);
     link.href = "/css/chat/light_styles.css";  // Update with the path of the new stylesheet
-     document.getElementById("messages").style.backgroundColor = "#ededed";
+    //  document.getElementById("messages").style.backgroundColor = "#ededed";
   }
 });
 

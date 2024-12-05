@@ -240,7 +240,7 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
     // Check if contact already exists
     for (let child of contact_list.children) {
         if (child.getAttribute('data-id') == id) {
-            choosePersonalChat(id, name, picture_path, showHightlight);
+            choosePersonalChatwSwitchWindow(id, name, picture_path, showHightlight);
             return false, child; // Exit function after finding the match, return false as no contact was added, and the contact div
         }
     }
@@ -265,7 +265,7 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
     const new_contact_div = addContactToList(picture_path, id, name, "", selected_class);     
     
     setTimeout(() => {
-        choosePersonalChat(id, name, picture_path, showHightlight);
+        choosePersonalChatwSwitchWindow(id, name, picture_path, showHightlight);
     }, 50);
     document.getElementById('message-input').focus();
 
@@ -764,6 +764,7 @@ function fetchProfilePicture() {
 
 // Load last Messages on window load    
 window.onload = async function(){
+    check_and_setup_darkmode();
     document.getElementById("hide-images").href = "";
     await getUserData();
     console.log("FETCH PIC");

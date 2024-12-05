@@ -11,8 +11,8 @@ body {
     padding: 20px;
     border-radius: 8px;
 
-    width: 40%;
-    min-width: 300px;
+    width: 80%;
+    max-width: 500px;
 
     display: flex;
     justify-content: center;
@@ -79,6 +79,7 @@ button[type="submit"] {
     width: 100%; 
 }
 #requirements-container {
+    display: none;
     width: 300px;
     padding: 20px;
     border-radius: 12px;

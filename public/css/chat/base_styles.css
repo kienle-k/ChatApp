@@ -5,6 +5,7 @@ html {
     height: 100dvh;
     overflow: hidden;
     font-family: Arial, sans-serif;
+    min-width: 195px;
 }
 
 
@@ -311,6 +312,7 @@ opacity: 0.7;
     justify-content: center;
     padding: 5px;
     cursor: pointer;
+
     
 }
 
@@ -323,7 +325,8 @@ opacity: 0.7;
 
 
 #app-name-container {
-    width: 300px;
+    width: fit-content;
+    max-width: 50%;
     height: 100%;
     box-sizing: border-box;
     display: flex;
@@ -333,6 +336,7 @@ opacity: 0.7;
     padding-left: 0px;
     padding-right: 0px;
     cursor: pointer;
+
 
 }
 
@@ -357,7 +361,6 @@ opacity: 0.7;
     justify-content: flex-end;
 
     gap: 10px;
-    z-index: 1;
 }
 
 
@@ -479,8 +482,14 @@ opacity: 0.7;
 
     border-bottom-left-radius: 20px;
     border-bottom-right-radius: 20px;
+
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
 
+#drop-down-users::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Edge */
+}
 
 #user-list {
     height: auto;
@@ -542,7 +551,15 @@ opacity: 0.7;
     user-select: none;
     position: relative;
     z-index: 5;
+    overflow: auto; /* Enables scrolling */
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
+
+#contacts::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Edge */
+}
+
 
 .contact-container {
     width: 100%;
@@ -841,3 +858,33 @@ opacity: 0.7;
         padding: 0; 
     }
   }
+
+
+@media (max-width: 350px) {
+    #app-name-container {
+        display: none;
+    }
+    #home-button-container {
+        width: 30%;
+        max-width: 30%;
+        min-width: 30%;
+    }
+    #current-user-container {
+            width: 70%;
+            max-width: 70%;
+            min-width: 70%;
+    }
+}
+
+
+@media (max-width: 260px) {
+    #home-button-container {
+        display: none;
+
+    }
+    #current-user-container {
+            width: 100%;
+            max-width: 100%;
+            min-width: 100%;
+    }
+}
