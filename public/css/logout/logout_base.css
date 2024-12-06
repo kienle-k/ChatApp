@@ -1,6 +1,10 @@
 
+html {
+    font-family: Arial, sans-serif;
+}
 
 body {
+    font-family: Arial, sans-serif;
     width: 100dvw;
     height: 100dvh;
     overflow: hidden;

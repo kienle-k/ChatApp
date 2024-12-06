@@ -66,20 +66,14 @@
   #switch-checkbox:checked + #slider:before {
     transform: translateX(26px); /* Move the circle to the right */
   }
-  
+   
 
-
+/* 
   @media (max-width: 600px) {
     .switch-container {
-        /* opacity: 0;
-        overflow: hidden;
-        width: 0px;
-        height: 0px;
-        z-index: -1; */
         position: absolute;
         top: -200px;
         left: -200px;
     }
-  }
-
+  } */
 

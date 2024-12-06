@@ -211,7 +211,7 @@
     border: 2px solid rgba(61, 216, 227);
 }
 
-#send-button {
+#send-button, #file-button {
     border: 2px solid transparent;
     background-color: #ededed;
     color: white;

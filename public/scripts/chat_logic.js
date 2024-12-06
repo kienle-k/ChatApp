@@ -63,7 +63,7 @@ const contact_list = document.getElementById("contacts");
 
 
 
-let CONTACTS_DISPLAYED = false;
+let CONTACTS_DISPLAYED = true;
 let CONTACT_WINDOW_LOCKED = true;
 
 function setContacts(value){
@@ -72,11 +72,13 @@ function setContacts(value){
         if (value == false){
             document.getElementById("contacts-window").classList.add("hidden-mobile-window");
             document.getElementById("chat-window").classList.remove("hidden-mobile-window");
+            CONTACTS_DISPLAYED = false;
         } else {
             document.getElementById("contacts-window").classList.remove("hidden-mobile-window");
             document.getElementById("chat-window").classList.add("hidden-mobile-window");
+            CONTACTS_DISPLAYED = true;
         }
-        CONTACTS_DISPLAYED = !CONTACTS_DISPLAYED;
+        
         console.log("Contacts displayed from now:", CONTACTS_DISPLAYED);
     }
 
@@ -772,6 +774,12 @@ window.onload = async function(){
     socket.emit("get-chat-history");
     // requestHistoryMessages(0,100);
     FIRST_LOAD = true; // Asure true
+
+    let width = document.body.clientWidth;
+    let height = document.body.clientHeight;
+    if (width <= 600){
+        setContactsForce(CONTACTS_DISPLAYED); // If the screen is resized, make sure one window is hidden
+    }
 }  
 
 // Automatic reload when scrolled to the top
@@ -786,6 +794,18 @@ messagesUL.addEventListener('scroll', function() {
         }
     }
 });
+
+
+
+window.addEventListener("resize", function(event) {
+    let width = document.body.clientWidth;
+    let height = document.body.clientHeight;
+    if (width <= 600){
+        setContactsForce(CONTACTS_DISPLAYED); // If the screen is resized, make sure one window is hidden
+    }
+  })
+
+
 
 document.getElementById('logout-button').addEventListener('click', async () => {
 try {

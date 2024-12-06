@@ -61,7 +61,7 @@ body * {
     height: 300px;
     max-width: 50%;
     overflow: hidden; 
-    border-radius: 20px;
+    border-radius: 15px;
 }
 
 #profile-pic-display .big-profile-pic {
@@ -93,8 +93,8 @@ opacity: 0.7;
 
 #top-bar {
     width: calc(100% - 20px);
-    height: 70px;
-    min-height: 70px;
+    height: 60px;
+    min-height: 60px;
 
     box-sizing: border-box;
 
@@ -106,9 +106,9 @@ opacity: 0.7;
 
 #main-content {
     width: 100%;
-    height: calc(100% - 70px);
-    min-height: calc(100% - 70px);
-    max-height: calc(100% - 70px); /* Max width is 100% of parent container, subtracting the minimum size of the send container MINUS GAP*/
+    height: calc(100% - 60px);
+    min-height: calc(100% - 60px);
+    max-height: calc(100% - 60px); /* Max width is 100% of parent container, subtracting the minimum size of the send container MINUS GAP*/
 
     flex-grow: 1;
     box-sizing: border-box;
@@ -116,7 +116,7 @@ opacity: 0.7;
     flex-direction: row;
     align-items: center;
     padding: 10px;
-    gap: 15px;
+    gap: 10px;
 }
 
 #contacts-window {
@@ -146,15 +146,15 @@ opacity: 0.7;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 8px;
     padding: 0;
 }
 
 
 #chat-container {
     width: 100%;
-    height: calc(100% - 70px - 15px);
-    max-height: calc(100% - 70px - 15px); /* Max width is 100% of parent container, subtracting the minimum size of the send container MINUS GAP*/
+    height: calc(100% - 50px - 8px);
+    max-height: calc(100% - 50px - 8px); /* Max width is 100% of parent container, subtracting the minimum size of the send container MINUS GAP*/
     /* Subtract the gap to the send container */
 
     box-sizing: border-box;
@@ -166,8 +166,8 @@ opacity: 0.7;
 
 #send-container {
     width: 100%;
-    height: 70px;
-    min-height: 70px;
+    height: 50px;
+    min-height: 50px;
     box-sizing: border-box;
 }
 
@@ -177,13 +177,6 @@ opacity: 0.7;
 /* Mobile view with user info bar */
 #user-info-bar {
     display: none;
-    width: 100%;
-    box-sizing: border-box;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    height: 50px;
-    gap: 10px;
 }
 
 .toggle-contacts {
@@ -209,7 +202,7 @@ opacity: 0.7;
 
 #contacts-window-toggler {
     border-radius: 2px;
-    border-top-left-radius: 20px;
+    border-top-left-radius: 15px;
     width: 60px;
     height: 100%;
 }
@@ -232,7 +225,7 @@ opacity: 0.7;
 /* RANDOM CHAT*/
 
 #random-chat-button {
-    padding: 0;
+    padding: 5px0;
     text-align: center;
     text-decoration: none;
     display: flex; 
@@ -271,12 +264,15 @@ opacity: 0.7;
 
 #current-user-profile {
     border-radius: 10px;
+    padding: 0px;
+    overflow: hidden;
 }
 
 #current-user-profile img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
+    border-radius: none;
 }
 
 #logout-button {
@@ -285,6 +281,7 @@ opacity: 0.7;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 20px;
 }
 
 
@@ -365,8 +362,8 @@ opacity: 0.7;
 
 
 #current-user-container button {
-    width: 70px;
-    min-width: 70px;
+    width: 60px;
+    min-width: 60px;
     height: 100%;
     box-sizing: border-box;
     flex-shrink: 0;
@@ -374,17 +371,17 @@ opacity: 0.7;
 }
 
 #current-user-container #logout-button {
-    padding: 2px;
+    padding: 10px;
 }
 #current-user-container #current-user-profile {
-    padding: 2px;
+    padding: 0px !important;
 }
 
 #current-user-container img {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    border-radius: 20px;
+    border-radius: 15px;
     margin: 0;
 }
 
@@ -415,8 +412,8 @@ opacity: 0.7;
     flex-wrap: nowrap;
 
     padding: 5px;
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
 
     z-index: 20;
 }
@@ -429,7 +426,7 @@ opacity: 0.7;
     width: 60%;
     height: 100%;
     border-radius: 2px;
-    border-top-left-radius: 16px;
+    border-top-left-radius: 12px;
     box-sizing: border-box;
     border: 0;
     padding-left: 15px;
@@ -443,7 +440,7 @@ opacity: 0.7;
     box-sizing: border-box;
     border-radius: 0;
     border-radius: 2px;
-    border-top-right-radius: 16px;
+    border-top-right-radius: 12px;
 
     padding: 0;/*15px 32px; /* Some padding */
     text-align: center; /* Centered text */
@@ -480,8 +477,8 @@ opacity: 0.7;
     overflow-y: auto;
     z-index: 10; 
 
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
 
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
@@ -498,8 +495,8 @@ opacity: 0.7;
     padding-top: 5px;
     padding-bottom: 0;
     list-style-type: none;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
 }
 
 
@@ -540,8 +537,8 @@ opacity: 0.7;
     height: 100%;
     max-width: 100%;
     max-height: 100%;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
     list-style-type: none;
     box-sizing: border-box;
     margin: 0;
@@ -573,7 +570,7 @@ opacity: 0.7;
     margin-bottom: 10px;
     padding: 10px;
     user-select: none;
-    border-radius: 20px;
+    border-radius: 15px;
     overflow: hidden;
     position: relative;
     cursor: pointer;
@@ -665,7 +662,7 @@ opacity: 0.7;
 #chat-form {
     width: 100%;
     height: 100%;
-    min-height: 70px;
+    min-height: 50px;
     max-width: 100%;
     max-height: 100%;
 
@@ -678,7 +675,7 @@ opacity: 0.7;
     justify-content: center;
     user-select: none;
 
-    gap: 15px;
+    gap: 8px;
 
 }
 
@@ -687,21 +684,34 @@ opacity: 0.7;
     width: 80%;
     height: 100%;
     box-sizing: border-box;
-    border-radius: 20px;
+    border-radius: 15px;
+    /* border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px; */
+    /*border-top-left-radius: 5px;
+    border-bottom-left-radius: 15px;     */
     font-size: 1.15em;
     border: 0;
     padding-left: 10px;
 }
 
-
-
 #send-button {
     width: 150px;
-    max-width: 50%;
+    max-width: 26%;
+    padding: 10px;
+
+}
+
+#file-button {
+    width: 50px;
+    max-width: 15%;
+}
+
+#send-button, #file-button {
+    
     height: 100%;
     box-sizing: border-box;
-    border-radius: 20px;
-
+    border-radius: 15px;
+    border: none;
     cursor: pointer;
     user-select: none;
     display: flex;
@@ -709,9 +719,14 @@ opacity: 0.7;
     justify-content: center;
 }
 
-#send-button img {
-    width: 70%; /* Adjust image size relative to button */
-    height: 70%; /* Adjust image size relative to button */
+
+
+
+
+#send-button img,
+#file-button img {
+    width: 80%; /* Adjust image size relative to button */
+    height: 80%; /* Adjust image size relative to button */
     object-fit: contain; /* Ensure the image scales properly */
 }
 
@@ -724,7 +739,12 @@ opacity: 0.7;
 #messages {
     list-style-type: none;
     height: 100%;
-    border-radius: 20px;
+    border-radius: 15px;
+    /* border-top-right-radius: 15px;
+    border-top-left-radius: 15px;
+    border-bottom-right-radius: 5px;    
+    border-bottom-left-radius: 5px; */
+
     width: 100%;
     margin: 0;
     overflow-y: auto;
@@ -816,8 +836,14 @@ opacity: 0.7;
 
 
 
+@media (max-width: 900px) {
+    .last-message {
+        visibility: hidden;
+    }
+}
+
 @media (max-width: 600px) {
-    #contacts-window {
+        #contacts-window {
         display: flex;
         width: 100%;
         min-width: 100%;
@@ -833,6 +859,14 @@ opacity: 0.7;
 
     #user-info-bar {
         display: flex;
+        width: 100%;
+        box-sizing: border-box;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        height: 60px;
+        gap: 10px;
+        padding: 5px;
     }
 
     .hidden-mobile-window {
@@ -857,13 +891,20 @@ opacity: 0.7;
         gap: 25px;
         padding: 0; 
     }
+
+    #app-name-container {
+        position: absolute;
+        top: -0px;
+        left: -0px;
+        visibility: hidden;
+    }
   }
 
 
 @media (max-width: 350px) {
-    #app-name-container {
+    /* #app-name-container {
         display: none;
-    }
+    } */
     #home-button-container {
         width: 30%;
         max-width: 30%;

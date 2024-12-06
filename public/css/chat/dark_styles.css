@@ -63,8 +63,8 @@ html {
 
 #current-user-profile {
     /* background-color: transparent; */
-    border: 2px solid rgb(106, 81, 145) !important;
     border-radius: 10px;
+    border: 2px solid rgb(106, 81, 145) !important;
 }
 
 
@@ -262,7 +262,7 @@ background-color: #332755;
     border: 2px solid rgb(76, 48, 126);
 }
 
-#send-button {
+#send-button, #file-button {
     border: 2px solid transparent;
     background-color: #161124;
     color: rgba(255,255,255,0.8);
@@ -278,7 +278,6 @@ background-color: #332755;
     
 #messages {
     border: 2px solid transparent; /*black; */
-    border-radius: 20px;
     background-color: #161124;
 }
 

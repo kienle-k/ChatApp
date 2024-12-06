@@ -43,7 +43,7 @@ document.getElementById('registerForm').addEventListener('submit', function(even
 
     event.preventDefault();
 
-    const fileInput = document.getElementById('imageInput');
+    // const fileInput = document.getElementById('imageInput');
 
     const username = usernameField.value;
     const password = passwordField.value;
@@ -71,10 +71,15 @@ document.getElementById('registerForm').addEventListener('submit', function(even
         errorMessage.textContent = '';
         // Handle image processing
         let formData = new FormData();
-        if (fileInput.files.length > 0) {
-            const file = fileInput.files[0];
-            formData.append('image', file);
-        }
+
+
+        // if (fileInput.files.length > 0) {
+        //     const file = fileInput.files[0];
+        //     formData.append('image', file);
+        // }
+
+        const profileUpload = document.getElementById('profile-upload').files[0]; // Get the uploaded file
+        formData.append('image', profileUpload);
 
         // Add other form data
         formData.append('email', document.getElementById('email').value);
@@ -116,4 +121,23 @@ window.onload = function(){
         link.href = "/css/register/register_light.css"; 
     }
 }
+
+
+
+// Trigger file upload
+function triggerUpload() {
+    document.getElementById('profile-upload').click();
+}
+
+// Preview selected image
+document.getElementById('profile-upload').addEventListener('change', function (event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById('profile-picture').src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+});
 
