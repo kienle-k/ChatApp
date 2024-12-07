@@ -739,7 +739,36 @@ opacity: 0.7;
     object-fit: contain; /* Ensure the image scales properly */
 }
 
+
+
+
     /* END SEND CONTAINER STYLING */
+
+
+    #call-container {
+        display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;
+    }
+
+#end-call-btn {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    /* background-color: transparent; */
+    border: none;
+    border-radius: 50%;
+    background-color: white;
+    cursor: pointer;
+
+}
+
+#end-call-btn img {
+    width: 100%; /* Adjust image size relative to button */
+    height: 100%; /* Adjust image size relative to button */
+    object-fit: contain; /* Ensure the image scales properly */
+}
+
+
+
 
 
 /* CALL STYLES */

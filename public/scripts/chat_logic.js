@@ -374,6 +374,7 @@ async function choosePersonalChat(user_id, username, picture_path=null, showHigh
     console.log("PICTURE PATH", picture_path);
     if (picture_path != null){
         console.log("ADDING PIC", picture_path);
+        picture_path = `/${picture_path}`;
         document.getElementById("user-image-img").src = picture_path;
         document.getElementById("user-image-img").onclick = function() {
             showBigProfilePic(user_id);
@@ -1020,10 +1021,11 @@ async function startCall(userId) {
 // Socket event listener for incoming call
 socket.on('incoming-call', async (data) => {
     const remoteUserId = data.from_user;
+  
 
     choosePersonalChatwSwitchWindow(remoteUserId, data.from_username, null);
+
     
-  
     document.getElementById('call-container').style.display = 'block';
     
     // Prompt user to accept the call
