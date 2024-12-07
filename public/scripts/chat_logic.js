@@ -253,11 +253,11 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
 
     try {
         if (!picture_path.includes("/")){
-            picture_path = 'images/profile.png';
+            picture_path = '/images/profile.png';
         }
     }catch (error){
         console.log("EROR");
-        picture_path = 'images/profile.png';
+        picture_path = '/images/profile.png';
     }
     console.log("THE PATH IS", picture_path);
 
@@ -374,11 +374,17 @@ async function choosePersonalChat(user_id, username, picture_path=null, showHigh
     console.log("PICTURE PATH", picture_path);
     if (picture_path != null){
         console.log("ADDING PIC", picture_path);
+        picture_path = `/${picture_path}`;
         document.getElementById("user-image-img").src = picture_path;
         document.getElementById("user-image-img").onclick = function() {
             showBigProfilePic(user_id);
         };
         
+    } else {
+        document.getElementById("user-image-img").src = "/images/profile.png";
+        document.getElementById("user-image-img").onclick = function() {
+            showBigProfilePic(user_id);
+        };
     }
     
 
@@ -1017,6 +1023,7 @@ async function startCall(userId) {
 socket.on('incoming-call', async (data) => {
     const remoteUserId = data.from_user;
   
+    choosePersonalChatwSwitchWindow(remoteUserId, data.from_username, null);
     document.getElementById('call-container').style.display = 'block';
     
     // Prompt user to accept the call
