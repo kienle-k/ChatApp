@@ -62,3 +62,13 @@ CREATE TABLE IF NOT EXISTS `files` (
     FOREIGN KEY (sender_id) REFERENCES `users`(id) ON DELETE CASCADE,
     FOREIGN KEY (receiver_id) REFERENCES `users`(id) ON DELETE CASCADE
 );
+
+
+INSERT INTO `users` (username, email, password, profile_picture) 
+VALUES (
+    'AI', 
+    'ai@example.com', 
+    '$2b$10$5HcYkTyrcWOTIFIDHQax6eiCvsdDkBQ4fxKqvz6iXTV5pkpk7QdYm', 
+    NULL
+);
+
