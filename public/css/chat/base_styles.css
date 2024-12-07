@@ -705,9 +705,16 @@ opacity: 0.7;
 #file-button {
     width: 70px;
     max-width: 15%;
+    padding: 0px;
 }
 
-#send-button, #file-button {
+#call-btn {
+    width: 70px;
+    max-width: 15%;
+    padding: 12px;
+}
+
+#send-button, #file-button, #call-btn {
     
     height: 100%;
     box-sizing: border-box;
@@ -725,7 +732,8 @@ opacity: 0.7;
 
 
 #send-button img,
-#file-button img {
+#file-button img,
+#call-btn img {
     width: 80%; /* Adjust image size relative to button */
     height: 80%; /* Adjust image size relative to button */
     object-fit: contain; /* Ensure the image scales properly */
@@ -734,8 +742,48 @@ opacity: 0.7;
     /* END SEND CONTAINER STYLING */
 
 
-    /* CHAT HISTORY STYLING */
+/* CALL STYLES */
 
+#call-container {
+    display: none; 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background: rgba(0,0,0,0.8); 
+    z-index: 1000;
+}
+
+
+#end-call-btn {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 60px;
+    box-sizing: border-box;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: transparent;
+}
+
+#end-call-btn img {
+    width: 80%; /* Adjust image size relative to button */
+    height: 80%; /* Adjust image size relative to button */
+    object-fit: contain; /* Ensure the image scales properly */
+}
+
+
+/* END CALL STYLES */
+
+    /* CHAT HISTORY STYLING */
     
 #messages {
     list-style-type: none;
@@ -905,10 +953,8 @@ opacity: 0.7;
   }
 
 
-@media (max-width: 350px) {
-    /* #app-name-container {
-        display: none;
-    } */
+/* @media (max-width: 350px) {
+
     #home-button-container {
         width: 30%;
         max-width: 30%;
@@ -919,7 +965,7 @@ opacity: 0.7;
             max-width: 70%;
             min-width: 70%;
     }
-}
+} */
 
 
 @media (max-width: 260px) {

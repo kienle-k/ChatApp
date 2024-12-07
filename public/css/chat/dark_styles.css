@@ -262,7 +262,7 @@ background-color: #332755;
     border: 2px solid rgb(76, 48, 126);
 }
 
-#send-button, #file-button {
+#send-button, #file-button, #call-btn {
     border: 2px solid transparent;
     background-color: #161124;
     color: rgba(255,255,255,0.8);
