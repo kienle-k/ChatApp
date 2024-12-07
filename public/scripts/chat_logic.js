@@ -830,23 +830,6 @@ function fetchProfilePicture() {
 
 
 
-// Load last Messages on window load    
-window.onload = async function(){
-    check_and_setup_darkmode();
-    document.getElementById("hide-images").href = "";
-    await getUserData();
-    console.log("FETCH PIC");
-    fetchProfilePicture();
-    socket.emit("get-chat-history");
-    // requestHistoryMessages(0,100);
-    FIRST_LOAD = true; // Asure true
-
-    let width = document.body.clientWidth;
-    let height = document.body.clientHeight;
-    if (width <= 600){
-        setContactsForce(CONTACTS_DISPLAYED); // If the screen is resized, make sure one window is hidden
-    }
-}  
 
 // Automatic reload when scrolled to the top
 messagesUL.addEventListener('scroll', function() {
@@ -969,9 +952,201 @@ fileInput.addEventListener('change', () => {
 
 
 
+
+
+// WebRTC call implementation
+
+let peerConnection = null;
+let localStream = null;
+
+async function startCall(userId) {
+    try {
+      // Request only audio access (no video)
+      localStream = await navigator.mediaDevices.getUserMedia({ 
+        audio: true
+      });
+  
+      // Create peer connection
+      peerConnection = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          // Add TURN servers here if needed
+        ]
+      });
+  
+      // Add local stream tracks to peer connection
+      localStream.getTracks().forEach(track => {
+        console.log('Adding track:', track.kind);  // Should log 'audio'
+        peerConnection.addTrack(track, localStream);
+      });
+  
+      // Create offer
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+  
+      // Send offer to the other user via socket
+      socket.emit('call-user', {
+        to_user: userId,
+        offer: offer
+      });
+  
+      // Handle incoming tracks (only audio)
+      peerConnection.ontrack = (event) => {
+        const remoteAudio = document.getElementById('remoteAudio');
+        if (event.streams[0].getAudioTracks().length > 0) {
+          remoteAudio.srcObject = event.streams[0];
+        }
+      };
+  
+      // Handle ICE candidates
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit('ice-candidate', {
+            to_user: userId,
+            candidate: event.candidate
+          });
+        }
+      };
+    } catch (error) {
+      console.error('Call setup error:', error);
+    }
+  }
+  
+
+// Socket event listener for incoming call
+socket.on('incoming-call', async (data) => {
+    const remoteUserId = data.from_user;
+  
+    document.getElementById('call-container').style.display = 'block';
+    
+    // Prompt user to accept the call
+    if (confirm(`Accept call from ${data.from_username}?`)) {
+  
+      // Request camera and microphone access
+      localStream = await navigator.mediaDevices.getUserMedia({ 
+        audio: true, 
+      });
+  
+      // Create a peer connection
+      peerConnection = new RTCPeerConnection({
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          // Add TURN servers here if needed
+        ]
+      });
+  
+      // Add local stream tracks to the peer connection
+      localStream.getTracks().forEach(track => {
+        peerConnection.addTrack(track, localStream);
+      });
+  
+      // Set up the ICE candidate handling
+      peerConnection.onicecandidate = (event) => {
+        if (event.candidate) {
+          socket.emit('ice-candidate', {
+            to_user: remoteUserId,
+            candidate: event.candidate
+          });
+        }
+      };
+  
+      // Set remote description with the incoming offer
+      await peerConnection.setRemoteDescription(data.offer);
+      
+      // Create an answer to send back to the caller
+      const answer = await peerConnection.createAnswer();
+      await peerConnection.setLocalDescription(answer);
+      
+      // Send the answer back to the caller
+      socket.emit('answer-call', {
+        to_user: remoteUserId,
+        answer: answer
+      });
+    }
+  });
+  
+
+socket.on('call-answered', async (data) => {
+  await peerConnection.setRemoteDescription(data.answer);
+});
+
+
+// Client-side code to handle 'call-ended' event
+socket.on('call-ended', (data) => {
+    // Hide the call container when the call ends
+    document.getElementById('call-container').style.display = 'none';
+    console.log("Call ended. Hiding the call container.");
+});
+
+
+socket.on('ice-candidate', async (data) => {
+  if (peerConnection) {
+    await peerConnection.addIceCandidate(data.candidate);
+  }
+});
+
+
+
+
+// In your client-side JavaScript
+function trigger_call(){
+    const selectedUserId = CURRENTLY_CHATTING_WITH_ID; // Implement this to get the current chat partner's ID
+    
+    if (selectedUserId) {
+      startCall(selectedUserId);
+      
+      // Optionally show call interface
+      document.getElementById('call-container').style.display = 'block';
+    } else {
+      alert('Please select a user to call');
+    }
+  }
+  
+  // Add an end call function
+function trigger_end_call(){  
+    if (peerConnection) {
+      peerConnection.close();
+      peerConnection = null;
+    }
+    
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      localStream = null;
+    }
+    
+    document.getElementById('call-container').style.display = 'none';
+    
+    // Optionally emit a 'end-call' event to the other user
+    socket.emit('end-call', { to_user: CURRENTLY_CHATTING_WITH_ID });
+}
+
+
+
 socket.on('disconnect', () => {
     console.log('Socket disconnected, reloading the page...');
     
     // Optionally, you can check the reason or do other actions before reloading
     window.location.reload();  // Reload the page
 });
+
+
+// Load last Messages on window load    
+window.onload = async function(){
+    check_and_setup_darkmode();
+    document.getElementById("hide-images").href = "";
+    await getUserData();
+    console.log("FETCH PIC");
+    fetchProfilePicture();
+    socket.emit("get-chat-history");
+    // requestHistoryMessages(0,100);
+    FIRST_LOAD = true; // Asure true
+
+    let width = document.body.clientWidth;
+    let height = document.body.clientHeight;
+    if (width <= 600){
+        setContactsForce(CONTACTS_DISPLAYED); // If the screen is resized, make sure one window is hidden
+    }
+
+    document.getElementById('call-btn').addEventListener('click', trigger_call);
+    document.getElementById('end-call-btn').addEventListener('click', trigger_end_call);
+}  

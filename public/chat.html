@@ -95,10 +95,18 @@
                         <img src="/images/upload2.png" alt="Upload File" id="file-button-image"/>
                     </button> 
 
+                    <button id="call-btn">Start Call</button><button id="send-button">Senden</button>
+
                     <button id="send-button"><img src="/images/send2.png"/></button>
                 </form>
 
             </div>
+
+            <div id="call-container" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;">
+                <button id="end-call-btn" style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);">End Call</button>
+                <audio id="remoteAudio" autoplay></audio>
+            </div>
+            
         </div>
     </div>
 

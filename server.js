@@ -662,6 +662,55 @@ io.on('connection', (socket) => {
       socket.emit("response-chat-history", { success: false, error: error });
     }
   });
+
+
+
+  socket.on('call-user', (data) => {
+    const { to_user, offer } = data;
+    if (connected_users[to_user]) {
+      connected_users[to_user].emit('incoming-call', {
+        from_user: sessionUser.id,
+        from_username: sessionUser.username,
+        offer: offer
+      });
+    }
+  });
+
+  socket.on('answer-call', (data) => {
+    const { to_user, answer } = data;
+    if (connected_users[to_user]) {
+      connected_users[to_user].emit('call-answered', {
+        from_user: sessionUser.id,
+        answer: answer
+      });
+    }
+  });
+
+  socket.on('ice-candidate', (data) => {
+    const { to_user, candidate } = data;
+    if (connected_users[to_user]) {
+      connected_users[to_user].emit('ice-candidate', {
+        from_user: sessionUser.id,
+        candidate: candidate
+      });
+    }
+  });
+
+
+  socket.on('end-call', (data) => {
+    const { to_user } = data;
+
+    // Notify the other user that the call has ended
+    if (connected_users[to_user]) {
+      connected_users[to_user].emit('call-ended', {
+        message: 'The call has been ended.',
+        from_user: socket.id
+      });
+    }
+
+    // You may also want to clean up resources or close the connection
+    socket.emit('call-ended', { message: 'The call has been ended.' });
+  });
 });
 
 
