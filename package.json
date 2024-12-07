@@ -30,7 +30,8 @@
     "nodemon": "^3.1.7",
     "path": "^0.12.7",
     "socket.io": "^4.8.0",
-    "unpipe": "^1.0.0"
+    "unpipe": "^1.0.0",
+    "uuid": "^7.0.0"
   },
   "keywords": []
 }

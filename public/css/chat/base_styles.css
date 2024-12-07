@@ -607,7 +607,8 @@ opacity: 0.7;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 16px;
+    /* border-radius: 10px; */
+    border-radius: 50%;
     flex-shrink: 0;
 }
 
@@ -695,14 +696,14 @@ opacity: 0.7;
 }
 
 #send-button {
-    width: 150px;
+    width: 130px;
     max-width: 26%;
     padding: 10px;
 
 }
 
 #file-button {
-    width: 50px;
+    width: 70px;
     max-width: 15%;
 }
 
@@ -828,6 +829,9 @@ opacity: 0.7;
 .new-message.expanded {
     opacity: 1;
 }
+
+
+
 
 
     /* END CHAT HISTORY STYLING */

@@ -8,6 +8,7 @@ const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
+const uuid = require('uuid'); // You can install this with `npm install uuid`
 
 const upload_path = 'public/uploads';
 
@@ -297,6 +298,80 @@ async function handleMessage(sessionUser, msg) {
     connection.release();
   }
 }
+
+
+
+// async function handleMessage(sessionUser, msg) {
+//   const to_user = msg.to_user;
+//   const text = msg.text;
+//   const file = msg.file; // Assuming the file is sent as part of the message
+
+//   if (!sessionUser || !to_user || !text) {
+//     console.log("Missing sessionUser, to_user, or text in message");
+//     return {
+//       id: msg.id,
+//       success: false,
+//       message: "Kein eingeloggter User vorhanden"
+//     };
+//   }
+//   console.log("YOYO CECKIN INPUT SEND SENT");
+
+//   const connection = await pool.getConnection();
+//   try {
+//     let filePath = null;
+    
+//     // Handle file upload if a file is included
+//     if (file) {
+//       console.log("File received");
+//       const fileBuffer = Buffer.from(file.fileData, 'base64'); // Convert base64 to buffer
+//       const fileName = `${uuid.v4()}_${file.fileName}`;
+//       const fileDirectory = path.join(__dirname, 'uploads', 'sent_files');
+      
+//       // Ensure the directory exists
+//       if (!fs.existsSync(fileDirectory)) {
+//         fs.mkdirSync(fileDirectory, { recursive: true });
+//       }
+      
+//       // Save the file to disk
+//       const fileSavePath = path.join(fileDirectory, fileName);
+//       fs.writeFileSync(fileSavePath, fileBuffer);
+
+//       filePath = `/uploads/sent_files/${fileName}`; // Path to store in database
+//     }
+
+//     // Insert the message into the database (including file if present)
+//     await connection.execute('INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at, file_path) VALUES (?, ?, ?, NOW(), ?)', 
+//       [sessionUser.id, to_user, text, filePath]);
+
+//     const broadcastMsg = {
+//       from_user: sessionUser.id,
+//       from_username: sessionUser.username,
+//       text: text,
+//       file: filePath // Include the file path in the message broadcast
+//     };
+
+//     // Broadcast the message to the recipient if they are online
+//     if (connected_users[to_user]) {
+//       console.log("Recipient is online, sending via socket: ", to_user);
+//       connected_users[to_user].emit('chat-message', broadcastMsg);
+//     }
+
+//     return {
+//       id: msg.id,
+//       success: true,
+//       message: "Nachricht gesendet."
+//     };
+//   } catch (error) {
+//     console.error('Error saving message:', error);
+//     return {
+//       id: msg.id,
+//       success: false,
+//       message: "Interner Serverfehler. Nachricht konnte nicht gesendet werden."
+//     };
+//   } finally {
+//     connection.release();
+//   }
+// }
 
 
 app.post('/api/find-user', isAuthenticated, async (req, res) => {

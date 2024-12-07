@@ -702,6 +702,7 @@ function sendMessage(event) {
     let value = input.value;
 
     input.value = ''; // Eingabefeld leeren
+    
 
     // Nachricht mit ID an den Server senden
 
@@ -731,6 +732,71 @@ document.getElementById('send-button').addEventListener("touchend", (e) => {
     sendMessage(e); // Event für Touch-Ende hinzufügen
 });
     
+
+// function sendMessage(event) {
+//     event.preventDefault(); 
+//     const msgID = Date.now(); // Unique ID for the message
+
+//     if (input.value === "" && !selectedFile) {
+//         return; // Do not proceed if no text or file is provided
+//     }
+
+//     let msgLi = addMessage(input.value || "Sending file...", 'pending'); // Placeholder for pending message
+//     pending_messages[msgID] = msgLi;
+
+//     setTimeout(scrollMessagesToBottom, 0);
+
+//     let to_user = CURRENTLY_CHATTING_WITH_ID;
+//     let to_group = CURRENT_CHAT_GROUP;
+
+//     if (!to_user && !to_group) {
+//         return;
+//     }
+
+//     let value = input.value;
+//     input.value = ''; // Clear input field
+
+//     // Prepare message data
+//     const messageData = {
+//         id: msgID,
+//         to_user: to_user,
+//         to_group: to_group,
+//         text: value || null, // Send text if available
+//     };
+
+//     // Handle file sending
+//     if (selectedFile) {
+//         const reader = new FileReader();
+//         reader.onload = (event) => {
+//             // Attach file data to messageData
+//             messageData.file = {
+//                 fileName: selectedFile.name,
+//                 fileType: selectedFile.type,
+//                 fileData: event.target.result, // Base64 or ArrayBuffer
+//             };
+
+//             // Emit the message with file
+//             socket.emit('chat-message', messageData);
+//         };
+//         reader.readAsArrayBuffer(); // Read the file as binary data
+//     } else {
+//         // Emit the message without file
+//         socket.emit('chat-message', messageData);
+//     }
+
+//     // Clear file-related UI state
+//     if (selectedFile) {
+//         selectedFile = null;
+//         fileInput.value = ''; // Reset file input
+//         fileButtonImage.src = '/images/upload2.png'; // Reset file button image
+//     }
+
+//     updateLastMessage("Du", to_user, value || "File sent");
+//     setTimeout(() => {
+//         document.getElementById('message-input').focus();
+//     }, 1000);
+// }
+
 
 function fetchProfilePicture() {
     const profileImageElement = document.getElementById('profileImage');
@@ -829,6 +895,77 @@ try {
 }
 });
 
+// rerggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
+
+// DOM elements
+const fileButton = document.getElementById('file-button');
+const fileButtonImage = document.getElementById('file-button-image');
+const fileInput = document.getElementById('file-input');
+// const messageInput = document.getElementById('message-input');
+// const chatForm = document.getElementById('chat-form');
+
+// File storage
+let selectedFile = null;
+
+// Handle file button click
+fileButton.addEventListener('click', () => {
+    if (selectedFile) {
+        // If a file is already uploaded, clear it
+        selectedFile = null;
+        fileInput.value = ''; // Clear file input
+        fileButtonImage.src = '/images/upload2.png'; // Reset to upload image
+    } else {
+        // Otherwise, trigger file input dialog
+        fileInput.click();
+    }
+});
+
+// Handle file selection
+fileInput.addEventListener('change', () => {
+    if (fileInput.files[0]) {
+        selectedFile = fileInput.files[0];
+        fileButtonImage.src = '/images/clear2.png'; // Change button to clear image
+    }
+});
+
+// // Handle form submission
+// chatForm.addEventListener('submit', (e) => {
+//     e.preventDefault(); // Prevent form default submission
+
+//     const message = messageInput.value.trim();
+
+//     // Prepare the message payload
+//     const payload = { message: message || null };
+
+//     // If a file is selected, read it and send
+//     if (selectedFile) {
+//         const reader = new FileReader();
+//         reader.onload = (event) => {
+//             payload.file = {
+//                 fileName: selectedFile.name,
+//                 fileType: selectedFile.type,
+//                 fileData: event.target.result,
+//             };
+//             socket.emit('chat-message', payload); // Emit message and file
+//         };
+//         reader.readAsArrayBuffer(); // Read file as binary
+//     } else {
+//         // If no file, send just the message
+//         socket.emit('chat-message', payload);
+//     }
+
+//     // Clear inputs and reset file button
+//     messageInput.value = '';
+//     if (selectedFile) {
+//         selectedFile = null;
+//         fileInput.value = '';
+//         fileButtonImage.src = '/images/upload2.png'; // Reset to upload image
+//     }
+// });
+
+
+
+// sddddddddddddddddddddddddddddd
 
 
 

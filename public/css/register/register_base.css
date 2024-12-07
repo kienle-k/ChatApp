@@ -14,13 +14,17 @@ body {
     width: 80%;
     max-width: 500px;
 
+    max-height: 90%;
+
     display: flex;
     justify-content: center;
     position: relative;
 
     opacity: 0;
     transition: opacity 1s ease;
+
 }
+
 
 h2 {
     text-align: center;
@@ -127,8 +131,8 @@ button[type="submit"] {
 }
 
 .profile-section img {
-    width: 150px;
-    height: 150px;
+    width: 100px;
+    height: 100px;
     border-radius: 50%;
     object-fit: cover;
     cursor: pointer;
@@ -138,7 +142,70 @@ button[type="submit"] {
     border: none;
     border-radius: 8px;
     padding: 8px 15px;
-    font-size: 14px;
+    font-size: 12px;
     cursor: pointer;
     transition: background-color 0.3s;
+}
+
+@media(max-height: 760px) {
+    input {
+        height: 30px;
+    }
+
+    label {
+        /* font-size: 0.2%; */
+        visibility: hidden;
+        font-size: 0;
+        height: 0;
+    }
+
+    .profile-section {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .profile-section img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        cursor: pointer;
+    }
+
+}
+
+@media(max-width: 600px) {
+    input {
+        height: 30px;
+    }
+
+    label {
+        /* font-size: 0.2%; */
+        visibility: hidden;
+        font-size: 0;
+        height: 0;
+    }
+
+    .profile-section {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        justify-content: center;
+    }
+
+    .profile-section img {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        object-fit: cover;
+        cursor: pointer;
+    }
+
+
 }

@@ -77,7 +77,7 @@
 
             <div id="chat-container">
                 <div id="user-info-bar">
-                    <button id="chat-window-toggler" class="toggle-contacts" onclick="setContactsForce(true)"><img src="images/contacts.png"></button>
+                    <button id="chat-window-toggler" class="toggle-contacts" onclick="setContactsForce(true)"><img src="images/left_arrow.png"></button>
                     <div id="user-image"><img id="user-image-img" src="images/profile.png"></div>
                     <div id="contact-info">Chat</div>
                 </div>
@@ -88,7 +88,13 @@
 
                 <form id="chat-form">
                     <input id="message-input" autocomplete="off">
-                    <button id="file-button"><img src="/images/upload2.png"/></button> 
+                    
+                    <input type="file" id="file-input" style="display: none;" accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg,.zip"/> 
+
+                    <button type="button" id="file-button">
+                        <img src="/images/upload2.png" alt="Upload File" id="file-button-image"/>
+                    </button> 
+
                     <button id="send-button"><img src="/images/send2.png"/></button>
                 </form>
 
