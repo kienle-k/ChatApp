@@ -8,7 +8,73 @@ const multer = require('multer');
 const path = require('path');
 const crypto = require('crypto');
 const fs = require('fs');
-const uuid = require('uuid'); // You can install this with `npm install uuid`
+const uuid = require('uuid');
+const fetch = require('node-fetch');
+const { text } = require('body-parser');
+
+
+function getApiKeySync(filePath) {
+  try {
+      const data = fs.readFileSync(filePath, 'utf-8');
+      return data.trim(); // Trim removes any leading/trailing whitespace
+  } catch (error) {
+      console.error('Error reading the API key file:', error);
+      throw error;
+  }
+}
+
+// Example Usage
+const filePath = path.join(__dirname, 'APIkey.txt'); // Adjust the path as needed
+const Gemini_API_KEY = getApiKeySync(filePath);
+
+
+async function talkToGemini(prompt) {
+  const Gemini_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${Gemini_API_KEY}`;
+
+  const requestBody = {
+      contents: [
+          {
+              parts: [
+                  { text: prompt }
+              ]
+          }
+      ]
+  };
+
+  try {
+      const response = await fetch(Gemini_API_URL, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestBody),
+      });
+
+      if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Log the raw response data to inspect its structure
+      console.log('Raw Response:', data);
+
+      // Check if the response has candidates
+      if (data.candidates && data.candidates.length > 0) {
+          const responseText = data.candidates[0].content.parts[0].text;
+          return responseText
+      } else {
+          console.error('No candidates found in response');
+      }
+  } catch (error) {
+      console.error('Error:', error);
+  }
+}
+
+
+
+
+
 
 const upload_path = 'public/uploads';
 
@@ -238,6 +304,7 @@ app.post('/register', upload.single('image'), async (req, res) => {
     try {
       await connection.execute('INSERT INTO users (email, username, password, profile_picture) VALUES (?, ?, ?, ?)', [email, username, hashedPassword, imagePath]);
       console.log("New user registered");
+      await connection.execute("INSERT INTO `chat_messages` (sender_id, receiver_id, message) VALUES ((SELECT id FROM `users` WHERE username = 'AI'), (SELECT id FROM `users` WHERE username = ?), 'Hello there, how can I help you?')", [username])
       res.status(200).send('User successfully registered.');
     } catch (err) {
       if (err.code === 'ER_DUP_ENTRY') {
@@ -258,6 +325,7 @@ app.post('/register', upload.single('image'), async (req, res) => {
 async function handleMessage(sessionUser, msg) {
   const to_user = msg.to_user;
   const text = msg.text;
+  const AI_userid = 1;
 
   if (!sessionUser || !to_user || !text) {
     console.log("Missing sessionUser, to_user, or text in message");
@@ -276,6 +344,37 @@ async function handleMessage(sessionUser, msg) {
       from_username: sessionUser.username,
       text: text
     };
+
+    
+
+    if (to_user == AI_userid) {
+      try {
+          // Fetch the response from Gemini API
+          const geminiResponse = await talkToGemini(text);
+  
+          // Ensure AI_userid and sessionUser.id are valid and not undefined
+          if (geminiResponse) {
+              // Insert the message into the chat_messages table
+              await connection.execute('INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at) VALUES (?, ?, ?, NOW())', [AI_userid, sessionUser.id, geminiResponse]);
+  
+              // Construct the broadcast message object
+              const broadcastMsg = {
+                  from_user: AI_userid,   // Assuming AI_userid is the ID number
+                  from_username: 'AI',    // This could be a static string or fetched from the database
+                  text: geminiResponse
+              };
+  
+              // Emit the broadcast message to the user
+              connected_users[sessionUser.id].emit('chat-message', broadcastMsg);
+
+          } else {
+              console.error("Gemini API didn't return a valid response.");
+          }
+      } catch (error) {
+          console.error("Error occurred while sending Gemini response:", error);
+      }
+  }
+  
 
     if (connected_users[to_user]) {
       console.log("Recipient is online, sending via socket: ", to_user);
