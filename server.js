@@ -255,9 +255,18 @@ app.post('/register', upload.single('image'), async (req, res) => {
   }
 });
 
+
+const DOC_UPLOADS_DIR = path.join(__dirname, 'public/uploads/documents');
+if (!fs.existsSync(DOC_UPLOADS_DIR)) {
+    fs.mkdirSync(DOC_UPLOADS_DIR, { recursive: true });
+}
+
+
 async function handleMessage(sessionUser, msg) {
   const to_user = msg.to_user;
   const text = msg.text;
+
+
 
   if (!sessionUser || !to_user || !text) {
     console.log("Missing sessionUser, to_user, or text in message");
@@ -274,7 +283,7 @@ async function handleMessage(sessionUser, msg) {
     const broadcastMsg = {
       from_user: sessionUser.id,
       from_username: sessionUser.username,
-      text: text
+      text: text,
     };
 
     if (connected_users[to_user]) {
@@ -288,6 +297,8 @@ async function handleMessage(sessionUser, msg) {
       message: "Nachricht gesendet."
     };
   } catch (error) {
+    console.log(error);
+    console.log("SERVER ERROR");
     console.error('Error saving message:', error);
     return {
       id: msg.id,
@@ -540,6 +551,7 @@ io.on('connection', (socket) => {
       const result = await handleMessage(sessionUser, msg);
       socket.emit('message-confirmation', result);
     } catch (error) {
+      console.log("INTERNAL ERROR", error);
       socket.emit('message-confirmation', {
         id: msg.id,
         success: false,

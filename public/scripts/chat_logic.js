@@ -7,16 +7,11 @@ const socket = io();
 DARKMODE = false;
 
 
-
-
-
 var FIRST_LOAD = true; //Flag for scrolling down when loading the first time -> will be set to zero after first load
-
 
 let MY_USER;
 let MY_USER_ID;
 
-// EDIT THESE VALUES TO SET THE CURRENTLY CHATTED WITH USER (CONSCHTI)
 let CURRENTLY_CHATTING_WITH_ID = null;
 let CURRENT_CHAT_GROUP = null;
 
@@ -42,29 +37,9 @@ const contact_list = document.getElementById("contacts");
 
 
 
-
-
-// async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class){
-//     contact_list.insertAdjacentHTML('beforeend', 
-//         `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' onclick="choosePersonalChat(${contact_id})">
-//             <button type="button" class="contact-profile-button" onclick="showBigProfilePic(${contact_id})">
-//                 <img src='/${picture_path}'>
-//             </button>
-//             <button type="button" class="choose-contact-button" data-id=${contact_id}>
-//                 <div class="contact">${contact_username}</div>
-//             </button>
-//             <div class="last-message">${last_msg_text}</div>
-//         </li>` 
-//     );
-// }
-
-
-
-
-
-
 let CONTACTS_DISPLAYED = true;
 let CONTACT_WINDOW_LOCKED = true;
+
 
 function setContacts(value){
     if (!CONTACT_WINDOW_LOCKED){
@@ -97,24 +72,21 @@ function choosePersonalChatwSwitchWindow(id, name, pic){
 
 
 
-
-
 function check_and_setup_darkmode(){
     const switchCheckbox = document.getElementById("switch-checkbox");
-const link = document.getElementById("theme-styles");
+    const link = document.getElementById("theme-styles");
     switchCheckbox.addEventListener("change", function() {
-        console.log("CHECKCHECK");
     if (switchCheckbox.checked) {
-        console.log("Darkmode turned ON.");
+        console.log("Darkmode ON.");
         localStorage.setItem("darkmode", true);
         DARKMODE = true;
-        link.href = "/css/chat/dark_styles.css";  // Update with the path of the new stylesheet
+        link.href = "/css/chat/dark_styles.css"; 
         document.getElementById("messages").style.backgroundColor = "#161124";
     } else {
         DARKMODE = false;
-        console.log("Darkmode turned OFF.");
+        console.log("Darkmode OFF.");
         localStorage.setItem("darkmode", false);
-        link.href = "/css/chat/light_styles.css";  // Update with the path of the new stylesheet
+        link.href = "/css/chat/light_styles.css";  
         document.getElementById("messages").style.backgroundColor = "#ededed";
     }
     });
@@ -131,6 +103,7 @@ const link = document.getElementById("theme-styles");
     switchCheckbox.dispatchEvent(new Event('change'));
 }
 
+
 function set_darkmode(value){
     const switchCheckbox = document.getElementById("switch-checkbox");
     const link = document.getElementById("theme-styles");
@@ -145,16 +118,74 @@ function set_darkmode(value){
 }
 
 
+// TODO MOVE THIS CALL TO A BETTER PLACE
 check_and_setup_darkmode();
 
+// Display the profile picture big
+function showBigProfilePic(id){
+    let src;
+    let name;
+
+    for (let child of contact_list.children) {
+        if (child.getAttribute('data-id') == id) {
+            src = child.getAttribute('data-imgsrc');
+            name = child.getAttribute('data-username');
+            email = "";
+            break; 
+        }
+    }
+    if (src) { 
+        bigProfileDisplay.innerHTML = '';
+        bigProfileInfo.innerHTML = `<div><b>${name}</b></div>
+                                    <div>${email}</div>`;
+        
+        bigProfileModal.style.display = "flex";
+
+        const img = document.createElement('img');
+        img.src = src; 
+        img.alt = "Profile Picture"; 
+        img.classList.add('big-profile-pic');
+
+        bigProfileDisplay.appendChild(img);
+    }
+        
+}
 
 
+function isListNearBottom() {
+    // Calculate the distance from the bottom
+    const distanceFromBottom = messagesUL.scrollHeight - messagesUL.scrollTop - messagesUL.clientHeight;
+    
+    // Return true if within threshold, false otherwise
+    return distanceFromBottom < bottomThreshold;
+}
 
+function scrollMessagesToBottom(){
+    messagesUL.scrollTop = messagesUL.scrollHeight;
+}
 
+function requestHistoryMessages(start_at_id, number_of_messages) {
+    const user2_id = CURRENTLY_CHATTING_WITH_ID;
+    socket.emit('get-history', { user2_id, start_at_id, number_of_messages });
+} 
 
+// Search for contact ID in the displayed list -> returns null || Li element
+function getContactLi(id){
+    if (id == null){
+        return null;
+    }
+    for (let child of contact_list.children) {
+        if (child.getAttribute('data-id') == id) {
+            return child;
+        }
+    }
+}
+// Checks if contact is already loaded or not present in the list -> returns true / false
+function isContactLoaded(id){
+    return getContactLi(id) != null;
+}
 
-
-
+// Add a new contact to the contacts list
 async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class) {
     contact_list.insertAdjacentHTML('beforeend', 
         `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' data-username='${contact_username}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
@@ -172,66 +203,15 @@ async function addContactToList(picture_path, contact_id, contact_username, last
     return contact_list.lastElementChild;
 }
 
-
-function isContactLoaded(id){
-    if (id == null){
-        return false;
-    }
-    for (let child of contact_list.children) {
-        if (child.getAttribute('data-id') == id) {
-            return true;
-        }
-    }
-
-}
-
-
-function showBigProfilePic(id){
-    console.log("OPENING IMG");
-    // Check if contact already exists
-
-    let src;
-    let name;
-
-    for (let child of contact_list.children) {
-        console.log(child);
- 
-        if (child.getAttribute('data-id') == id) {
-            src = child.getAttribute('data-imgsrc');
-            name = child.getAttribute('data-username');
-            email = "Email@email.email" // child.getAttribute('data-email');
-            break; // Exit function after finding the match
-        }
-    }
-    console.log(src);
-
-    if (src) { 
-       
-        bigProfileDisplay.innerHTML = '';
-        bigProfileInfo.innerHTML = `<div><b>${name}</b></div>
-                                    <div>${email}</div>`;
-        
-        bigProfileModal.style.display = "flex";
-
-        // Create a new image element
-        const img = document.createElement('img');
-        img.src = src; // Set the image source
-        img.alt = "Profile Picture"; // Set alt text for accessibility
-        img.classList.add('big-profile-pic');
-
-        bigProfileDisplay.appendChild(img);
-    }
-        
-}
-
-
-
+// Add Contact to the chat list
 async function addContact(id, name, picture_path = null, showHightlight=true){
 
     const resultsContainer = document.getElementById('user-list');
     const ct_wrapper = document.getElementById('drop-down-users');
     const user_search_input = document.getElementById('user-search-input');
 
+
+    // Reset and hide the search results
     resultsContainer.innerHTML = '';
     ct_wrapper.style.opacity = "0";
     user_search_input.value = "";
@@ -239,53 +219,56 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
         ct_wrapper.style.display = "none";
     }, 250);
 
+
     // Check if contact already exists
-    for (let child of contact_list.children) {
-        if (child.getAttribute('data-id') == id) {
+    const li_element = getContactLi(id);
+    if (li_element != null){
             choosePersonalChatwSwitchWindow(id, name, picture_path, showHightlight);
-            return false, child; // Exit function after finding the match, return false as no contact was added, and the contact div
-        }
+            return false, li_element; // Exit function, return false, list-element  (no new contact added, already present)
     }
+
 
     selected_class = "";
 
-    console.log("THE PATH IS", picture_path);
-
     try {
-        if (!picture_path.includes("/")){
+        if (picture_path == null || !picture_path.includes("/")){
             picture_path = '/images/profile.png';
         }
     }catch (error){
-        console.log("EROR");
         picture_path = '/images/profile.png';
     }
-    console.log("THE PATH IS", picture_path);
+    console.log("Picture path of new contact:", picture_path);
 
+    // Add "Du" for own user (when chatting with own account back)
     if (id == MY_USER_ID && !name.includes("(Du)")){
         name += " (Du)";
     }
+
+    // Finally add element to the list
     const new_contact_div = addContactToList(picture_path, id, name, "", selected_class);     
     
+    // Switch to the newly added contact chat
     setTimeout(() => {
         choosePersonalChatwSwitchWindow(id, name, picture_path, showHightlight);
     }, 50);
+
+    // Focus the message input (To make direct writing possible)
     document.getElementById('message-input').focus();
 
+    // Return true (contact added successfully) and the list-element
     return true, new_contact_div;
 
 }
 
+// Is triggered by typing in the search bar, requests & then displays all users whose's name matches the search string
 async function findUser() {
-    console.log("SEARCH TRIGGER");
-
     const searchName = document.getElementById('user-search-input').value;
     const ct_wrapper = document.getElementById('drop-down-users');
     const resultsContainer = document.getElementById('user-list');
 
-    console.log(searchName, ct_wrapper, resultsContainer);
 
+    // Decide wether to search & display results / abandon the search
     if (searchName == ""){
-        console.log("NO SEARCH name");
         resultsContainer.innerHTML = '';
         ct_wrapper.style.opacity = "0";
         setTimeout(()=> {
@@ -299,14 +282,8 @@ async function findUser() {
         }, 10);
     }
 
-    console.log(ct_wrapper.style.display);
-    console.log("OPACITY:", ct_wrapper.style.opacity);
-
-    const computedOpacity = window.getComputedStyle(ct_wrapper).opacity;
-    console.log(`Computed opacity: ${computedOpacity}`);
-    // Make a POST request to your backend endpoint
+    // Request matching users from backend via POST
     try {
-      console.log("SKURR; REQESTING USERS");
       const response = await fetch('/api/find-user', {
         method: 'POST',
         headers: {
@@ -317,44 +294,42 @@ async function findUser() {
 
       const data = await response.json();
 
-      console.log("DATA:", data);
-
+      // Reset container for new results
       resultsContainer.innerHTML = '';
 
       if (data.success && data.users.length > 0) {
 
-        console.log(resultsContainer.childElementCount);
-        console.log(data.users);
-
+        // Add every matching user to the results list
         data.users.forEach(user => {
             const userDiv = document.createElement('div');
+            // Add marker for own user
             if (user.id == MY_USER_ID){
                 user.username += " (Du)";
             }
 
+            // New contacts have a plus, already chatted-with users are displayed with another mark
             let img_path = "/images/plus2.png";
             if (isContactLoaded(user.id)){
                 img_path = "/images/done.png";
             }
-            console.log(img_path);
+
+            // Create div with data & Add to result list
             userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}', '${user.profile_picture}')"><img src="${img_path}"/>${user.username}</button>`; // <br>Email: ${user.email}
             resultsContainer.appendChild(userDiv);
-            console.log("ADDING:", userDiv);
         });
-        console.log(resultsContainer.childElementCount);
 
       } else {
+        // Display message when no user is matching the string
         resultsContainer.innerHTML = '<div id="no-users">Keine Nutzer gefunden.</div>';
       }
     } catch (error) {
        console.error('An error occurred while searching for users:', error);
-    //    alert('An error occurred while searching for users.');
     }
 }
 
+// Changes the highlighted contact to the one currently chatted with (CURRENTLY_CHATTING_WITH_ID)
 async function updateSelectedChatDisplay() {
-    console.log("UPDATGING");
-    // Check if contact already exists
+    console.log("Updating selected chat");
     for (let child of contact_list.children) {
         const contactButton = child.querySelector('.choose-contact-button');
         child.classList.remove("selected-chat-user");
@@ -365,15 +340,12 @@ async function updateSelectedChatDisplay() {
 }
 
 
-
-
-
+// Opens a new personal chat, loads and displays it
 async function choosePersonalChat(user_id, username, picture_path=null, showHightlight=true) {
 
+    // For Mobile view, contact info & image on top of the chat
     document.getElementById("contact-info").innerText = username;
-    console.log("PICTURE PATH", picture_path);
     if (picture_path != null){
-        console.log("ADDING PIC", picture_path);
         picture_path = `/${picture_path}`;
         document.getElementById("user-image-img").src = picture_path;
         document.getElementById("user-image-img").onclick = function() {
@@ -386,7 +358,7 @@ async function choosePersonalChat(user_id, username, picture_path=null, showHigh
         }; 
     }
     
-
+    // Display a flash to highlight the update of the chat
     if (showHightlight) {
         messages_div = document.getElementById("messages");
         if (!DARKMODE){
@@ -405,32 +377,37 @@ async function choosePersonalChat(user_id, username, picture_path=null, showHigh
             }
         }, 250);
     }
+
+    // Return if the clicked chat partner is the same as the previous
     if (user_id == CURRENTLY_CHATTING_WITH_ID){
         return;
     }
-    CURRENTLY_CHATTING_WITH_ID = user_id;
-    CURRENT_CHAT_GROUP = null; // Setze die aktuelle Chat-Gruppe auf null, da es sich um einen persönlichen Chat handelt
 
+    // Change IDs
+    CURRENTLY_CHATTING_WITH_ID = user_id;
+    CURRENT_CHAT_GROUP = null; // Personal Chat -> Group ID is null!
+
+    // Update the highlighted contact div
     updateSelectedChatDisplay();
     
-    messagesUL.innerHTML = ""; // Leere die Nachrichtenliste
-    requestHistoryMessages(0, 100); // Fordere die Chat-Historie an
-    FIRST_LOAD = true;
+    // Delete previous messages, Request 100 of the new chat partner from the server
+    messagesUL.innerHTML = ""; 
+    requestHistoryMessages(0, 100);
+    FIRST_LOAD = true; // Flag to prevent buggy scrolling in the beginning
 
-    document.getElementById('message-input').focus(); // Fokussiere das Eingabefeld für Nachrichten
+    document.getElementById('message-input').focus(); // Focus chat input, to allow direct texting onload
 }
 
-document.getElementById("search-button").addEventListener("click", findUser);
-document.getElementById("user-search-input").addEventListener("input", findUser);
 
-
-
+// Open user settings page in new tab
 function openSettingsPage(){
     settingsTab = window.open('/user-settings', '_blank');
     settingsTab.opener = window;
     settingsTab.focus();
 }
 
+
+// Load username & ID of OWN chat user
 async function getUserData() {
     try {
         const response = await fetch('/api/get-my-user', {
@@ -452,28 +429,14 @@ async function getUserData() {
     }
 }
 
-function isListNearBottom() {
-    // Calculate the distance from the bottom
-    const distanceFromBottom = messagesUL.scrollHeight - messagesUL.scrollTop - messagesUL.clientHeight;
-    
-    // Return true if within threshold, false otherwise
-    return distanceFromBottom < bottomThreshold;
-}
-
-function scrollMessagesToBottom(){
-    messagesUL.scrollTop = messagesUL.scrollHeight;
-}
-
-function requestHistoryMessages(start_at_id, number_of_messages) {
-    const user2_id = CURRENTLY_CHATTING_WITH_ID;
-    socket.emit('get-history', { user2_id, start_at_id, number_of_messages });
-}
 
 
+// Socket for receiving the requested chat history 
 socket.on('response-history', (data) => {
-    console.log('Received data from server:', data); // Process the returned data
+    console.log('Received chat data:', data); // Process the returned data
     if (!data.success){return; };
     
+    // Add messages to List
     let messages = data.messages;
     let msg;
     for (let i=messages.length-1; i>= 0; i--){
@@ -491,7 +454,6 @@ socket.on('response-history', (data) => {
         }
     }
     if (FIRST_LOAD == true){
-        console.log("SCROLLING TO BTM");
         scrollMessagesToBottom();
         FIRST_LOAD = false;
     }
@@ -499,15 +461,12 @@ socket.on('response-history', (data) => {
     currently_loading_messages = false;
 });
 
-
+// Add a message to the current chat
 function addMessage(message, messageType, on_top=false){
     // messageType can be 'pending' / 'sent' / 'received'
 
-    // Nachricht sofort anzeigen
     const li = document.createElement('li');
-
     li.classList.add("message-container");            
-    
     const msg = document.createElement('div');
 
     msg.innerText = message;
@@ -532,42 +491,24 @@ function addMessage(message, messageType, on_top=false){
             break;
     }
 
-
     li.appendChild(msg);
 
-
-    
     if (on_top){
         messagesUL.insertBefore(li, messagesUL.firstChild);
     }else{
         messagesUL.appendChild(li);
     } 
 
-    // msg.addEventListener('transitionend', scrollMessagesToBottom);
     setTimeout(() => {
         msg.classList.add('expanded');
     }, 10);
 
-    
-
     return li;
 }
 
-
+// Display last sent message in the contact field 
 async function updateLastMessage(from_name, chat_partner_id, text){
     console.log(from_name, chat_partner_id, text );
-
-    // let add_points = "";
-    // if (text.length > 9){
-    //     add_points = "...";
-    // }
-    // text = text.slice(0, 9);
-    // // Add spaces if the length is less than 6
-    // while (text.length < 9) {
-    //     text += " ";
-    // }        
-    
-    // text += add_points;
 
     const contactItems = document.querySelectorAll('.contact-container');
 
@@ -585,17 +526,13 @@ async function updateLastMessage(from_name, chat_partner_id, text){
     });
 }
 
-
-// Wenn eine Nachricht empfangen wird
+// Socket for receiving messages
 socket.on('chat-message', (msg) => {
     console.log("RECEIVED: ", msg);
 
     from_user =  msg.from_user;
     from_username = msg.from_username;
     text = msg.text;
-
-    // TODO make it more logical, change addMessage function, change whole flow
-    // DEBUG MODE: ALL MESSAGES ARE PUT IN THE SAME CHAT
 
     updateLastMessage(from_username, from_user, text);
 
@@ -605,14 +542,13 @@ socket.on('chat-message', (msg) => {
             setTimeout(scrollMessagesToBottom, 0);
         }
     } else {
-        console.log("Received message from user that is currently not chatted with");
-        // TODO: MAKE USER HIGHLIGHTED (MESSAGE COUNT)
+        console.log("Received message from user that is currently not chatted with.", msg);
     }
 });
 
 // Old approach, now API call -> different handling
 
-// // Wenn eine Nachricht als bestätigt zurückkommt
+// Message confirmed as received by the server -> "Sent"
 socket.on('message-confirmation', (output) => {
     if (output.success == true){
         let msgID = output.id;
@@ -676,16 +612,11 @@ async function sendMessageToAPI(messageData) {
         }
     }
 }
-
-    // Equivalent message data
     
-
-
+// Send message to the server
 function sendMessage(event) {
     event.preventDefault(); 
     const msgID = Date.now(); 
-
-
 
     if (input.value == ""){
         return;
@@ -707,9 +638,6 @@ function sendMessage(event) {
     let value = input.value;
 
     input.value = ''; // Eingabefeld leeren
-    
-
-    // Nachricht mit ID an den Server senden
 
     const messageData = {
         id: msgID,
@@ -718,16 +646,21 @@ function sendMessage(event) {
         text: value,
     };
 
+    // Handle file sending TODO TODO TODO
+    if (selectedFile != null) {
+    }
+
     // sendMessageToAPI(messageData);
 
-    // Approach via socket
-    socket.emit('chat-message', { id: msgID, to_user: to_user, to_group: to_group, text: value }); 
+    // Send message via socket
+    socket.emit('chat-message', messageData); 
     
+    // Update last sent message in contact field
     updateLastMessage("Du", to_user, value);
 
     setTimeout(() => {
              document.getElementById('message-input').focus();
-    }, 1000);
+    }, 100);
 }
 
 // Nachricht senden
@@ -738,71 +671,7 @@ document.getElementById('send-button').addEventListener("touchend", (e) => {
 });
     
 
-// function sendMessage(event) {
-//     event.preventDefault(); 
-//     const msgID = Date.now(); // Unique ID for the message
-
-//     if (input.value === "" && !selectedFile) {
-//         return; // Do not proceed if no text or file is provided
-//     }
-
-//     let msgLi = addMessage(input.value || "Sending file...", 'pending'); // Placeholder for pending message
-//     pending_messages[msgID] = msgLi;
-
-//     setTimeout(scrollMessagesToBottom, 0);
-
-//     let to_user = CURRENTLY_CHATTING_WITH_ID;
-//     let to_group = CURRENT_CHAT_GROUP;
-
-//     if (!to_user && !to_group) {
-//         return;
-//     }
-
-//     let value = input.value;
-//     input.value = ''; // Clear input field
-
-//     // Prepare message data
-//     const messageData = {
-//         id: msgID,
-//         to_user: to_user,
-//         to_group: to_group,
-//         text: value || null, // Send text if available
-//     };
-
-//     // Handle file sending
-//     if (selectedFile) {
-//         const reader = new FileReader();
-//         reader.onload = (event) => {
-//             // Attach file data to messageData
-//             messageData.file = {
-//                 fileName: selectedFile.name,
-//                 fileType: selectedFile.type,
-//                 fileData: event.target.result, // Base64 or ArrayBuffer
-//             };
-
-//             // Emit the message with file
-//             socket.emit('chat-message', messageData);
-//         };
-//         reader.readAsArrayBuffer(); // Read the file as binary data
-//     } else {
-//         // Emit the message without file
-//         socket.emit('chat-message', messageData);
-//     }
-
-//     // Clear file-related UI state
-//     if (selectedFile) {
-//         selectedFile = null;
-//         fileInput.value = ''; // Reset file input
-//         fileButtonImage.src = '/images/upload2.png'; // Reset file button image
-//     }
-
-//     updateLastMessage("Du", to_user, value || "File sent");
-//     setTimeout(() => {
-//         document.getElementById('message-input').focus();
-//     }, 1000);
-// }
-
-
+// Get own profile picture
 function fetchProfilePicture() {
     const profileImageElement = document.getElementById('profileImage');
     // Make the API request to the backend
@@ -829,10 +698,6 @@ function fetchProfilePicture() {
       });
   }
   
-
-
-
-
 
 
 
@@ -893,10 +758,11 @@ const fileInput = document.getElementById('file-input');
 // const chatForm = document.getElementById('chat-form');
 
 // File storage
-let selectedFile = null;
+var selectedFile = null;
 
 // Handle file button click
 fileButton.addEventListener('click', () => {
+    console.log("BUTTON CLICK FILEUPLOAD");
     if (selectedFile) {
         // If a file is already uploaded, clear it
         selectedFile = null;
@@ -914,6 +780,7 @@ fileInput.addEventListener('change', () => {
         selectedFile = fileInput.files[0];
         fileButtonImage.src = '/images/clear2.png'; // Change button to clear image
     }
+    console.log("FILE SELECTED: ", selectedFile);
 });
 
 // // Handle form submission
@@ -1158,4 +1025,9 @@ window.onload = async function(){
 
     document.getElementById('call-btn').addEventListener('click', trigger_call);
     document.getElementById('end-call-btn').addEventListener('click', trigger_end_call);
+
+    document.getElementById("search-button").addEventListener("click", findUser);
+    document.getElementById("user-search-input").addEventListener("input", findUser);
+
+
 }  
