@@ -398,13 +398,7 @@ async function handleMessage(sessionUser, msg) {
   try {
     const { iv, encryptedData } = encryptMessage(text);
     await connection.execute('INSERT INTO chat_messages (sender_id, receiver_id, message, iv, sent_at) VALUES (?, ?, ?, ?, NOW())', [sessionUser.id, to_user, encryptedData, iv]);
-    const broadcastMsg = {
-      from_user: sessionUser.id,
-      from_username: sessionUser.username,
-      text: text,
-    };
-
-    
+ 
 
     if (to_user == AI_userid) {
       try {
