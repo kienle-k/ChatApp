@@ -13,7 +13,9 @@ const usernameRegex = /^[A-Za-z\d]{5,30}$/;
 
 usernameField.addEventListener('input', function() {
     const username = usernameField.value;
-    if (!usernameRegex.test(username)) {
+    if (username.toLowerCase() === 'ai') {
+        usernameErrorMessage.textContent = 'Der Benutzername darf nicht "AI" sein.';
+    } else if (!usernameRegex.test(username)) {
         if (username.length < 5) {
             usernameErrorMessage.textContent = 'Der Benutzername muss mindestens 5 Zeichen lang sein.';
         } else if (username.length > 30) {
