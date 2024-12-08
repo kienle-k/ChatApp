@@ -957,6 +957,11 @@ window.onload = async function(){
     document.getElementById("user-search-input").addEventListener("input", findUser);
 
 
+
+    document.getElementById("add-group-modal").addEventListener('click', () => {document.getElementById("add-group-modal").style.display="none"});
+    document.getElementById("addGroupButton").addEventListener('click', () => {document.getElementById("add-group-modal").style.display="flex"});
+
+
     // Handle file button click
     fileButton.addEventListener('click', fileButtonLogic);
 

@@ -605,7 +605,7 @@ app.post('/api/update-my-info', upload.single('profile_picture'), async (req, re
 });
 
 
-app.post('/api/get-group-details', async (req, res) => {
+app.post('/api/get-group-details', isAuthenticated, async (req, res) => {
   const { group_id } = req.body;
 
   let [rows] = await connection.query(
@@ -622,6 +622,11 @@ app.post('/api/get-group-details', async (req, res) => {
   return res.json({ group_id: group_id, details: details });
 });
 
+
+
+app.post('/api/add-new-group', isAuthenticated, async (req, res) =>  {
+
+});
 
 
 // WebSocket connection
