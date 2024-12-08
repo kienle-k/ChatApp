@@ -536,11 +536,14 @@ opacity: 0.7;
 #files-list {
     width: 100%;
     height: fit-content;
-    min-height: 10px;
-    max-height: 50%;
+    min-height: 100px;
     overflow-y: auto;
+    overflow-x: hidden;
     background-color: gray;
     border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+
 }
 
 

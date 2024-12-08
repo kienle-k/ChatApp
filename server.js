@@ -385,7 +385,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
       // File metadata
       const fileName = req.file.filename;
-      const filePath = path.join('uploads/documents', fileName); // Relative path to the file
+      const filePath = path.join('uploads', fileName); // Relative path to the file
       const fileSize = req.file.size;
       const fileType = req.file.mimetype;
 
@@ -412,9 +412,9 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
 
 app.post('/download', async (req, res) => {
+  const connection = await pool.getConnection();
   try {
-      const connection = await pool.getConnection();
-
+      
       const to_user = req.body;
 
       // Replace with the logged-in user's ID

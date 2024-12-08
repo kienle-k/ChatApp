@@ -134,6 +134,7 @@ html {
 }
 
 #addGroupButton {
+    display: none;
     border: 0;
     color: white; /* White text */
     background-color: #211443;   
