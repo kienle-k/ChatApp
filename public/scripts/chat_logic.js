@@ -1005,7 +1005,10 @@ window.onload = async function(){
 
 
     document.getElementById("add-group-modal").addEventListener('click', () => {document.getElementById("add-group-modal").style.display="none"});
-    document.getElementById("addGroupButton").addEventListener('click', () => {document.getElementById("add-group-modal").style.display="flex"});
+    document.getElementById("addGroupButton").addEventListener('click', () => {
+        event.stopPropagation();
+        document.getElementById("add-group-modal").style.display="flex"
+    });
 
 
     // Handle file button click
