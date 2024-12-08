@@ -785,6 +785,13 @@ function trigger_end_call(){
 }
 
 
+
+function loadChatFiles(){
+    
+}
+
+
+
 // Socket for receiving the requested chat history 
 socket.on('response-history', (data) => {
     console.log('Received chat data:', data); // Process the returned data
@@ -982,6 +989,18 @@ window.onload = async function(){
 
     document.getElementById("search-button").addEventListener("click", findUser);
     document.getElementById("user-search-input").addEventListener("input", findUser);
+
+
+
+    document.getElementById("openFilesButton").addEventListener('click', () => {
+        style = document.getElementById("files-list").style.display;
+        if (style == "flex"){
+            document.getElementById("files-list").style.display = "none";
+        }else{
+            document.getElementById("files-list").style.display = "flex";
+            loadChatFiles();
+        }
+    });
 
 
 

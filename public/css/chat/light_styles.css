@@ -98,6 +98,12 @@
     padding-right: 15px;
 }
 
+#addGroupButton {
+    border: 0;
+    color: rgb(0, 0, 0); /* White text */
+    background-color: lightgray;
+}
+
 #search-button {
     border: 0;
     color: rgb(0, 0, 0); /* White text */

@@ -756,8 +756,6 @@ app.post('/api/add-new-group', isAuthenticated, async (req, res) => {
 
 
 
-
-
 // WebSocket connection
 io.on('connection', (socket) => {
   console.log('New user socket has connected');

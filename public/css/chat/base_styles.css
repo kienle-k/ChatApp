@@ -168,6 +168,8 @@ opacity: 0.7;
     flex-direction: column;
     align-items: center;
     user-select: none;
+
+    position: relative; /* For open files button */
 }
 
 #send-container {
@@ -506,6 +508,40 @@ opacity: 0.7;
 
 
 
+#openFilesButton {
+    height: 50px;
+    box-sizing: border-box;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* position: absolute; */
+
+    align-self: flex-start;
+    z-index: 1000;
+    margin: 10px;
+}
+
+#openFilesButton img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
+
+
+
+#files-list {
+    width: 100%;
+    height: fit-content;
+    min-height: 10px;
+    max-height: 50%;
+    overflow-y: auto;
+    background-color: gray;
+    border-radius: 15px;
+}
 
 
 /* Modal Overlay */
