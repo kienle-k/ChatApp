@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="/css/password_visibility_styles.css">
     <link rel="stylesheet" href="/css/user_settings/settings_base.css">
     <link rel="stylesheet" href="/css/user_settings/settings_light.css" id="doc-styles">
-    
     <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
 </head>
 <body>
@@ -28,7 +27,7 @@
         </div>
         <form class="settings-form">
             <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="Your Username"/>
+            <input type="text" id="username" name="username" placeholder="Your Username" disabled aria-disabled="true" />
 
             <label for="email">Email</label>
             <input type="email" id="email" name="email" placeholder="Your Email" />
@@ -38,12 +37,14 @@
                 <input type="password" id="password" name="password" placeholder="New Password" />
                 <button type="button" id="toggle-password" class="toggle-password">🙈</button>
             </div>
+            <p id="password-error-message" style="color: red;"></p>
 
             <label for="confirm-password">Passwort bestätigen</label>
             <div class="password-container">
                 <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm Password" />
                 <button type="button" id="toggle-confirm-password" class="toggle-password">🙈</button>
             </div>
+            <p id="error-message" style="color: red;"></p>
 
             <button type="submit" class="save-btn">Save Changes</button>
         </form>
