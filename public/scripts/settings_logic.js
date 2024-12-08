@@ -25,8 +25,6 @@ document.getElementById('profile-upload').addEventListener('change', function (e
     }
 });
 
-
-
 // Load user data on page load
 async function loadData() {
     // First allow image display after loading
@@ -57,8 +55,13 @@ document.querySelector('.settings-form').addEventListener('submit', async functi
     const confirmPassword = document.getElementById('confirm-password').value.trim();
     const profileUpload = document.getElementById('profile-upload').files[0]; // Get the uploaded file
 
+    if (!passwordRegex.test(password)) {
+        passwordErrorMessage.textContent = 'Das Passwort erfüllt nicht die Anforderungen.';
+        return;
+    }
+
     if (password !== confirmPassword) {
-        alert("Passwords do not match!");
+        errorMessage.textContent = 'Die Passwörter stimmen nicht überein.';
         return;
     }
 
@@ -90,21 +93,17 @@ document.querySelector('.settings-form').addEventListener('submit', async functi
     }
 });
 
-
 const bigProfileModal = document.getElementById('profile-pic-modal');
 const bigProfileDisplay = document.getElementById('profile-pic-display');
 const bigProfileInfo = document.getElementById('profile-text');
 const emailInput = document.getElementById('email');
 const usernameInput = document.getElementById('username');
 
-
 function showBigProfilePic(){
-
     // Get image source
     let src = document.getElementById("profile-picture").src;
 
     if (src) { 
-       
         bigProfileDisplay.innerHTML = '';
         bigProfileInfo.innerHTML = `<div><b>${usernameInput.value}</b></div>
                                     <div>${emailInput.value}</div>`;
@@ -119,12 +118,7 @@ function showBigProfilePic(){
 
         bigProfileDisplay.appendChild(img);
     }
-        
 }
-
-
-
-
 
 async function loadUserSettings() {
     try {
@@ -153,7 +147,6 @@ async function loadUserSettings() {
 
 document.addEventListener('DOMContentLoaded', loadUserSettings);
 
-
 window.onload = function(){
     loadData();
     const link = document.getElementById("doc-styles");
@@ -168,3 +161,29 @@ window.onload = function(){
         link.href = "/css/user_settings/settings_light.css"; 
     }
 }
+// Passwortanforderungen und Validierung
+const passwordField = document.getElementById('password');
+const confirmPasswordField = document.getElementById('confirm-password');
+const passwordErrorMessage = document.getElementById('password-error-message');
+const errorMessage = document.getElementById('error-message');
+
+// Passwortanforderungen: mindestens 8 Zeichen, ein Großbuchstabe, eine Zahl, maximale Länge 30 Zeichen, Sonderzeichen erlaubt aber nicht Pflicht
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,30}$/;
+//const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,30}$/; // härtere Anforderungen: Sonderzeichen Pflicht
+
+passwordField.addEventListener('input', function() {
+    const password = passwordField.value;
+    if (!passwordRegex.test(password)) {
+        if (password.length < 8) {
+            passwordErrorMessage.textContent = 'Das Passwort muss mindestens 8 Zeichen lang sein.';
+        } else if (!/[A-Z]/.test(password)) {
+            passwordErrorMessage.textContent = 'Das Passwort erfordert einen Großbuchstaben.';
+        } else if (!/\d/.test(password)) {
+            passwordErrorMessage.textContent = 'Das Passwort erfordert eine Zahl.';
+        } else {
+            passwordErrorMessage.textContent = 'Das Passwort enthält ungültige Zeichen.';
+        }
+    } else {
+        passwordErrorMessage.textContent = '';
+    }
+});
