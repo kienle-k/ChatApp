@@ -1004,12 +1004,21 @@ window.onload = async function(){
 
 
 
-    document.getElementById("add-group-modal").addEventListener('click', () => {document.getElementById("add-group-modal").style.display="none"});
-    document.getElementById("addGroupButton").addEventListener('click', (event) => {
-        event.stopPropagation();
-        document.getElementById("add-group-modal").style.display="flex"
+    // Close modal when the background is clicked
+    document.getElementById("add-group-modal").addEventListener('click', () => {
+        document.getElementById("add-group-modal").style.display = "none";
     });
 
+    // Show modal when the button is clicked
+    document.getElementById("addGroupButton").addEventListener('click', (event) => {
+        event.stopPropagation();  // Stop event from propagating to the modal background
+        document.getElementById("add-group-modal").style.display = "flex";
+    });
+
+    // Prevent closing the modal when clicking inside the modal content
+    document.getElementById("add-group-window").addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent event from propagating to the background
+    });
 
     // Handle file button click
     fileButton.addEventListener('click', fileButtonLogic);
