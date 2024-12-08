@@ -11,6 +11,7 @@ const fs = require('fs');
 const uuid = require('uuid');
 const fetch = require('node-fetch');
 const { text } = require('body-parser');
+const port = 3000;
 
 
 function getApiKeySync(filePath) {
@@ -73,16 +74,11 @@ async function talkToGemini(prompt) {
 
 
 
-
-
-
 const upload_path = 'public/uploads';
 
 if (!fs.existsSync(upload_path)) {
   fs.mkdirSync(upload_path);
 }
-
-const port = 3000;
 
 // Initialize Express
 const app = express();
