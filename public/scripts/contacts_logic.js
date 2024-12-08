@@ -1,9 +1,4 @@
 
-
-
-
-
-
 socket.on('response-chat-history', (rows) => {
     console.log("RECEIVED CHATS:", rows.messages);
     let contact_username;
@@ -19,36 +14,24 @@ socket.on('response-chat-history', (rows) => {
 
 
 
-    for (const message of rows.messages) {
+    for (const chat of rows.messages) {
 
-        let txtmessage = message.message;
+        let txtmessage = chat.message;
 
-        // let add_points = "";
-        // if (txtmessage.length > 9){
-        //     add_points = "...";
-        // }
-        // txtmessage = txtmessage.slice(0, 9);
-        // // Add spaces if the length is less than 6
-        // while (txtmessage.length < 9) {
-        //     txtmessage += " ";
-        // }        
-        
-        // txtmessage += add_points;
-
-        if (message.group_name == null) {
-            if (message.sender_username == MY_USER) {
-                contact_username = message.receiver_username;
-                contact_id = message.receiver_id;
+        if (chat.group_name == null) {
+            if (chat.sender_username == MY_USER) {
+                contact_username = chat.receiver_username;
+                contact_id = chat.receiver_id;
                 last_msg_text = `<b style="color: darkgray">Du:</b><br>${txtmessage}`;
-                picture_path = message.receiver_picture;
+                picture_path = chat.receiver_picture;
             } else {
-                contact_username = message.sender_username;
-                contact_id = message.sender_id;
+                contact_username = chat.sender_username;
+                contact_id = chat.sender_id;
                 last_msg_text = `<b style="color: darkgray">${contact_username}:</b><br>${txtmessage}`;
-                picture_path = message.sender_picture;
+                picture_path = chat.sender_picture;
             }
 
-            if (message.receiver_id == message.sender_id){
+            if (chat.receiver_id == chat.sender_id){
                 contact_username += " (Du)";
             }
 

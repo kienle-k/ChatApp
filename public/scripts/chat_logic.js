@@ -15,7 +15,6 @@ let CURRENT_CHAT_GROUP = null;
 let CONTACTS_DISPLAYED = true;
 let CONTACT_WINDOW_LOCKED = true;
 
-
 var currently_loading_messages = false;
 
 

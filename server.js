@@ -14,6 +14,10 @@ const { text } = require('body-parser');
 const port = 3000;
 
 
+
+const AI_userid = 1;
+
+
 function getApiKeySync(filePath) {
   try {
       const data = fs.readFileSync(filePath, 'utf-8');
@@ -159,12 +163,27 @@ async function testConnection() {
 
 testConnection();
 
+
 async function getPasswordHash(password) {
   return await bcrypt.hash(password, 10);
 }
 
 async function verifyPassword(password, hash) {
   return await bcrypt.compare(password, hash);
+}
+
+function isAuthenticated(req, res, next) {
+  if (req.session && req.session.user) {
+    console.log("Authenticated user: ", req.session.user.username);
+    return next();
+  } else {
+    console.log("User is not authenticated");
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    } else {
+      return res.redirect('/');
+    }
+  }
 }
 
 // Login endpoint
@@ -192,42 +211,23 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-function isAuthenticated(req, res, next) {
-  if (req.session && req.session.user) {
-    console.log("Authenticated user: ", req.session.user.username);
-    return next();
-  } else {
-    console.log("User is not authenticated");
-    if (req.path.startsWith('/api/')) {
-      return res.status(401).json({ error: 'Not authenticated' });
-    } else {
-      return res.redirect('/');
-    }
-  }
-}
-
 // Secure chat route
 app.get('/chat', isAuthenticated, (req, res) => {
   return res.sendFile(__dirname + '/public/chat.html');
 });
-
 // Page endpoints
 app.get('/register', (req, res) => {
   return res.sendFile(__dirname + '/public/register.html');
 });
-
 app.get('/login', (req, res) => {
   return res.sendFile(__dirname + '/public/index.html');
 });
-
 app.get('/logout', (req, res) => {
   return res.sendFile(__dirname + '/public/logout.html');
 });
-
 app.get('/registrated-successfully', (req, res) => {
   return res.sendFile(__dirname + '/public/registered.html');
 });
-
 app.get('/user-settings', isAuthenticated, (req, res) => {
   return res.sendFile(__dirname + '/public/user-settings.html');
 });
@@ -236,15 +236,12 @@ app.get('/user-settings', isAuthenticated, (req, res) => {
 app.get('/user-settings.html', isAuthenticated, (req, res) => {
   return res.redirect(301, '/user-settings');
 });
-
 app.get('/register.html', (req, res) => {
   return res.redirect(301, '/register');
 });
-
 app.get('/index.html', (req, res) => {
   return res.redirect(301, '/');
 });
-
 app.get('/logout.html', (req, res) => {
   return res.redirect(301, '/logout');
 });
@@ -328,9 +325,6 @@ if (!fs.existsSync(DOC_UPLOADS_DIR)) {
 async function handleMessage(sessionUser, msg) {
   const to_user = msg.to_user;
   const text = msg.text;
-  const AI_userid = 1;
-
-
 
   if (!sessionUser || !to_user || !text) {
     console.log("Missing sessionUser, to_user, or text in message");
@@ -344,13 +338,6 @@ async function handleMessage(sessionUser, msg) {
   const connection = await pool.getConnection();
   try {
     await connection.execute('INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at) VALUES (?, ?, ?, NOW())', [sessionUser.id, to_user, text]);
-    const broadcastMsg = {
-      from_user: sessionUser.id,
-      from_username: sessionUser.username,
-      text: text,
-    };
-
-    
 
     if (to_user == AI_userid) {
       try {
@@ -363,14 +350,14 @@ async function handleMessage(sessionUser, msg) {
               await connection.execute('INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at) VALUES (?, ?, ?, NOW())', [AI_userid, sessionUser.id, geminiResponse]);
   
               // Construct the broadcast message object
-              const broadcastMsg = {
+              const returnMessage = {
                   from_user: AI_userid,   // Assuming AI_userid is the ID number
                   from_username: 'AI',    // This could be a static string or fetched from the database
                   text: geminiResponse
               };
   
               // Emit the broadcast message to the user
-              connected_users[sessionUser.id].emit('chat-message', broadcastMsg);
+              connected_users[sessionUser.id].emit('chat-message', returnMessage);
 
           } else {
               console.error("Gemini API didn't return a valid response.");
@@ -378,8 +365,14 @@ async function handleMessage(sessionUser, msg) {
       } catch (error) {
           console.error("Error occurred while sending Gemini response:", error);
       }
-  }
-  
+    }
+
+    const broadcastMsg = {
+      from_user: sessionUser.id,
+      from_username: sessionUser.username,
+      text: text,
+    };
+
 
     if (connected_users[to_user]) {
       console.log("Recipient is online, sending via socket: ", to_user);
@@ -391,9 +384,9 @@ async function handleMessage(sessionUser, msg) {
       success: true,
       message: "Nachricht gesendet."
     };
+
   } catch (error) {
     console.log(error);
-    console.log("SERVER ERROR");
     console.error('Error saving message:', error);
     return {
       id: msg.id,
@@ -405,79 +398,6 @@ async function handleMessage(sessionUser, msg) {
   }
 }
 
-
-
-// async function handleMessage(sessionUser, msg) {
-//   const to_user = msg.to_user;
-//   const text = msg.text;
-//   const file = msg.file; // Assuming the file is sent as part of the message
-
-//   if (!sessionUser || !to_user || !text) {
-//     console.log("Missing sessionUser, to_user, or text in message");
-//     return {
-//       id: msg.id,
-//       success: false,
-//       message: "Kein eingeloggter User vorhanden"
-//     };
-//   }
-//   console.log("YOYO CECKIN INPUT SEND SENT");
-
-//   const connection = await pool.getConnection();
-//   try {
-//     let filePath = null;
-    
-//     // Handle file upload if a file is included
-//     if (file) {
-//       console.log("File received");
-//       const fileBuffer = Buffer.from(file.fileData, 'base64'); // Convert base64 to buffer
-//       const fileName = `${uuid.v4()}_${file.fileName}`;
-//       const fileDirectory = path.join(__dirname, 'uploads', 'sent_files');
-      
-//       // Ensure the directory exists
-//       if (!fs.existsSync(fileDirectory)) {
-//         fs.mkdirSync(fileDirectory, { recursive: true });
-//       }
-      
-//       // Save the file to disk
-//       const fileSavePath = path.join(fileDirectory, fileName);
-//       fs.writeFileSync(fileSavePath, fileBuffer);
-
-//       filePath = `/uploads/sent_files/${fileName}`; // Path to store in database
-//     }
-
-//     // Insert the message into the database (including file if present)
-//     await connection.execute('INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at, file_path) VALUES (?, ?, ?, NOW(), ?)', 
-//       [sessionUser.id, to_user, text, filePath]);
-
-//     const broadcastMsg = {
-//       from_user: sessionUser.id,
-//       from_username: sessionUser.username,
-//       text: text,
-//       file: filePath // Include the file path in the message broadcast
-//     };
-
-//     // Broadcast the message to the recipient if they are online
-//     if (connected_users[to_user]) {
-//       console.log("Recipient is online, sending via socket: ", to_user);
-//       connected_users[to_user].emit('chat-message', broadcastMsg);
-//     }
-
-//     return {
-//       id: msg.id,
-//       success: true,
-//       message: "Nachricht gesendet."
-//     };
-//   } catch (error) {
-//     console.error('Error saving message:', error);
-//     return {
-//       id: msg.id,
-//       success: false,
-//       message: "Interner Serverfehler. Nachricht konnte nicht gesendet werden."
-//     };
-//   } finally {
-//     connection.release();
-//   }
-// }
 
 
 app.post('/api/find-user', isAuthenticated, async (req, res) => {
@@ -503,6 +423,8 @@ app.post('/api/find-user', isAuthenticated, async (req, res) => {
   }
 });
 
+
+// Unused!!: Usin socket for messages //
 app.post('/api/send-message', isAuthenticated, async (req, res) => {
   try {
     const result = await handleMessage(req.session.user, req.body);
@@ -512,6 +434,7 @@ app.post('/api/send-message', isAuthenticated, async (req, res) => {
     return res.status(500).json({ success: false, error: 'Failed to process message' });
   }
 });
+////
 
 app.get('/api/get-my-user', isAuthenticated, async (req, res) => {
   if (req.session.user) {
@@ -643,6 +566,9 @@ io.on('connection', (socket) => {
 
   socket.on('chat-message', async (msg) => {
     try {
+      if (msg.to_user == AI_userid){
+        socket.emit('message-confirmation', {id: msg.id, success: true,message: "Nachricht gesendet."}); // Pre-confirm message sent, so that message isnt pending until answer arrives
+      }
       const result = await handleMessage(sessionUser, msg);
       socket.emit('message-confirmation', result);
     } catch (error) {
