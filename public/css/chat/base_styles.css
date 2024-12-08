@@ -59,16 +59,17 @@ body * {
 }
 
 #profile-wrapper #profile-pic-display{
-    width: 50%;
+    width: 300px;
     height: 300px;
-    max-width: 50%;
+    max-width: 100%; /* Make the image cover the div */
     overflow: hidden; 
     border-radius: 15px;
+    overflow: hidden;
 }
 
 #profile-pic-display .big-profile-pic {
-    width: 100%; /* Make the image cover the div */
     height: 100%;
+    width: 100%;
     object-fit: cover; /* Ensures the image fills and crops */
     object-position: center; /* Centers the image within the div */
     display: block; /* Removes any extra space below the image */ 
@@ -431,7 +432,7 @@ opacity: 0.7;
     width: 60%;
     height: 100%;
     border-radius: 2px;
-    border-top-left-radius: 12px;
+    /* border-top-left-radius: 12px; */
     box-sizing: border-box;
     border: 0;
     padding-left: 15px;
@@ -447,24 +448,123 @@ opacity: 0.7;
     border-radius: 2px;
     border-top-right-radius: 12px;
 
-    padding: 0;/*15px 32px; /* Some padding */
-    text-align: center; /* Centered text */
-    text-decoration: none; /* Remove underline */
+    padding: 0;
+    text-align: center;
+    text-decoration: none;
     display: flex;
     align-items: center;
     justify-content: center;
     text-wrap: nowrap;
-    font-size: 12px; /* Increase font size */
-    margin: 10px 0px; /* Some margin */
+    font-size: 12px; 
+    margin: 10px 0px;
     margin-left: 4px;
-    cursor: pointer; /* Pointer/hand icon */
+    cursor: pointer; 
 }
 
 #search-button img {
-    width: 70%; /* Adjust image size relative to button */
-    height: 70%; /* Adjust image size relative to button */
-    object-fit: contain; /* Ensure the image scales properly */
+    width: 70%;
+    height: 70%;
+    object-fit: contain;
 }
+
+
+
+#addGroupButton {
+    width: 25%;
+    height: 100%;
+    box-sizing: border-box;
+    border-radius: 0;
+    border-radius: 2px;
+    border-top-left-radius: 12px;
+
+    padding: 0;
+    text-align: center;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-wrap: nowrap;
+    font-size: 12px; 
+    margin-right: 4px;
+    cursor: pointer; 
+    border: 0;
+
+}
+
+#addGroupButton img {
+    width: 70%;
+    height: 70%; 
+    object-fit: contain;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* Modal Overlay */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7); /* Semi-transparent black background */
+    display: flex; /* Flexbox to center the modal */
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+    z-index: 9999; /* Make sure the modal is above other content */
+}
+
+/* Modal Window */
+.modal-window {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    max-width: 90%; /* Make sure the modal doesn't get too wide on small screens */
+}
+
+/* Modal Form */
+.modal-form {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Input Fields */
+.modal-input {
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+.modal-input::placeholder {
+    color: #888;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #drop-down-users {

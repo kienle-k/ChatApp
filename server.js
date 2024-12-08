@@ -520,7 +520,7 @@ app.get('/api/get-my-info', isAuthenticated, async (req, res) => {
 
       if (rows.length > 0) {
         const { username, email, profile_picture } = rows[0];
-        const picturePath = profile_picture ? `/${profile_picture}` : 'images/profile.jpg';
+        const picturePath = profile_picture ? `/${profile_picture}` : 'images/profile.png';
         res.json({ username, email, profile_picture: picturePath });
       } else {
         res.status(404).send('User not found');
@@ -602,6 +602,24 @@ app.post('/api/update-my-info', upload.single('profile_picture'), async (req, re
     console.error('Error connecting to database:', err);
     res.status(500).send('An error occurred.');
   }
+});
+
+
+app.post('/api/get-group-details', async (req, res) => {
+  const { group_id } = req.body;
+
+  let [rows] = await connection.query(
+    `SELECT * FROM groups
+     WHERE groups.id = ?
+     LIMIT 1`,
+    [group_id]
+  );
+
+  let details = rows[0] || null;
+  if (details == null) {
+    return res.status(404).send("No Group found with id" + group_id);
+  }
+  return res.json({ group_id: group_id, details: details });
 });
 
 

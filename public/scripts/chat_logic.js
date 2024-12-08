@@ -607,16 +607,21 @@ function fetchProfilePicture() {
       .then(response => response.json()) // Parse the JSON response from the backend
       .then(data => {
         // Get the profile picture path from the response
-        const profilePicturePath = data.profile_picture;
+        let profilePicturePath = data.profile_picture;
   
         // Find the image element where the profile picture will be displayed
        
   
         // If the element exists, set its src attribute to the profile picture path
-        if (profileImageElement && profileImageElement != null) {
-          profileImageElement.src = profilePicturePath;
+        if (profileImageElement && profileImageElement != null && profilePicturePath != null) {
+            if (profilePicturePath[0] != "/"){
+                profilePicturePath = "/" + profilePicturePath;
+            }
+            console.log("Profile pic loaded and set", profilePicturePath);
+
+            profileImageElement.src = profilePicturePath;
         } else {
-          profileImageElement.src = '/images/profile.png'; 
+            profileImageElement.src = '/images/profile.png'; 
         }
       })
       .catch(error => {

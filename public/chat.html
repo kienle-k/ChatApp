@@ -16,13 +16,32 @@
 <body>
  
 
-    <div id="profile-pic-modal" style="display:none">
+    <div id="profile-pic-modal" style="display: none">
         <div id="profile-wrapper">
             <div id="profile-pic-display"></div>
             <div id="profile-text"></div>
         </div>
     </div>
 
+
+    <div id="add-group-modal" class="modal-overlay" style="display: none">
+        <div id="add-group-window" class="modal-window">
+            <form id="add-group-form" class="modal-form">
+                <input type="text" placeholder="Gruppen-Name" class="modal-input">
+                <input type="text" placeholder="Users, separated by ';'" class="modal-input">
+                <button type="submit" id="create-group-button">Gruppe erstellen</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="call-container">
+        <button id="end-call-btn">
+            <img src="/images/endcall.png">
+        </button>
+        <audio id="remoteAudio" autoplay></audio>
+    </div>
+
+    
     <div id="top-bar">
         <div id="home-button-container">
             <a id="home-button" href="/chat/chat.html"><img src="/images/logo.png" alt="LinkUp"></a>
@@ -52,11 +71,9 @@
             <div id="search-user">
 
                 <div id="search-bar">
-                  <!-- <button class="toggle-contacts-btn" id="contacts-window-toggler" onclick="toggleContacts()">?</button> -->
 
+                  <button id="addGroupButton"><img src="/images/add_group.png"></button>
                   <input type="text" placeholder="Username" id="user-search-input"/>
-                  <!-- <button id="random-chat-button">Random Chat</button>
-                  <button id="search-button">Suchen</button>                   -->
                   <button id="random-chat-button"><img src="/images/shuffle2.png"/></button>
                   <button id="search-button"><img src="/images/search.png"/></button>
                   
@@ -103,13 +120,7 @@
 
             </div>
 
-            <div id="call-container">
-                <button id="end-call-btn">
-                    <img src="/images/endcall.png">
-                </button>
-                <audio id="remoteAudio" autoplay></audio>
-            </div>
-            
+                      
         </div>
     </div>
 
