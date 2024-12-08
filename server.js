@@ -13,9 +13,68 @@ const fetch = require('node-fetch');
 const { text } = require('body-parser');
 const port = 3000;
 
-
-
 const AI_userid = 1;
+
+
+const KEY_FILE = 'encryption.key';
+const IV_LENGTH = 16; // For AES, IV length is always 16 bytes
+
+let ENCRYPTION_KEY;
+
+// Load or generate the encryption key
+if (fs.existsSync(KEY_FILE)) {
+    ENCRYPTION_KEY = Buffer.from(fs.readFileSync(KEY_FILE, 'utf8'), 'hex');
+    console.log('Encryption key loaded.');
+} else {
+    ENCRYPTION_KEY = crypto.randomBytes(32);
+    fs.writeFileSync(KEY_FILE, ENCRYPTION_KEY.toString('hex'));
+    console.log('Encryption key generated and saved.');
+}
+
+function encryptMessage(message) {
+  const iv = crypto.randomBytes(IV_LENGTH); // Generate a random IV
+  const cipher = crypto.createCipheriv('aes-256-cbc', ENCRYPTION_KEY, iv);
+  let encrypted = cipher.update(message, 'utf8', 'hex');
+  encrypted += cipher.final('hex');
+  console.log('Encrypted Message:', encrypted); // Log encrypted message for debugging
+  console.log('IV used:', iv.toString('hex')); // Log IV used for debugging
+  return {
+      iv: iv.toString('hex'),
+      encryptedData: encrypted,
+  };
+}
+
+function decryptMessage(encryptedMessage, iv) {
+  try {
+      console.log('Attempting decryption with IV:', iv); // Log IV during decryption
+      const decipher = crypto.createDecipheriv(
+          'aes-256-cbc',
+          ENCRYPTION_KEY,
+          Buffer.from(iv, 'hex') // Convert IV from hex to Buffer
+      );
+
+      let decrypted = decipher.update(encryptedMessage, 'hex', 'utf8');
+      decrypted += decipher.final('utf8');
+
+      return decrypted;
+  } catch (err) {
+      console.error('Decryption failed:', err.message);
+      return null; // Return null if decryption fails
+  }
+}
+
+function decryptMessages(messages) {
+  return messages.map(msg => {
+      if (msg.iv) {
+          const decryptedMessage = decryptMessage(msg.message, msg.iv);
+          return {
+              ...msg,
+              message: decryptedMessage || '[Decryption failed]', // Replace with plaintext or error message
+          };
+      }
+      return msg; // Return unchanged if no IV
+  });
+}
 
 
 function getApiKeySync(filePath) {
@@ -337,7 +396,15 @@ async function handleMessage(sessionUser, msg) {
 
   const connection = await pool.getConnection();
   try {
-    await connection.execute('INSERT INTO chat_messages (sender_id, receiver_id, message, sent_at) VALUES (?, ?, ?, NOW())', [sessionUser.id, to_user, text]);
+    const { iv, encryptedData } = encryptMessage(text);
+    await connection.execute('INSERT INTO chat_messages (sender_id, receiver_id, message, iv, sent_at) VALUES (?, ?, ?, ?, NOW())', [sessionUser.id, to_user, encryptedData, iv]);
+    const broadcastMsg = {
+      from_user: sessionUser.id,
+      from_username: sessionUser.username,
+      text: text,
+    };
+
+    
 
     if (to_user == AI_userid) {
       try {
@@ -604,6 +671,7 @@ io.on('connection', (socket) => {
             m.sender_id,
             m.receiver_id,
             m.message,
+            m.iv,
             m.sent_at,
             sender.username AS sender_username,
             receiver.username AS receiver_username
@@ -619,6 +687,8 @@ io.on('connection', (socket) => {
           OFFSET ?`,
           [user1_id, user2_id, user2_id, user1_id, number_of_messages, start_at_id]
         );
+
+        messages = decryptMessages(messages);
 
         socket.emit("response-history", {
           success: true,
@@ -644,7 +714,7 @@ io.on('connection', (socket) => {
 
       const connection = await pool.getConnection();
       try {
-        const [rows] = await connection.execute(
+        let [rows] = await connection.execute(
           `WITH LastMessages AS (
             SELECT
               cm.message_id,
@@ -656,6 +726,7 @@ io.on('connection', (socket) => {
               u2.profile_picture AS receiver_picture,
               u2.username AS receiver_username,
               cm.message,
+              cm.iv,
               cm.sent_at,
               ROW_NUMBER() OVER (
                 PARTITION BY
@@ -680,11 +751,14 @@ io.on('connection', (socket) => {
             sender_picture,
             receiver_picture,
             message,
+            iv,
             sent_at
           FROM LastMessages
           WHERE message_rank = 1
           ORDER BY sent_at DESC;
         `, [user1_id, user1_id]);
+        
+        rows = decryptMessages(rows);
 
         socket.emit("response-chat-history", { success: true, messages: rows });
       } finally {
