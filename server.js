@@ -375,6 +375,91 @@ app.post('/register', upload.single('image'), async (req, res) => {
 });
 
 
+app.post('/upload', upload.single('image'), async (req, res) => {
+  const connection = await pool.getConnection();
+
+  try {
+      if (!req.file) {
+          return res.status(400).json({ error: 'No file provided' });
+      }
+
+      // File metadata
+      const fileName = req.file.filename;
+      const filePath = path.join('uploads', fileName); // Relative path to the file
+      const fileSize = req.file.size;
+      const fileType = req.file.mimetype;
+
+      // Validate sender and receiver IDs
+      const { sender_id, receiver_id } = req.body;
+      if (!sender_id || !receiver_id) {
+          return res.status(400).json({ error: 'Sender and receiver IDs are required' });
+      }
+
+      // Insert file record into the database
+      const query = `INSERT INTO files (sender_id, receiver_id, file_name, file_url, file_type, file_size)
+                     VALUES (?, ?, ?, ?, ?, ?)`;
+      const [result] = await connection.execute(query, [sender_id, receiver_id, fileName, filePath, fileType, fileSize]);
+
+      // Return success response
+      res.status(200).json({ message: 'File uploaded successfully', fileId: result.insertId });
+  } catch (err) {
+      console.error('Error handling file upload:', err);
+      res.status(500).json({ error: 'File upload failed', details: err });
+  } finally {
+      connection.release();
+  }
+});
+
+
+app.post('/download', async (req, res) => {
+  try {
+      const connection = await pool.getConnection();
+
+      const to_user = req.body;
+
+      // Replace with the logged-in user's ID
+      const userId = CURRENT_USER_ID;
+
+      // Query to fetch files sent to the user
+      const query = `
+          SELECT 
+              file_name, 
+              sender_id, 
+              file_url AS file_path
+          FROM 
+              files
+          WHERE 
+              receiver_id = ?;
+      `;
+
+      const [results] = await connection.execute(query, [userId]);
+
+      console.log(results); // Array of files sent to the user
+
+      if (results.length === 0) {
+          // No files found for the user
+          return res.status(404).json({ message: 'No files found for this user.' });
+      }
+
+      // Return the list of files
+      res.status(200).json({
+          message: 'Files retrieved successfully',
+          files: results, // Return the list of files
+      });
+
+  } catch (err) {
+      console.error('Error fetching files:', err);
+      res.status(500).json({ error: 'Failed to fetch files', details: err });
+  } finally {
+      // Ensure the connection is released
+      if (connection) {
+          connection.release();
+      }
+  }
+});
+
+
+
 const DOC_UPLOADS_DIR = path.join(__dirname, 'public/uploads/documents');
 if (!fs.existsSync(DOC_UPLOADS_DIR)) {
     fs.mkdirSync(DOC_UPLOADS_DIR, { recursive: true });

@@ -652,15 +652,42 @@ function fileButtonLogic(){
     }
 }
 
-// 
 function fileUploadLogic(){
-    if (fileInput.files[0]) {
-        selectedFile = fileInput.files[0];
-        fileButtonImage.src = '/images/clear2.png'; // Change button to clear image
+    if (!fileInput.files[0]) {
+        console.error('No file selected');
+        return;
     }
+
+    selectedFile = fileInput.files[0];
+    fileButtonImage.src = '/images/clear2.png'; // Change button to clear image
+
     console.log("FILE SELECTED: ", selectedFile);
-   
+
+    // Prepare FormData
+    const formData = new FormData();
+    formData.append("image", selectedFile);
+    formData.append("sender_id", MY_USER_ID);  // Replace with dynamic user ID
+    formData.append("receiver_id", CURRENTLY_CHATTING_WITH_ID);
+
+    // Send file to server
+    fetch('/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Server responded with status ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('File uploaded successfully:', data);
+    })
+    .catch(error => {
+        console.error('Error uploading file:', error);
+    });
 }
+
 
 
 // WebRTC call implementation
