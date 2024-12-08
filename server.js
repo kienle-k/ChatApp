@@ -385,7 +385,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
       // File metadata
       const fileName = req.file.filename;
-      const filePath = path.join('uploads', fileName); // Relative path to the file
+      const filePath = path.join('uploads/documents', fileName); // Relative path to the file
       const fileSize = req.file.size;
       const fileType = req.file.mimetype;
 
@@ -418,7 +418,7 @@ app.post('/download', async (req, res) => {
       const to_user = req.body;
 
       // Replace with the logged-in user's ID
-      const userId = CURRENT_USER_ID;
+      const userId = req.session.user.id;
 
       // Query to fetch files sent to the user
       const query = `
@@ -753,6 +753,9 @@ app.post('/api/add-new-group', isAuthenticated, async (req, res) => {
     connection.release();
   }
 });
+
+
+
 
 
 

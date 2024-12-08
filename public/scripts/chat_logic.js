@@ -786,9 +786,7 @@ function trigger_end_call(){
 
 
 
-function loadChatFiles(){
     
-}
 
 
 
@@ -951,6 +949,68 @@ socket.on('disconnect', () => {
 
 
 
+
+async function fetchFiles() {
+    try {
+      // Fetch files from the backend
+      const response = await fetch('/download', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({}),
+      });
+
+      // Handle response
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Error fetching files:', errorData.message);
+        document.getElementById('files-list').innerText = 'No files found.';
+        return;
+      }
+
+      const data = await response.json();
+
+      // Select the target div
+      const filesListDiv = document.getElementById('files-list');
+      filesListDiv.innerHTML = ''; // Clear existing content
+
+      // Iterate through the files and add them to the DIV
+      data.files.forEach((file) => {
+        const fileElement = document.createElement('div');
+        fileElement.textContent = `${file.file_name} (sent by ${file.sender_id})`;
+
+        // Add onclick listener to download file
+        fileElement.onclick = () => {
+          downloadFile(file.file_path);
+        };
+
+        // Add styling for better visibility
+        fileElement.style.cursor = 'pointer';
+        fileElement.style.margin = '5px 0';
+        fileElement.style.color = 'blue';
+
+        filesListDiv.appendChild(fileElement);
+      });
+    } catch (error) {
+      console.error('Error during fetch operation:', error);
+      document.getElementById('files-list').innerText = 'Error fetching files.';
+    }
+  }
+
+  // Function to download file
+  function downloadFile(filePath) {
+    const link = document.createElement('a');
+    link.href = filePath; // Assumes `file_path` is a direct URL to the file
+    link.download = filePath.split('/').pop(); // Extract the file name from the path
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+
+
+
 // Load last Messages on window load    
 window.onload = async function(){
 
@@ -998,7 +1058,7 @@ window.onload = async function(){
             document.getElementById("files-list").style.display = "none";
         }else{
             document.getElementById("files-list").style.display = "flex";
-            loadChatFiles();
+            fetchFiles();
         }
     });
 
