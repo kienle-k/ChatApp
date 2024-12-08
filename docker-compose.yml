@@ -1,0 +1,31 @@
+version: '3.8'
+services:
+  app:
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy  # Ensure the app waits until the DB is healthy
+    environment:
+      DB_HOST: db
+      DB_USER: root
+      DB_PASSWORD: thisandthat123
+      DB_NAME: chatAppDB
+
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: thisandthat123
+      MYSQL_DATABASE: chatAppDB
+    ports:
+      - "3307:3306"
+    volumes:
+    - ./script.sql:/docker-entrypoint-initdb.d/script.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pthisandthat123"]
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 5s

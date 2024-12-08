@@ -138,13 +138,13 @@ io.use((socket, next) => {
 });
 
 const dbConfig = {
-  host: 'localhost',
-  user: 'root',
-  password: 'thisandthat123',
-  database: 'chatAppDB',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0
+    host: process.env.DB_HOST || 'localhost', // Default to localhost for non-Docker dev environments
+    user: process.env.DB_USER || 'root',
+    password: process.env.DB_PASSWORD || 'thisandthat123',
+    database: process.env.DB_NAME || 'chatAppDB',
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
 };
 
 // Create connection pool
