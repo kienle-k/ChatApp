@@ -68,7 +68,57 @@ INSERT INTO `users` (username, email, password, profile_picture)
 VALUES (
     'AI', 
     'ai@example.com', 
-    '$2b$10$5HcYkTyrcWOTIFIDHQax6eiCvsdDkBQ4fxKqvz6iXTV5pkpk7QdYm', 
+    '$2b$10$5HcYkTyrcWOTIFIDHQax6eiCvsdDkBQ4fxKqvz6iXTV5pkpk7QdYm',
     NULL
 );
+
+INSERT INTO `users` (username, email, password, profile_picture) 
+VALUES (
+    'user1', 
+    'user1@example.com', 
+    '$2b$10$wcpGVGLWMqpvIcxEcTeDb.pzs0CoPtVOCObTY0a3tEtELNrPTJbBq',
+    NULL
+);
+
+INSERT INTO `users` (username, email, password, profile_picture) 
+VALUES (
+    'user2', 
+    'user2@example.com', 
+    '$2b$10$8IFnZ.l7NioeE1y4EX2DXeWBfKKCls7Lkq1Rv/muCzNMu.1eaQyFG',
+    NULL
+);
+
+INSERT INTO `users` (username, email, password, profile_picture) 
+VALUES (
+    'user3', 
+    'user3@example.com', 
+    '$2b$10$9u5qwItj127eMGNkpqJhyuKJU1CqfzIGejkOvyghCHVl1rTPGW8O2',
+    NULL
+);
+
+INSERT INTO `chat_messages` (sender_id, receiver_id, message)
+VALUES (1, 2, 'Hello there, how can I help you?');
+
+INSERT INTO `chat_messages` (sender_id, receiver_id, message)
+VALUES (1, 3, 'Hello there, how can I help you?');
+
+INSERT INTO `chat_messages` (sender_id, receiver_id, message)
+VALUES (1, 4, 'Hello there, how can I help you?');
+
+
+
+
+INSERT INTO `chat_messages` (sender_id, receiver_id, message)
+VALUES (2, 3, 'Hey, whats up?');
+
+INSERT INTO `chat_messages` (sender_id, receiver_id, message)
+VALUES (2, 4, "Hey, how's your day going?");
+
+
+
+INSERT INTO `chat_messages` (sender_id, receiver_id, message)
+VALUES (3, 2, 'Not much, how about you?');
+
+INSERT INTO `chat_messages` (sender_id, receiver_id, message)
+VALUES (4, 2, 'Pretty good, thanks for asking! How about you?');
 
