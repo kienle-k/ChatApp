@@ -624,9 +624,53 @@ app.post('/api/get-group-details', isAuthenticated, async (req, res) => {
 
 
 
-app.post('/api/add-new-group', isAuthenticated, async (req, res) =>  {
 
+
+app.post('/api/add-new-group', isAuthenticated, async (req, res) => {
+  const { groupName, userIds } = req.body;
+
+  // Validate input
+  if (!groupName || !Array.isArray(userIds) || userIds.length === 0) {
+    return res.status(400).json({ success: false, message: 'Group name and user IDs are required.' });
+  }
+
+  const sessionUser = req.session.user;
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Insert the new group
+    const [result] = await connection.execute(
+      'INSERT INTO `groups` (group_name, group_picture, created_at) VALUES (?, NULL, NOW())',
+      [groupName]
+    );
+
+    const groupId = result.insertId;
+
+    // Add the creator to the group members
+    const groupMembers = [[sessionUser.id, groupId]];
+    userIds.forEach((userId) => groupMembers.push([userId, groupId]));
+
+    await connection.query(
+      'INSERT INTO `group_members` (user_id, group_id, joined_at) VALUES ?',
+      [groupMembers]
+    );
+
+    await connection.commit();
+
+    res.status(201).json({ success: true, groupId, message: 'Group created successfully.' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error creating group:', error);
+    res.status(500).json({ success: false, message: 'Failed to create group.' });
+  } finally {
+    connection.release();
+  }
 });
+
+
+
 
 
 // WebSocket connection
