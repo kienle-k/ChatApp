@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `chat_messages` (
     receiver_id INT,
     receiver_group_id INT,
     message TEXT NOT NULL,
+    iv VARCHAR(32),
     sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (receiver_group_id) REFERENCES `groups`(group_id) ON DELETE CASCADE,
     FOREIGN KEY (sender_id) REFERENCES `users`(id) ON DELETE CASCADE,
@@ -96,29 +97,26 @@ VALUES (
     NULL
 );
 
-INSERT INTO `chat_messages` (sender_id, receiver_id, message)
-VALUES (1, 2, 'Hello there, how can I help you?');
+INSERT INTO `chat_messages` (sender_id, receiver_id, message, sent_at)
+VALUES (2, 3, 'Hey, whats up?', NOW());
 
-INSERT INTO `chat_messages` (sender_id, receiver_id, message)
-VALUES (1, 3, 'Hello there, how can I help you?');
-
-INSERT INTO `chat_messages` (sender_id, receiver_id, message)
-VALUES (1, 4, 'Hello there, how can I help you?');
+INSERT INTO `chat_messages` (sender_id, receiver_id, message, sent_at)
+VALUES (2, 4, "Hey, how's your day going?", NOW());
 
 
+INSERT INTO `chat_messages` (sender_id, receiver_id, message, sent_at)
+VALUES (3, 2, 'Not much, how about you?', NOW());
 
-
-INSERT INTO `chat_messages` (sender_id, receiver_id, message)
-VALUES (2, 3, 'Hey, whats up?');
-
-INSERT INTO `chat_messages` (sender_id, receiver_id, message)
-VALUES (2, 4, "Hey, how's your day going?");
+INSERT INTO `chat_messages` (sender_id, receiver_id, message, sent_at)
+VALUES (4, 2, 'Pretty good, thanks for asking! How about you?', NOW());
 
 
 
-INSERT INTO `chat_messages` (sender_id, receiver_id, message)
-VALUES (3, 2, 'Not much, how about you?');
+INSERT INTO `chat_messages` (sender_id, receiver_id, message, sent_at)
+VALUES (1, 2, 'Hello there, how can I help you?', NOW());
 
-INSERT INTO `chat_messages` (sender_id, receiver_id, message)
-VALUES (4, 2, 'Pretty good, thanks for asking! How about you?');
+INSERT INTO `chat_messages` (sender_id, receiver_id, message, sent_at)
+VALUES (1, 3, 'Hello there, how can I help you?', NOW());
 
+INSERT INTO `chat_messages` (sender_id, receiver_id, message, sent_at)
+VALUES (1, 4, 'Hello there, how can I help you?', NOW());
