@@ -82,7 +82,7 @@ function getApiKeySync(filePath) {
   } catch (error) {
       console.error('Error reading the API key file:', error);
       throw error;
-  }
+  } 
 }
 
 // Example Usage

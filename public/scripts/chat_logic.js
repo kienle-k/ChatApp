@@ -2,11 +2,7 @@
 const socket = io();
 
 
-
-
-DARKMODE = false;
-
-
+var DARKMODE = false;
 var FIRST_LOAD = true; //Flag for scrolling down when loading the first time -> will be set to zero after first load
 
 let MY_USER;
@@ -15,63 +11,44 @@ let MY_USER_ID;
 let CURRENTLY_CHATTING_WITH_ID = null;
 let CURRENT_CHAT_GROUP = null;
 
-var currently_loading_messages = false;
-
-var pending_messages = [];
-
-const input = document.getElementById("message-input");
-const messageContainer = document.getElementById('message-history-container');
-const messagesUL = document.getElementById('messages');
-
-const bottomThreshold = 150;
-
-
-const bigProfileModal = document.getElementById('profile-pic-modal');
-const bigProfileDisplay = document.getElementById('profile-pic-display');
-const bigProfileInfo = document.getElementById('profile-text');
-
-
-bigProfileModal.addEventListener("click", function(){ bigProfileModal.style.display="none"; });
-
-const contact_list = document.getElementById("contacts");
-
-
 
 let CONTACTS_DISPLAYED = true;
 let CONTACT_WINDOW_LOCKED = true;
 
 
-function setContacts(value){
-    if (!CONTACT_WINDOW_LOCKED){
-        console.log("Contacts displayed until now:", CONTACTS_DISPLAYED);
-        if (value == false){
-            document.getElementById("contacts-window").classList.add("hidden-mobile-window");
-            document.getElementById("chat-window").classList.remove("hidden-mobile-window");
-            CONTACTS_DISPLAYED = false;
-        } else {
-            document.getElementById("contacts-window").classList.remove("hidden-mobile-window");
-            document.getElementById("chat-window").classList.add("hidden-mobile-window");
-            CONTACTS_DISPLAYED = true;
-        }
-        
-        console.log("Contacts displayed from now:", CONTACTS_DISPLAYED);
-    }
+var currently_loading_messages = false;
 
-}
 
-function setContactsForce(value){
-    CONTACT_WINDOW_LOCKED = false;
-    console.log("FORCING");
-    setContacts(value);
-}
+// File storage
+var selectedFile = null;
 
-function choosePersonalChatwSwitchWindow(id, name, pic){
-    choosePersonalChat(id, name, pic);
-    setContactsForce(false);
-}
+
+let peerConnection = null;
+let localStream = null;
+
+
+var pending_messages = [];
+const bottomThreshold = 150;
 
 
 
+let input;
+let messageContainer;
+let messagesUL;
+
+let bigProfileModal;
+let bigProfileDisplay;
+let bigProfileInfo;
+
+let contact_list;
+
+let fileButton;
+let fileButtonImage;
+let fileInput;
+
+
+
+// Function to run pre-load, selects darkmode css
 function check_and_setup_darkmode(){
     const switchCheckbox = document.getElementById("switch-checkbox");
     const link = document.getElementById("theme-styles");
@@ -104,24 +81,51 @@ function check_and_setup_darkmode(){
 }
 
 
+// Enable / Disable darkmode via TRUE / FALSE
 function set_darkmode(value){
     const switchCheckbox = document.getElementById("switch-checkbox");
     const link = document.getElementById("theme-styles");
     DARKMODE = value;
-    if (value == true){
-        switchCheckbox.checked = true;
-    } else {
-        switchCheckbox.checked = false;
-    }
 
+    switchCheckbox.checked = true;
+    
     switchCheckbox.dispatchEvent(new Event('change'));
 }
 
 
-// TODO MOVE THIS CALL TO A BETTER PLACE
-check_and_setup_darkmode();
+// For Mobile View: Lets you choose wether to display contact list OR te chat
+function setContacts(value){
+    if (!CONTACT_WINDOW_LOCKED){
+        console.log("Contacts displayed until now:", CONTACTS_DISPLAYED);
+        if (value == false){
+            document.getElementById("contacts-window").classList.add("hidden-mobile-window");
+            document.getElementById("chat-window").classList.remove("hidden-mobile-window");
+            CONTACTS_DISPLAYED = false;
+        } else {
+            document.getElementById("contacts-window").classList.remove("hidden-mobile-window");
+            document.getElementById("chat-window").classList.add("hidden-mobile-window");
+            CONTACTS_DISPLAYED = true;
+        }
+        
+        console.log("Contacts displayed from now:", CONTACTS_DISPLAYED);
+    }
 
-// Display the profile picture big
+}
+
+// Force version, that also works with CONTACT_WINDOW_LOCKED enabled
+function setContactsForce(value){
+    CONTACT_WINDOW_LOCKED = false;
+    console.log("FORCING");
+    setContacts(value);
+}
+
+// For Mobile View: Open contact chat
+function choosePersonalChatwSwitchWindow(id, name, pic){
+    choosePersonalChat(id, name, pic);
+    setContactsForce(false);
+}
+
+// Display the big profile picture 
 function showBigProfilePic(id){
     let src;
     let name;
@@ -151,7 +155,7 @@ function showBigProfilePic(id){
         
 }
 
-
+// Returns bool, if list is scrolled below a certain distance from the bottom
 function isListNearBottom() {
     // Calculate the distance from the bottom
     const distanceFromBottom = messagesUL.scrollHeight - messagesUL.scrollTop - messagesUL.clientHeight;
@@ -160,10 +164,13 @@ function isListNearBottom() {
     return distanceFromBottom < bottomThreshold;
 }
 
+// Scrolls the chat message list to the bottom
 function scrollMessagesToBottom(){
     messagesUL.scrollTop = messagesUL.scrollHeight;
 }
 
+// Send a socket request to get the last chat messages 
+// Starting from the <start_at_id> message in the database and from there get <number_of_messages> messaes
 function requestHistoryMessages(start_at_id, number_of_messages) {
     const user2_id = CURRENTLY_CHATTING_WITH_ID;
     socket.emit('get-history', { user2_id, start_at_id, number_of_messages });
@@ -429,38 +436,6 @@ async function getUserData() {
     }
 }
 
-
-
-// Socket for receiving the requested chat history 
-socket.on('response-history', (data) => {
-    console.log('Received chat data:', data); // Process the returned data
-    if (!data.success){return; };
-    
-    // Add messages to List
-    let messages = data.messages;
-    let msg;
-    for (let i=messages.length-1; i>= 0; i--){
-        const scrollPosition = messagesUL.scrollTop;
-        const offsetHeightBefore = messagesUL.scrollHeight;
-        msg = messages[i];
-        let messageType = 'sent';
-        if (msg.sender_id == CURRENTLY_CHATTING_WITH_ID){
-            messageType = 'received'
-        }
-        addMessage(msg.message, messageType, on_top=true);
-        if (on_top) {
-            const offsetHeightAfter = messagesUL.scrollHeight;
-            messagesUL.scrollTop = scrollPosition + (offsetHeightAfter - offsetHeightBefore);
-        }
-    }
-    if (FIRST_LOAD == true){
-        scrollMessagesToBottom();
-        FIRST_LOAD = false;
-    }
-
-    currently_loading_messages = false;
-});
-
 // Add a message to the current chat
 function addMessage(message, messageType, on_top=false){
     // messageType can be 'pending' / 'sent' / 'received'
@@ -526,47 +501,8 @@ async function updateLastMessage(from_name, chat_partner_id, text){
     });
 }
 
-// Socket for receiving messages
-socket.on('chat-message', (msg) => {
-    console.log("RECEIVED: ", msg);
 
-    from_user =  msg.from_user;
-    from_username = msg.from_username;
-    text = msg.text;
-
-    updateLastMessage(from_username, from_user, text);
-
-    if (from_user == CURRENTLY_CHATTING_WITH_ID){
-        let li = addMessage(text, 'received');
-        if (isListNearBottom()) {
-            setTimeout(scrollMessagesToBottom, 0);
-        }
-    } else {
-        console.log("Received message from user that is currently not chatted with.", msg);
-    }
-});
-
-// Old approach, now API call -> different handling
-
-// Message confirmed as received by the server -> "Sent"
-socket.on('message-confirmation', (output) => {
-    if (output.success == true){
-        let msgID = output.id;
-        // Suchen der Nachricht mit der erhaltenen msgID
-        const li = pending_messages[msgID];
-        if (li) {
-            const msg = li.querySelector("div");
-            msg.classList.remove('pending-message'); // Entfernt den Pending-Status
-            msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
-            console.log("Message confirmed sent: " + msgID);
-            delete pending_messages[msgID]; // Entferne das Pending-Tracking
-        }
-    } else {
-        alert(output.message);
-    }
-});
-
-
+// !!!!UNUSED!!!!!: Sends message to the API Endpoint 
 async function sendMessageToAPI(messageData) {
     const msgID = messageData.id;
     const li = pending_messages[msgID];
@@ -613,7 +549,7 @@ async function sendMessageToAPI(messageData) {
     }
 }
     
-// Send message to the server
+// Send message to the server via Socket
 function sendMessage(event) {
     event.preventDefault(); 
     const msgID = Date.now(); 
@@ -663,13 +599,6 @@ function sendMessage(event) {
     }, 100);
 }
 
-// Nachricht senden
-document.getElementById('chat-form').addEventListener('submit', sendMessage);
-document.getElementById('send-button').addEventListener("touchend", (e) => {
-    e.preventDefault();
-    sendMessage(e); // Event für Touch-Ende hinzufügen
-});
-    
 
 // Get own profile picture
 function fetchProfilePicture() {
@@ -696,13 +625,10 @@ function fetchProfilePicture() {
         // Optionally, set a default image in case of an error
         profileImageElement.src = '/images/profile.png';
       });
-  }
-  
+}
 
 
-
-// Automatic reload when scrolled to the top
-messagesUL.addEventListener('scroll', function() {
+function reloadMsgsWhenReachingTop(){
     if (messagesUL.scrollTop === 0) {
         if (currently_loading_messages == false){
             console.log("at the top, triggerin reload");
@@ -712,57 +638,10 @@ messagesUL.addEventListener('scroll', function() {
             requestHistoryMessages(num, 50);
         }
     }
-});
-
-
-
-window.addEventListener("resize", function(event) {
-    let width = document.body.clientWidth;
-    let height = document.body.clientHeight;
-    if (width <= 600){
-        setContactsForce(CONTACTS_DISPLAYED); // If the screen is resized, make sure one window is hidden
-    }
-  })
-
-
-
-document.getElementById('logout-button').addEventListener('click', async () => {
-try {
-    const response = await fetch('/api/logout', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json',
-    },
-    });
-
-    const result = await response.json();
-
-    if (result.success) {
-        // alert('Logout success!')
-        window.location.href = '/logout';  // Redirect to login page after logout
-    } else {
-        alert('Logout failed');
-    }
-} catch (error) {
-    console.error('Error logging out:', error);
 }
-});
-
-// rerggrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr
-
-// DOM elements
-const fileButton = document.getElementById('file-button');
-const fileButtonImage = document.getElementById('file-button-image');
-const fileInput = document.getElementById('file-input');
-// const messageInput = document.getElementById('message-input');
-// const chatForm = document.getElementById('chat-form');
-
-// File storage
-var selectedFile = null;
-
-// Handle file button click
-fileButton.addEventListener('click', () => {
-    console.log("BUTTON CLICK FILEUPLOAD");
+  
+// Switch between uploading file / deleting uploaded file
+function fileButtonLogic(){
     if (selectedFile) {
         // If a file is already uploaded, clear it
         selectedFile = null;
@@ -772,64 +651,21 @@ fileButton.addEventListener('click', () => {
         // Otherwise, trigger file input dialog
         fileInput.click();
     }
-});
+}
 
-// Handle file selection
-fileInput.addEventListener('change', () => {
+// 
+function fileUploadLogic(){
     if (fileInput.files[0]) {
         selectedFile = fileInput.files[0];
         fileButtonImage.src = '/images/clear2.png'; // Change button to clear image
     }
     console.log("FILE SELECTED: ", selectedFile);
-});
-
-// // Handle form submission
-// chatForm.addEventListener('submit', (e) => {
-//     e.preventDefault(); // Prevent form default submission
-
-//     const message = messageInput.value.trim();
-
-//     // Prepare the message payload
-//     const payload = { message: message || null };
-
-//     // If a file is selected, read it and send
-//     if (selectedFile) {
-//         const reader = new FileReader();
-//         reader.onload = (event) => {
-//             payload.file = {
-//                 fileName: selectedFile.name,
-//                 fileType: selectedFile.type,
-//                 fileData: event.target.result,
-//             };
-//             socket.emit('chat-message', payload); // Emit message and file
-//         };
-//         reader.readAsArrayBuffer(); // Read file as binary
-//     } else {
-//         // If no file, send just the message
-//         socket.emit('chat-message', payload);
-//     }
-
-//     // Clear inputs and reset file button
-//     messageInput.value = '';
-//     if (selectedFile) {
-//         selectedFile = null;
-//         fileInput.value = '';
-//         fileButtonImage.src = '/images/upload2.png'; // Reset to upload image
-//     }
-// });
-
-
-
-// sddddddddddddddddddddddddddddd
-
-
-
+   
+}
 
 
 // WebRTC call implementation
 
-let peerConnection = null;
-let localStream = null;
 
 async function startCall(userId) {
     try {
@@ -884,6 +720,111 @@ async function startCall(userId) {
     }
   }
   
+
+  // In your client-side JavaScript
+function trigger_call(){
+    const selectedUserId = CURRENTLY_CHATTING_WITH_ID; // Implement this to get the current chat partner's ID
+    
+    if (selectedUserId) {
+      startCall(selectedUserId);
+      
+      // Optionally show call interface
+      document.getElementById('call-container').style.display = 'block';
+    } else {
+      alert('Please select a user to call');
+    }
+  }
+  
+  // Add an end call function
+function trigger_end_call(){  
+    if (peerConnection) {
+      peerConnection.close();
+      peerConnection = null;
+    }
+    
+    if (localStream) {
+      localStream.getTracks().forEach(track => track.stop());
+      localStream = null;
+    }
+    
+    document.getElementById('call-container').style.display = 'none';
+    
+    // Optionally emit a 'end-call' event to the other user
+    socket.emit('end-call', { to_user: CURRENTLY_CHATTING_WITH_ID });
+}
+
+
+// Socket for receiving the requested chat history 
+socket.on('response-history', (data) => {
+    console.log('Received chat data:', data); // Process the returned data
+    if (!data.success){return; };
+    
+    // Add messages to List
+    let messages = data.messages;
+    let msg;
+    for (let i=messages.length-1; i>= 0; i--){
+        const scrollPosition = messagesUL.scrollTop;
+        const offsetHeightBefore = messagesUL.scrollHeight;
+        msg = messages[i];
+        let messageType = 'sent';
+        if (msg.sender_id == CURRENTLY_CHATTING_WITH_ID){
+            messageType = 'received'
+        }
+        addMessage(msg.message, messageType, on_top=true);
+        if (on_top) {
+            const offsetHeightAfter = messagesUL.scrollHeight;
+            messagesUL.scrollTop = scrollPosition + (offsetHeightAfter - offsetHeightBefore);
+        }
+    }
+    if (FIRST_LOAD == true){
+        scrollMessagesToBottom();
+        FIRST_LOAD = false;
+    }
+
+    currently_loading_messages = false;
+});
+
+
+// Socket for receiving messages
+socket.on('chat-message', (msg) => {
+    console.log("RECEIVED: ", msg);
+
+    from_user =  msg.from_user;
+    from_username = msg.from_username;
+    text = msg.text;
+
+    updateLastMessage(from_username, from_user, text);
+
+    if (from_user == CURRENTLY_CHATTING_WITH_ID){
+        let li = addMessage(text, 'received');
+        if (isListNearBottom()) {
+            setTimeout(scrollMessagesToBottom, 0);
+        }
+    } else {
+        console.log("Received message from user that is currently not chatted with.", msg);
+    }
+});
+
+// Old approach, now API call -> different handling
+
+// Message confirmed as received by the server -> "Sent"
+socket.on('message-confirmation', (output) => {
+    if (output.success == true){
+        let msgID = output.id;
+        // Suchen der Nachricht mit der erhaltenen msgID
+        const li = pending_messages[msgID];
+        if (li) {
+            const msg = li.querySelector("div");
+            msg.classList.remove('pending-message'); // Entfernt den Pending-Status
+            msg.classList.add('sent-message'); // Fügt die normale Nachricht-Klasse hinzu
+            console.log("Message confirmed sent: " + msgID);
+            delete pending_messages[msgID]; // Entferne das Pending-Tracking
+        }
+    } else {
+        alert(output.message);
+    }
+});
+
 
 // Socket event listener for incoming call
 socket.on('incoming-call', async (data) => {
@@ -962,42 +903,6 @@ socket.on('ice-candidate', async (data) => {
 });
 
 
-
-
-// In your client-side JavaScript
-function trigger_call(){
-    const selectedUserId = CURRENTLY_CHATTING_WITH_ID; // Implement this to get the current chat partner's ID
-    
-    if (selectedUserId) {
-      startCall(selectedUserId);
-      
-      // Optionally show call interface
-      document.getElementById('call-container').style.display = 'block';
-    } else {
-      alert('Please select a user to call');
-    }
-  }
-  
-  // Add an end call function
-function trigger_end_call(){  
-    if (peerConnection) {
-      peerConnection.close();
-      peerConnection = null;
-    }
-    
-    if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
-      localStream = null;
-    }
-    
-    document.getElementById('call-container').style.display = 'none';
-    
-    // Optionally emit a 'end-call' event to the other user
-    socket.emit('end-call', { to_user: CURRENTLY_CHATTING_WITH_ID });
-}
-
-
-
 socket.on('disconnect', () => {
     console.log('Socket disconnected, reloading the page...');
     
@@ -1006,16 +911,34 @@ socket.on('disconnect', () => {
 });
 
 
+
+
 // Load last Messages on window load    
 window.onload = async function(){
+
+    input = document.getElementById("message-input");
+    messageContainer = document.getElementById('message-history-container');
+    messagesUL = document.getElementById('messages');
+
+    bigProfileModal = document.getElementById('profile-pic-modal');
+    bigProfileDisplay = document.getElementById('profile-pic-display');
+    bigProfileInfo = document.getElementById('profile-text');
+
+    contact_list = document.getElementById("contacts");
+
+    fileButton = document.getElementById('file-button');
+    fileButtonImage = document.getElementById('file-button-image');
+    fileInput = document.getElementById('file-input');
+
+
     check_and_setup_darkmode();
     document.getElementById("hide-images").href = "";
     await getUserData();
     console.log("FETCH PIC");
     fetchProfilePicture();
     socket.emit("get-chat-history");
-    // requestHistoryMessages(0,100);
-    FIRST_LOAD = true; // Asure true
+
+    FIRST_LOAD = true;
 
     let width = document.body.clientWidth;
     let height = document.body.clientHeight;
@@ -1030,4 +953,57 @@ window.onload = async function(){
     document.getElementById("user-search-input").addEventListener("input", findUser);
 
 
+    // Handle file button click
+    fileButton.addEventListener('click', fileButtonLogic);
+
+    // Handle file selection
+    fileInput.addEventListener('change', fileUploadLogic);
+
+    // Automatic reload when scrolled to the top
+    messagesUL.addEventListener('scroll', reloadMsgsWhenReachingTop);
+
+    // Nachricht senden
+    document.getElementById('chat-form').addEventListener('submit', sendMessage);
+    document.getElementById('send-button').addEventListener("touchend", (e) => {
+        e.preventDefault();
+        sendMessage(e); // Event für Touch-Ende hinzufügen
+    });
+        
+    bigProfileModal.addEventListener("click", function(){ bigProfileModal.style.display="none"; });
+
+
+    window.addEventListener("resize", function(event) {
+        let width = document.body.clientWidth;
+        let height = document.body.clientHeight;
+        if (width <= 600){
+            setContactsForce(CONTACTS_DISPLAYED); // If the screen is resized, make sure one window is hidden
+        }
+    })
+
+
+
+    document.getElementById('logout-button').addEventListener('click', async () => {
+    try {
+        const response = await fetch('/api/logout', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            // alert('Logout success!')
+            window.location.href = '/logout';  // Redirect to login page after logout
+        } else {
+            alert('Logout failed');
+        }
+    } catch (error) {
+        console.error('Error logging out:', error);
+    }
+    });
+
 }  
+
+
