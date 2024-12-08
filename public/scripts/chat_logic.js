@@ -1052,33 +1052,32 @@ window.onload = async function(){
 
 
 
-    document.getElementById("openFilesButton").addEventListener('click', () => {
-        style = document.getElementById("files-list").style.display;
-        if (style == "flex"){
-            document.getElementById("files-list").style.display = "none";
-        }else{
-            document.getElementById("files-list").style.display = "flex";
-            fetchFiles();
-        }
-    });
+    // document.getElementById("openFilesButton").addEventListener('click', () => {
+    //     style = document.getElementById("files-list").style.display;
+    //     if (style == "flex"){
+    //         document.getElementById("files-list").style.display = "none";
+    //     }else{
+    //         document.getElementById("files-list").style.display = "flex";
+    //         fetchFiles();
+    //     }
+    // });
 
 
+    // // Close modal when the background is clicked
+    // document.getElementById("add-group-modal").addEventListener('click', () => {
+    //     document.getElementById("add-group-modal").style.display = "none";
+    // });
 
-    // Close modal when the background is clicked
-    document.getElementById("add-group-modal").addEventListener('click', () => {
-        document.getElementById("add-group-modal").style.display = "none";
-    });
+    // // Show modal when the button is clicked
+    // document.getElementById("addGroupButton").addEventListener('click', (event) => {
+    //     event.stopPropagation();  // Stop event from propagating to the modal background
+    //     document.getElementById("add-group-modal").style.display = "flex";
+    // });
 
-    // Show modal when the button is clicked
-    document.getElementById("addGroupButton").addEventListener('click', (event) => {
-        event.stopPropagation();  // Stop event from propagating to the modal background
-        document.getElementById("add-group-modal").style.display = "flex";
-    });
-
-    // Prevent closing the modal when clicking inside the modal content
-    document.getElementById("add-group-window").addEventListener('click', (event) => {
-        event.stopPropagation(); // Prevent event from propagating to the background
-    });
+    // // Prevent closing the modal when clicking inside the modal content
+    // document.getElementById("add-group-window").addEventListener('click', (event) => {
+    //     event.stopPropagation(); // Prevent event from propagating to the background
+    // });
 
     // Handle file button click
     fileButton.addEventListener('click', fileButtonLogic);
