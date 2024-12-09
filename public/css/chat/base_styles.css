@@ -183,9 +183,27 @@ opacity: 0.7;
 
 
 /* Mobile view with user info bar */
+/* #user-info-bar {
+    display: none;
+} */
+
 #user-info-bar {
+    display: flex;
+    width: 100%;
+    box-sizing: border-box;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    height: 60px;
+    gap: 10px;
+    padding: 5px;
+}
+
+#user-info-bar #chat-window-toggler {
     display: none;
 }
+
+
 
 .toggle-contacts {
     box-sizing: border-box;
@@ -434,7 +452,7 @@ opacity: 0.7;
     width: 60%;
     height: 100%;
     border-radius: 2px;
-    border-top-left-radius: 12px;
+    /* border-top-left-radius: 12px; */
     box-sizing: border-box;
     border: 0;
     padding-left: 15px;
@@ -509,7 +527,8 @@ opacity: 0.7;
 
 
 #openFilesButton {
-    height: 50px;
+    width: 40px;
+    height: 40px;
     box-sizing: border-box;
     border-radius: 15px;
     border: none;
@@ -520,9 +539,9 @@ opacity: 0.7;
     justify-content: center;
     /* position: absolute; */
 
-    align-self: flex-start;
-    z-index: 1000;
     margin: 10px;
+
+    position: relative;
 }
 
 #openFilesButton img {
@@ -533,17 +552,27 @@ opacity: 0.7;
 
 
 
+
+
 #files-list {
     width: 100%;
     height: fit-content;
     min-height: 100px;
     overflow-y: auto;
     overflow-x: hidden;
-    background-color: gray;
     border-radius: 15px;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 10px;
 
+    list-style-type: none;
+    margin: 0;
+    user-select: none;
+    box-sizing: border-box;
+    transition: border 0.2s ease;
+    padding: 10px;
 }
 
 
@@ -1082,7 +1111,7 @@ opacity: 0.7;
         max-width: 100%;
     }
 
-    #user-info-bar {
+    /* #user-info-bar {
         display: flex;
         width: 100%;
         box-sizing: border-box;
@@ -1092,7 +1121,11 @@ opacity: 0.7;
         height: 60px;
         gap: 10px;
         padding: 5px;
+    } */
+    #user-info-bar #chat-window-toggler {
+        display: flex;
     }
+
 
     .hidden-mobile-window {
         display: none !important;

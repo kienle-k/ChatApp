@@ -1,12 +1,26 @@
-// Go back function
+
+let NEW_IMAGE = false;
+
+
 function goBack() {
     if (window.opener) {
         window.opener.focus(); // Focus the original tab
+        if (NEW_IMAGE){
+            setTimeout(() => {
+                if (window.opener.fetchProfilePicture) {
+                    window.opener.fetchProfilePicture(); // Call the function
+                } else {
+                    console.log('fetchProfilePicture function is not available.');
+                }
+            }, 200);  // Timeout to ensure the opener window is ready
+        } else {
+            window.close(); // Close the current tab
+        }
+    } else {
+        console.log('No opener window found.');
     }
-    window.close(); // Close the current tab
-    // window.location.href = '/chat';
-    // window.history.back();
 }
+    
 
 // Trigger file upload
 function triggerUpload() {
@@ -55,14 +69,17 @@ document.querySelector('.settings-form').addEventListener('submit', async functi
     const confirmPassword = document.getElementById('confirm-password').value.trim();
     const profileUpload = document.getElementById('profile-upload').files[0]; // Get the uploaded file
 
-    if (!passwordRegex.test(password)) {
-        passwordErrorMessage.textContent = 'Das Passwort erfüllt nicht die Anforderungen.';
-        return;
-    }
+    // New password was set
+    if (password != ""){
+        if (!passwordRegex.test(password)) {
+            passwordErrorMessage.textContent = 'Das Passwort erfüllt nicht die Anforderungen.';
+            return;
+        }
 
-    if (password !== confirmPassword) {
-        errorMessage.textContent = 'Die Passwörter stimmen nicht überein.';
-        return;
+        if (password !== confirmPassword) {
+            errorMessage.textContent = 'Die Passwörter stimmen nicht überein.';
+            return;
+        }
     }
 
     const formData = new FormData();
@@ -71,6 +88,7 @@ document.querySelector('.settings-form').addEventListener('submit', async functi
     formData.append('password', password);
     if (profileUpload) {
         formData.append('profile_picture', profileUpload); // Append the file to the request
+        NEW_IMAGE = true;
     }
 
     try {
@@ -172,7 +190,12 @@ const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|
 //const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,30}$/; // härtere Anforderungen: Sonderzeichen Pflicht
 
 passwordField.addEventListener('input', function() {
+
     const password = passwordField.value;
+
+    if (password == ""){
+        return;
+    }
     if (!passwordRegex.test(password)) {
         if (password.length < 8) {
             passwordErrorMessage.textContent = 'Das Passwort muss mindestens 8 Zeichen lang sein.';

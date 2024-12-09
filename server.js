@@ -137,29 +137,52 @@ async function talkToGemini(prompt) {
 
 
 
-const upload_path = 'public/uploads';
-
-if (!fs.existsSync(upload_path)) {
-  fs.mkdirSync(upload_path);
-}
-
 // Initialize Express
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
 
-// Configure multer storage
-const storage = multer.diskStorage({
+
+
+const upload_path = 'public/uploads/profile_pictures';
+const file_upload_path = 'public/uploads/files'; // New path for file uploads
+
+// Ensure directories exist
+[upload_path, file_upload_path].forEach((path) => {
+  if (!fs.existsSync(path)) {
+    fs.mkdirSync(path, { recursive: true });
+  }
+});
+
+
+// Configure multer storage for profile pictures
+const profileStorage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, 'public/uploads');
+    cb(null, 'public/uploads/profile_pictures'); // Path for profile pictures
   },
   filename: function (req, file, cb) {
     const hash = crypto.createHash('sha256').update(file.originalname + Date.now().toString()).digest('hex');
     cb(null, hash + path.extname(file.originalname));
-  }
+  },
 });
 
-const upload = multer({ storage });
+// Configure multer storage for file uploads
+const fileStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'public/uploads/files'); // Path for general file uploads
+  },
+  filename: function (req, file, cb) {
+    const hash = crypto.createHash('sha256').update(file.originalname + Date.now().toString()).digest('hex');
+    cb(null, hash + path.extname(file.originalname));
+  },
+});
+
+// Multer instances
+const uploadProfile = multer({ storage: profileStorage });
+const uploadFile = multer({ storage: fileStorage });
+
+
+
 
 let connected_users = [];
 
@@ -337,7 +360,7 @@ app.post('/api/logout', isAuthenticated, (req, res) => {
 });
 
 // Registration endpoint with profile picture upload
-app.post('/register', upload.single('image'), async (req, res) => {
+app.post('/register', uploadProfile.single('profile_picture'), async (req, res) => {
   const { email, username, password } = req.body;
 
   if (!email || !username || !password) {
@@ -346,7 +369,7 @@ app.post('/register', upload.single('image'), async (req, res) => {
 
   let imagePath = null;
   if (req.file) {
-    imagePath = path.join('uploads', req.file.filename);
+    imagePath = path.join('uploads/profile_pictures', req.file.filename);
   }
 
   try {
@@ -375,7 +398,7 @@ app.post('/register', upload.single('image'), async (req, res) => {
 });
 
 
-app.post('/upload', upload.single('image'), async (req, res) => {
+app.post('/upload', uploadFile.single('file'), async (req, res) => {
   const connection = await pool.getConnection();
 
   try {
@@ -385,7 +408,7 @@ app.post('/upload', upload.single('image'), async (req, res) => {
 
       // File metadata
       const fileName = req.file.filename;
-      const filePath = path.join('uploads', fileName); // Relative path to the file
+      const filePath = path.join('uploads/files', fileName); // Relative path to the file
       const fileSize = req.file.size;
       const fileType = req.file.mimetype;
 
@@ -434,6 +457,7 @@ app.post('/download', async (req, res) => {
 
       const [results] = await connection.execute(query, [userId]);
 
+
       console.log(results); // Array of files sent to the user
 
       if (results.length === 0) {
@@ -460,10 +484,6 @@ app.post('/download', async (req, res) => {
 
 
 
-const DOC_UPLOADS_DIR = path.join(__dirname, 'public/uploads/documents');
-if (!fs.existsSync(DOC_UPLOADS_DIR)) {
-    fs.mkdirSync(DOC_UPLOADS_DIR, { recursive: true });
-}
 
 
 async function handleMessage(sessionUser, msg) {
@@ -623,7 +643,7 @@ app.get('/api/get-my-info', isAuthenticated, async (req, res) => {
 });
 
 // Route to update user information by ID
-app.post('/api/update-my-info', upload.single('profile_picture'), async (req, res) => {
+app.post('/api/update-my-info', uploadProfile.single('profile_picture'), async (req, res) => {
   const { username, email, password } = req.body;
 
   const sessionUser = req.session.user;
@@ -635,7 +655,7 @@ app.post('/api/update-my-info', upload.single('profile_picture'), async (req, re
 
   let imagePath = null;
   if (req.file) {
-    imagePath = path.join('uploads', req.file.filename);
+    imagePath = path.join('uploads/profile_pictures', req.file.filename);
   }
 
   try {
@@ -709,8 +729,6 @@ app.post('/api/get-group-details', isAuthenticated, async (req, res) => {
 
 
 
-
-
 app.post('/api/add-new-group', isAuthenticated, async (req, res) => {
   const { groupName, userIds } = req.body;
 
@@ -733,10 +751,14 @@ app.post('/api/add-new-group', isAuthenticated, async (req, res) => {
 
     const groupId = result.insertId;
 
-    // Add the creator to the group members
-    const groupMembers = [[sessionUser.id, groupId]];
-    userIds.forEach((userId) => groupMembers.push([userId, groupId]));
+    // Fetch the valid user IDs (if userIds contains usernames, convert them to user IDs)
+    const validUserIds = await getValidUserIds(userIds, connection);
 
+    // Add the creator to the group members
+    const groupMembers = [[sessionUser.id, groupId, new Date()]]; // Add the creator with current date for joined_at
+    validUserIds.forEach((userId) => groupMembers.push([userId, groupId, new Date()]));
+
+    // Insert all group members
     await connection.query(
       'INSERT INTO `group_members` (user_id, group_id, joined_at) VALUES ?',
       [groupMembers]
@@ -754,9 +776,13 @@ app.post('/api/add-new-group', isAuthenticated, async (req, res) => {
   }
 });
 
+// Helper function to get valid user IDs
+async function getValidUserIds(usernames, connection) {
+  const query = 'SELECT id FROM users WHERE username IN (?)';
+  const [rows] = await connection.execute(query, [usernames]);
 
-
-
+  return rows.map(row => row.id); // Return an array of user IDs
+}
 
 
 // WebSocket connection
@@ -849,6 +875,60 @@ io.on('connection', (socket) => {
     }
   });
 
+
+  socket.on('get-group-chat-history', async () => {
+    console.log("Sending group chat history");
+    try {
+        const user_id = parseInt(sessionUser.id);
+
+        if (isNaN(user_id)) {
+            console.log("No session user -> no data");
+            return;
+        }
+
+        const connection = await pool.getConnection();
+        try {
+            const [rows] = await connection.execute(
+                `
+                SELECT 
+                    g.group_id,
+                    g.group_name,
+                    g.group_picture,
+                    cm.message,
+                    cm.sent_at,
+                    u.username AS sender_username
+                FROM \`groups\` g
+                LEFT JOIN (
+                    SELECT receiver_group_id, message, sent_at, sender_id
+                    FROM chat_messages
+                    WHERE receiver_group_id IS NOT NULL
+                    ORDER BY sent_at DESC
+                ) cm ON g.group_id = cm.receiver_group_id
+                LEFT JOIN users u ON cm.sender_id = u.id
+                WHERE g.group_id IN (
+                    SELECT group_id
+                    FROM group_members
+                    WHERE user_id = ?
+                )
+                ORDER BY cm.sent_at DESC;
+                `,
+                [user_id]
+            );
+
+            socket.emit("response-group-chat-history", { success: true, groups: rows });
+        } finally {
+            connection.release();
+        }
+    } catch (error) {
+        console.error("Error fetching group chat history:", error);
+        socket.emit("response-group-chat-history", { success: false, error: error.message });
+    }
+  });
+
+
+
+  
+
   socket.on('get-chat-history', async () => {
     console.log("Sending chat history");
     try {
@@ -916,6 +996,7 @@ io.on('connection', (socket) => {
       socket.emit("response-chat-history", { success: false, error: error });
     }
   });
+
 
 
 

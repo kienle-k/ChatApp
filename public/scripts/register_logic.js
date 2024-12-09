@@ -81,7 +81,7 @@ document.getElementById('registerForm').addEventListener('submit', function(even
         // }
 
         const profileUpload = document.getElementById('profile-upload').files[0]; // Get the uploaded file
-        formData.append('image', profileUpload);
+        formData.append('profile_picture', profileUpload);
 
         // Add other form data
         formData.append('email', document.getElementById('email').value);

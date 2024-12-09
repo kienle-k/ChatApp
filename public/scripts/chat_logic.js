@@ -124,6 +124,171 @@ function choosePersonalChatwSwitchWindow(id, name, pic){
     setContactsForce(false);
 }
 
+
+
+//  CHATGPT LOGIC FOR GROUPS; NOT WORKING 
+
+async function addGroupChat(groupId, groupName, groupPicturePath = null, showHighlight = true, switchWindow=false) {
+
+
+    let exists = await checkFileExists(groupPicturePath);
+
+    try {
+        if (groupPicturePath == null || !exists) {
+            groupPicturePath = '/images/group-default.png';
+        }
+    } catch (error) {
+        groupPicturePath = '/images/group-default.png';
+    }
+    console.log("Group picture path:", groupPicturePath);
+
+    // Check if group already exists
+    const li_element = getGroupLi(groupId);
+    if (li_element != null) {
+        if (switchWindow == true){
+            chooseGroupChatwSwitchWindow(groupId, groupName, groupPicturePath, showHighlight);
+        }else {
+            chooseGroupChat(groupId, groupName, groupPicturePath, showHighlight);
+        }
+        return false, li_element; // Exit function, return false, list-element (no new group added, already present)
+    }
+
+    selected_class = "";
+
+    // Add the new group to the list
+    const new_group_div = addGroupToList(groupPicturePath, groupId, groupName, "", selected_class);
+
+    // Switch to the newly added group chat
+    setTimeout(() => {
+            if (switchWindow == true){
+                chooseGroupChatwSwitchWindow(groupId, groupName, groupPicturePath, showHighlight);
+            }else {
+                chooseGroupChat(groupId, groupName, groupPicturePath, showHighlight);
+            }
+        }, 50);
+
+    // Focus the message input (To make direct writing possible)
+    document.getElementById('message-input').focus();
+
+    // Return true (group added successfully) and the list-element
+    return true, new_group_div;
+}
+
+// Opens a new group chat, loads and displays it
+async function chooseGroupChat(groupId, groupName, groupPicturePath = null, showHighlight = true) {
+
+    // For Mobile view, group info & image on top of the chat
+    document.getElementById("contact-info").innerText = groupName;
+
+    // If no group picture provided, use default one
+    if (groupPicturePath != null) {
+        let exists = await checkFileExists(groupPicturePath);
+        if (!exists) {
+            groupPicturePath = "/images/group-default.png"; // Default group image
+        }
+        document.getElementById("user-image-img").src = groupPicturePath;
+        document.getElementById("user-image-img").onclick = function () {
+            showBigGroupPic(groupId);  // Assuming this function is set up for the group
+        };
+    } else {
+        document.getElementById("user-image-img").src = "/images/group-default.png"; // Default image
+        document.getElementById("user-image-img").onclick = function () {
+            showBigGroupPic(groupId);  // Assuming this function is set up for the group
+        };
+    }
+
+    // Display a flash to highlight the update of the chat
+    if (showHighlight) {
+        const messagesDiv = document.getElementById("messages");
+        if (!DARKMODE) {
+            messagesDiv.style.border = "2px solid lightseagreen";
+            messagesDiv.style.backgroundColor = "rgba(32, 178, 170, 0.1)";
+        } else {
+            messagesDiv.style.border = "2px solid rgb(106, 81, 145)";
+            messagesDiv.style.backgroundColor = "rgba(106, 81, 145, 0.2)";
+        }
+        setTimeout(() => {
+            messagesDiv.style.border = "2px solid transparent";
+            if (!DARKMODE) {
+                messagesDiv.style.backgroundColor = "#ededed";
+            } else {
+                messagesDiv.style.backgroundColor = "#161124";
+            }
+        }, 250);
+    }
+
+    // Return if the clicked group is the same as the previous one
+    if (groupId == CURRENT_CHAT_GROUP) {
+        return;
+    }
+
+    // Change the current IDs
+    CURRENTLY_CHATTING_WITH_ID = null;  // Reset personal chat ID
+    CURRENT_CHAT_GROUP = groupId;  // Set current chat group ID
+
+    // Update the highlighted group div
+    updateSelectedChatDisplay();
+
+    // Delete previous messages, Request 100 of the new group chat history from the server
+    messagesUL.innerHTML = "";
+    requestHistoryMessages(0, 100);
+    FIRST_LOAD = true; // Flag to prevent buggy scrolling in the beginning
+
+    document.getElementById('message-input').focus(); // Focus chat input, to allow direct texting on load
+}
+
+function chooseGroupChatwSwitchWindow(id, name, pic){
+    chooseGroupChat(id, name, pic);
+    setContactsForce(false);
+}
+
+
+
+// Search for group ID in the displayed list -> returns null || Li element
+function getGroupLi(group_id) {
+    if (group_id == null) {
+        return null;
+    }
+    for (let child of contact_list.children) {
+        if (child.getAttribute('data-id') == group_id) {
+            return child;
+        }
+    }
+}
+
+
+
+
+function fetchGroupChatHistory() {
+
+    return;
+    
+    // Emit the event to fetch group chat history
+    socket.emit('get-group-chat-history');
+
+    // Listen for the response from the server
+    socket.on('response-group-chat-history', (data) => {
+        if (data.success) {
+            // Iterate through the groups and add them
+            data.groups.forEach(group => {
+                const { groupId, groupName, groupPicturePath } = group;
+                addGroupChat(groupId, groupName, groupPicturePath);
+            });
+        } else {
+            console.error('Error fetching group chat history:', data.error);
+        }
+    });
+}
+
+//
+
+
+
+
+
+
+
+
 // Display the big profile picture 
 function showBigProfilePic(id){
     let src;
@@ -175,6 +340,9 @@ function requestHistoryMessages(start_at_id, number_of_messages) {
     socket.emit('get-history', { user2_id, start_at_id, number_of_messages });
 } 
 
+
+
+
 // Search for contact ID in the displayed list -> returns null || Li element
 function getContactLi(id){
     if (id == null){
@@ -186,17 +354,67 @@ function getContactLi(id){
         }
     }
 }
+
+
+
+
 // Checks if contact is already loaded or not present in the list -> returns true / false
 function isContactLoaded(id){
     return getContactLi(id) != null;
 }
 
+
+
+
+
+// Add a new group to the groups list
+async function addGroupToList(group_picture_path, group_id, group_name, last_msg_text, selected_class) {
+    let exists = await checkFileExists(group_picture_path);
+
+    try {
+        if (group_picture_path == null || !exists){
+            group_picture_path = '/images/group.png'; // Default image for groups
+        }
+    }catch (error){
+        group_picture_path = '/images/group.png'; // Default image for groups
+    }
+    console.log("Picture path of loaded group:", group_picture_path);
+
+    contact_list.insertAdjacentHTML('beforeend', 
+        `<li class="contact-container ${selected_class}" data-id=${group_id} data-imgsrc='${group_picture_path}' data-groupname='${group_name}' onclick="chooseGroupChatwSwitchWindow(${group_id}, '${group_name}', '${group_picture_path}')">
+            <button type="button" class="contact-profile-button" onclick="event.stopPropagation(); showBigGroupPic(${group_id});">
+                <img src='${group_picture_path}'>
+            </button>
+            <button type="button" class="choose-contact-button" data-id=${group_id}>
+                <div class="contact">${group_name}</div>
+            </button>
+            <div class="last-message">${last_msg_text}</div>
+        </li>`
+    );
+
+    // Return the last inserted group element
+    return contact_list.lastElementChild;
+}
+
+
+
 // Add a new contact to the contacts list
 async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class) {
+    let exists = await checkFileExists(picture_path);
+
+    try {
+        if (picture_path == null || !exists){
+            picture_path = '/images/profile.png';
+        }
+    }catch (error){
+        picture_path = '/images/profile.png';
+    }
+    console.log("Picture path of loaded contact:", picture_path);
+
     contact_list.insertAdjacentHTML('beforeend', 
-        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='/${picture_path}' data-username='${contact_username}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
+        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='${picture_path}' data-username='${contact_username}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
             <button type="button" class="contact-profile-button" onclick="event.stopPropagation(); showBigProfilePic(${contact_id});">
-                <img src='/${picture_path}'>
+                <img src='${picture_path}'>
             </button>
             <button type="button" class="choose-contact-button" data-id=${contact_id}>
                 <div class="contact">${contact_username}</div>
@@ -210,6 +428,7 @@ async function addContactToList(picture_path, contact_id, contact_username, last
 }
 
 // Add Contact to the chat list
+
 async function addContact(id, name, picture_path = null, showHightlight=true){
 
     const resultsContainer = document.getElementById('user-list');
@@ -225,6 +444,18 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
         ct_wrapper.style.display = "none";
     }, 250);
 
+    
+    let exists = await checkFileExists(picture_path);
+
+    try {
+        if (picture_path == null  || !exists){
+            picture_path = '/images/profile.png';
+        }
+    }catch (error){
+        picture_path = '/images/profile.png';
+    }
+    console.log("Picture path of new contact:", picture_path);
+
 
     // Check if contact already exists
     const li_element = getContactLi(id);
@@ -236,14 +467,6 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
 
     selected_class = "";
 
-    try {
-        if (picture_path == null || !picture_path.includes("/")){
-            picture_path = '/images/profile.png';
-        }
-    }catch (error){
-        picture_path = '/images/profile.png';
-    }
-    console.log("Picture path of new contact:", picture_path);
 
     // Add "Du" for own user (when chatting with own account back)
     if (id == MY_USER_ID && !name.includes("(Du)")){
@@ -265,6 +488,9 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
     return true, new_contact_div;
 
 }
+
+
+
 
 // Is triggered by typing in the search bar, requests & then displays all users whose's name matches the search string
 async function findUser() {
@@ -352,7 +578,11 @@ async function choosePersonalChat(user_id, username, picture_path=null, showHigh
     // For Mobile view, contact info & image on top of the chat
     document.getElementById("contact-info").innerText = username;
     if (picture_path != null){
-        picture_path = `/${picture_path}`;
+        // picture_path = `/${picture_path}`;
+        let exists = checkFileExists(picture_path);
+        if (!exists){
+            picture_path = "/images/profile.png";
+        }
         document.getElementById("user-image-img").src = picture_path;
         document.getElementById("user-image-img").onclick = function() {
             showBigProfilePic(user_id);
@@ -403,6 +633,10 @@ async function choosePersonalChat(user_id, username, picture_path=null, showHigh
 
     document.getElementById('message-input').focus(); // Focus chat input, to allow direct texting onload
 }
+
+
+
+
 
 
 // Open user settings page in new tab
@@ -547,11 +781,50 @@ async function sendMessageToAPI(messageData) {
         }
     }
 }
+
+
+// Send a custom message directly to the current chat user
+function sendCustomMessage(txt) {
+    if (!CURRENTLY_CHATTING_WITH_ID && !CURRENT_CHAT_GROUP) {
+        console.error("No valid recipient for the message.");
+        return;
+    }
+
+    // Construct message data
+    const msgID = Date.now(); // Unique message ID using current time
+    const messageData = {
+        id: msgID,
+        to_user: CURRENTLY_CHATTING_WITH_ID,
+        to_group: CURRENT_CHAT_GROUP,
+        text: txt,
+    };
+
+    // Send the message via socket to the server
+    socket.emit('chat-message', messageData);
+
+    // Optionally update the UI or logs (e.g., appending the message to the chat)
+    const msgLi = addMessage(txt, 'sent'); // This can be customized based on your chat UI
+    setTimeout(scrollMessagesToBottom, 0); // Scroll to the latest message
+
+    // Update the last sent message in the contact field
+    updateLastMessage("Du", CURRENTLY_CHATTING_WITH_ID, txt);
     
+    // Ensure focus is back on the input field after sending
+    setTimeout(() => {
+        document.getElementById('message-input').focus();
+    }, 100);
+}
+
+
 // Send message to the server via Socket
 function sendMessage(event) {
     event.preventDefault(); 
     const msgID = Date.now(); 
+
+    if (selectedFile != null){
+        sendFile();
+        sendCustomMessage("[Datei gesendet]");
+    }
 
     if (input.value == ""){
         return;
@@ -599,36 +872,44 @@ function sendMessage(event) {
 }
 
 
-// Get own profile picture
-function fetchProfilePicture() {
+async function fetchProfilePicture() {
+    console.log("Fetching profile picture...");
+
     const profileImageElement = document.getElementById('profileImage');
-    // Make the API request to the backend
-    fetch('/api/get-my-info')
-      .then(response => response.json()) // Parse the JSON response from the backend
-      .then(data => {
+    
+    try {
+        // Make the API request to the backend and await the response
+        const response = await fetch('/api/get-my-info');
+        const data = await response.json(); // Parse the JSON response from the backend
+
         // Get the profile picture path from the response
         let profilePicturePath = data.profile_picture;
-  
-        // Find the image element where the profile picture will be displayed
-       
-  
-        // If the element exists, set its src attribute to the profile picture path
-        if (profileImageElement && profileImageElement != null && profilePicturePath != null) {
-            if (profilePicturePath[0] != "/"){
+
+        // If the element exists and the profile picture path is not null
+        if (profileImageElement && profilePicturePath != null) {
+            // Ensure the profile picture path starts with "/"
+            if (!profilePicturePath.startsWith("/")) {
                 profilePicturePath = "/" + profilePicturePath;
             }
-            console.log("Profile pic loaded and set", profilePicturePath);
+
+            // Check if the file exists on the server
+            let exists = await checkFileExists(profilePicturePath);
+            if (!exists) {
+                profilePicturePath = '/images/profile.png'; // Fallback if file doesn't exist
+            }
 
             profileImageElement.src = profilePicturePath;
+
+            console.log("Profile pic loaded and set", profilePicturePath);
+
         } else {
-            profileImageElement.src = '/images/profile.png'; 
+            profileImageElement.src = '/images/profile.png'; // Default image if no profile picture is provided
         }
-      })
-      .catch(error => {
+    } catch (error) {
         console.error('Error fetching profile picture:', error);
         // Optionally, set a default image in case of an error
         profileImageElement.src = '/images/profile.png';
-      });
+    }
 }
 
 
@@ -668,9 +949,13 @@ function fileUploadLogic(){
 
     console.log("FILE SELECTED: ", selectedFile);
 
+}
+
+
+function sendFile(){
     // Prepare FormData
     const formData = new FormData();
-    formData.append("image", selectedFile);
+    formData.append("file", selectedFile);
     formData.append("sender_id", MY_USER_ID);  // Replace with dynamic user ID
     formData.append("receiver_id", CURRENTLY_CHATTING_WITH_ID);
 
@@ -683,6 +968,7 @@ function fileUploadLogic(){
         if (!response.ok) {
             throw new Error(`Server responded with status ${response.status}`);
         }
+        fileButtonLogic();
         return response.json();
     })
     .then(data => {
@@ -948,55 +1234,83 @@ socket.on('disconnect', () => {
 
 
 
+async function checkFileExists(fileUrl) {
+    try {
+        const response = await fetch(fileUrl, { method: 'HEAD' });
+        return response.ok; // true if file exists, false if not
+    } catch (error) {
+        console.error('Error checking file existence:', error);
+        return false; // If there's an error, assume file doesn't exist
+    }
+}
+
 
 
 async function fetchFiles() {
     try {
-      // Fetch files from the backend
-      const response = await fetch('/download', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({}),
-      });
+        // Fetch files from the backend
+        const response = await fetch('/download', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({}),
+        });
 
-      // Handle response
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error('Error fetching files:', errorData.message);
-        document.getElementById('files-list').innerText = 'No files found.';
-        return;
-      }
+        // Handle response
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error fetching files:', errorData.message);
+            document.getElementById('files-list').innerText = 'No files found.';
+            return;
+        }
 
-      const data = await response.json();
+        const data = await response.json();
 
-      // Select the target div
-      const filesListDiv = document.getElementById('files-list');
-      filesListDiv.innerHTML = ''; // Clear existing content
+        // Select the target div
+        const filesListDiv = document.getElementById('files-list');
+        filesListDiv.innerHTML = ''; // Clear existing content
 
-      // Iterate through the files and add them to the DIV
-      data.files.forEach((file) => {
-        const fileElement = document.createElement('div');
-        fileElement.textContent = `${file.file_name} (sent by ${file.sender_id})`;
+        let results = [];
+        // Iterate through the files and add them to the DIV
+        for (const file of data.files) {
+            const fileElement = document.createElement('div');
+            fileElement.classList.add("highlight-on-hover");
 
-        // Add onclick listener to download file
-        fileElement.onclick = () => {
-          downloadFile(file.file_path);
-        };
+            console.log("File:", file.file_path);
+            // Use await for checking the file existence
+            let exists = await checkFileExists(file.file_path);
+            if (exists) {
+                // If file exists, show download icon
+                fileElement.innerHTML = `<img style="width: 80%; height: 80%; object-fit: cover" src="/images/downloadFile.png">`;
+                fileElement.onclick = () => {
+                    downloadFile(file.file_path);
+                };
+            } else {
+                // If file does not exist, show "deleted" icon
+                fileElement.innerHTML = `<img style="width: 70%; height: 70%; object-fit: cover" src="/images/downloadLostFile.png">`;
+                fileElement.onclick = () => {
+                    alert("Diese Datei wurde gelöscht.");
+                };
+            }
 
-        // Add styling for better visibility
-        fileElement.style.cursor = 'pointer';
-        fileElement.style.margin = '5px 0';
-        fileElement.style.color = 'blue';
+            // Add styling for better visibility
+            fileElement.style.width = "50px";
+            fileElement.style.height = "50px";
+            fileElement.style.cursor = 'pointer';
 
-        filesListDiv.appendChild(fileElement);
-      });
+            // Append the file element to the files list
+            results.push(fileElement);
+        }
+        for (const fileElement of results){
+            filesListDiv.appendChild(fileElement);
+        }
     } catch (error) {
-      console.error('Error during fetch operation:', error);
-      document.getElementById('files-list').innerText = 'Error fetching files.';
+        console.error('Error during fetch operation:', error);
+        document.getElementById('files-list').innerText = 'Error fetching files.';
     }
-  }
+}
+
 
   // Function to download file
   function downloadFile(filePath) {
@@ -1010,9 +1324,66 @@ async function fetchFiles() {
 
 
 
+  async function addGroupToServer(){
+    // Get the group name and user IDs from the form inputs
+    const groupName = document.querySelector('input[placeholder="Gruppen-Name"]').value;
+    const userInput = document.querySelector('input[placeholder="Users, separated by \';\'"]').value;
+    
+    // Parse user IDs (split by semicolon, and remove leading/trailing spaces)
+    const userIds = userInput.split(';').map(userId => userId.trim()).filter(userId => userId !== '');
+
+    console.log(userIds);
+
+    // Validate inputs
+    if (!groupName || userIds.length === 0) {
+        alert("Please enter a valid group name and at least one user.");
+        return;
+    }
+
+    try {
+        // Send the data to the backend
+        const response = await fetch('/api/add-new-group', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                groupName: groupName,
+                userIds: userIds
+            })
+        });
+
+        // Handle the response
+        const result = await response.json();
+        if (result.success) {
+            // Group created successfully
+            document.getElementById("add-group-modal").style.display = 'none';
+            document.getElementById("add-group-form").reset();
+            setTimeout(()=>{
+                alert(result.message);
+            }, 50);
+
+        } else {
+            // Group creation failed
+            alert(result.message);
+        }
+    } catch (error) {
+        console.error('Error creating group:', error);
+        alert('An error occurred while creating the group. Please try again.');
+    }
+}
+
 
 // Load last Messages on window load    
 window.onload = async function(){
+
+
+
+    document.getElementById("create-group-button").addEventListener("click", async (event) => {
+        event.preventDefault();
+        addGroupToServer();
+    });
+    
 
     input = document.getElementById("message-input");
     messageContainer = document.getElementById('message-history-container');
@@ -1035,6 +1406,7 @@ window.onload = async function(){
     console.log("FETCH PIC");
     fetchProfilePicture();
     socket.emit("get-chat-history");
+    fetchGroupChatHistory();
 
     FIRST_LOAD = true;
 
@@ -1052,32 +1424,34 @@ window.onload = async function(){
 
 
 
-    // document.getElementById("openFilesButton").addEventListener('click', () => {
-    //     style = document.getElementById("files-list").style.display;
-    //     if (style == "flex"){
-    //         document.getElementById("files-list").style.display = "none";
-    //     }else{
-    //         document.getElementById("files-list").style.display = "flex";
-    //         fetchFiles();
-    //     }
-    // });
+    document.getElementById("openFilesButton").addEventListener('click', async function() {
+        style = document.getElementById("files-list").style.display;
+        if (style == "flex"){
+            document.getElementById("files-list").style.display = "none";
+        }else{
+            const filesListDiv = document.getElementById('files-list');
+            filesListDiv.innerHTML = ''; // Clear existing content
+            document.getElementById("files-list").style.display = "flex";
+            fetchFiles();
+        }
+    });
 
 
-    // // Close modal when the background is clicked
-    // document.getElementById("add-group-modal").addEventListener('click', () => {
-    //     document.getElementById("add-group-modal").style.display = "none";
-    // });
+    // Close modal when the background is clicked
+    document.getElementById("add-group-modal").addEventListener('click', () => {
+        document.getElementById("add-group-modal").style.display = "none";
+    });
 
-    // // Show modal when the button is clicked
-    // document.getElementById("addGroupButton").addEventListener('click', (event) => {
-    //     event.stopPropagation();  // Stop event from propagating to the modal background
-    //     document.getElementById("add-group-modal").style.display = "flex";
-    // });
+    // Show modal when the button is clicked
+    document.getElementById("addGroupButton").addEventListener('click', (event) => {
+        event.stopPropagation();  // Stop event from propagating to the modal background
+        document.getElementById("add-group-modal").style.display = "flex";
+    });
 
-    // // Prevent closing the modal when clicking inside the modal content
-    // document.getElementById("add-group-window").addEventListener('click', (event) => {
-    //     event.stopPropagation(); // Prevent event from propagating to the background
-    // });
+    // Prevent closing the modal when clicking inside the modal content
+    document.getElementById("add-group-window").addEventListener('click', (event) => {
+        event.stopPropagation(); // Prevent event from propagating to the background
+    });
 
     // Handle file button click
     fileButton.addEventListener('click', fileButtonLogic);
