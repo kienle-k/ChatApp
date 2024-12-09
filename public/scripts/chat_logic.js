@@ -129,7 +129,7 @@ function choosePersonalChatwSwitchWindow(id, name, pic){
 //  CHATGPT LOGIC FOR GROUPS; NOT WORKING 
 
 async function addGroupChat(groupId, groupName, groupPicturePath = null, showHighlight = true, switchWindow=false) {
-
+    return;
 
     let exists = await checkFileExists(groupPicturePath);
 
@@ -176,9 +176,9 @@ async function addGroupChat(groupId, groupName, groupPicturePath = null, showHig
 
 // Opens a new group chat, loads and displays it
 async function chooseGroupChat(groupId, groupName, groupPicturePath = null, showHighlight = true) {
-
+    return;
     // For Mobile view, group info & image on top of the chat
-    document.getElementById("contact-info").innerText = groupName;
+    // document.getElementById("contact-info").innerText = groupName;
 
     // If no group picture provided, use default one
     if (groupPicturePath != null) {
@@ -461,7 +461,7 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
     const li_element = getContactLi(id);
     if (li_element != null){
             choosePersonalChatwSwitchWindow(id, name, picture_path, showHightlight);
-            return false, li_element; // Exit function, return false, list-element  (no new contact added, already present)
+            return li_element; // Exit function, return false, list-element  (no new contact added, already present)
     }
 
 
@@ -485,7 +485,7 @@ async function addContact(id, name, picture_path = null, showHightlight=true){
     document.getElementById('message-input').focus();
 
     // Return true (contact added successfully) and the list-element
-    return true, new_contact_div;
+    return new_contact_div;
 
 }
 
@@ -575,8 +575,11 @@ async function updateSelectedChatDisplay() {
 // Opens a new personal chat, loads and displays it
 async function choosePersonalChat(user_id, username, picture_path=null, showHightlight=true) {
 
+    console.log("USERRRR", username);
     // For Mobile view, contact info & image on top of the chat
-    document.getElementById("contact-info").innerText = username;
+    if (username != null && username != false){
+        document.getElementById("contact-info").innerText = username;
+    }
     if (picture_path != null){
         // picture_path = `/${picture_path}`;
         let exists = checkFileExists(picture_path);
@@ -1406,7 +1409,7 @@ window.onload = async function(){
     console.log("FETCH PIC");
     fetchProfilePicture();
     socket.emit("get-chat-history");
-    fetchGroupChatHistory();
+    // fetchGroupChatHistory();
 
     FIRST_LOAD = true;
 
