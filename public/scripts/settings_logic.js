@@ -9,6 +9,9 @@ function goBack() {
             setTimeout(() => {
                 if (window.opener.fetchProfilePicture) {
                     window.opener.fetchProfilePicture(); // Call the function
+                    setTimeout(() => {
+                        window.close(); // Close the current tab
+                    }, 100);
                 } else {
                     console.log('fetchProfilePicture function is not available.');
                 }
@@ -17,6 +20,7 @@ function goBack() {
             window.close(); // Close the current tab
         }
     } else {
+        window.location.href = "/chat";
         console.log('No opener window found.');
     }
 }

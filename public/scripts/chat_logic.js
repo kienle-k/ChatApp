@@ -115,7 +115,7 @@ function setContactsForce(value) {
 }
 
 // For Mobile View: Open contact chat
-function choosePersonalChatwSwitchWindow(id, name, pic, showHighlight=false) {
+function choosePersonalChatwSwitchWindow(id, name, pic, showHighlight=true) {
     choosePersonalChat(id, name, pic, showHighlight);
     setContactsForce(false);
     
@@ -390,7 +390,6 @@ async function findUser() {
 async function updateSelectedChatDisplay() {
     console.log("Updating selected chat", contact_list.children.length);
     for (let child of contact_list.children) {
-        console.log(child);
         const contactButton = child.querySelector('.choose-contact-button');
         child.classList.remove("selected-chat-user");
         if (contactButton && contactButton.getAttribute('data-id') == CURRENTLY_CHATTING_WITH_ID) {
@@ -418,13 +417,11 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
             picture_path = "/images/profile.png";
         }
 
-        console.log("small pic path: ", picture_path);
         document.getElementById("user-image-img").src = picture_path;
         document.getElementById("user-image-img").onclick = function () {
             showBigProfilePic(user_id);
         };
     } else {
-        console.log("small pic path was null: ", picture_path);
         document.getElementById("user-image-img").src = "/images/profile.png";
         document.getElementById("user-image-img").onclick = function () {
             showBigProfilePic(user_id);
@@ -913,7 +910,7 @@ function trigger_end_call() {
 }
 
 socket.on('response-chat-history', (rows) => {
-    console.log("RECEIVED CHATS:", rows.messages);
+    console.log("Received recent chats:", rows.messages);
     let contact_username;
 
     let contact_id;
@@ -951,7 +948,6 @@ socket.on('response-chat-history', (rows) => {
 
             selected_class = "";
 
-            console.log(picture_path);
 
             if (picture_path == null){
                 picture_path = 'images/profile.png';
@@ -980,12 +976,9 @@ socket.on('response-chat-history', (rows) => {
 });
 
 
-
-
-
 // Socket for receiving the requested chat history 
 socket.on('response-history', (data) => {
-    console.log('Received chat data:', data); // Process the returned data
+    console.log('Received chat messages:', data); // Process the returned data
     if (!data.success) { return; };
 
     // Add messages to List
@@ -1030,7 +1023,7 @@ socket.on('chat-message', (msg) => {
             setTimeout(scrollMessagesToBottom, 0);
         }
     } else {
-        console.log("Received message from user that is currently not chatted with.", msg);
+        console.log("Received message from user that is currently not chatted with: ", msg);
     }
 });
 
@@ -1121,7 +1114,7 @@ socket.on('call-answered', async (data) => {
 socket.on('call-ended', (data) => {
     // Hide the call container when the call ends
     document.getElementById('call-container').style.display = 'none';
-    console.log("Call ended. Hiding the call container.");
+    console.log("Call ended.");
 });
 
 
@@ -1142,9 +1135,12 @@ socket.on('disconnect', () => {
 
 
 async function checkFileExists(fileUrl) {
-    console.log("The following error is calculated and checks for the existence of the file on the server :)");
+    
     try {
         const response = await fetch(fileUrl, { method: 'HEAD' });
+        if (!response.ok){
+            console.log("The 404 error is by design, to check the existence of files on the server (if file is not present).");
+        }
         return response.ok; // true if file exists, false if not
     } catch (error) {
         console.error('Error checking file existence:', error);
