@@ -30,5 +30,6 @@ else
 fi
 
 # Build and start the services
-sudo docker-compose build
-sudo docker-compose up
+sudo docker-compose up --build
+# sudo docker-compose build
+# sudo docker-compose up

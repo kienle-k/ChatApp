@@ -413,15 +413,18 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
     }
     if (picture_path != null) {
         // picture_path = `/${picture_path}`;
-        let exists = checkFileExists(picture_path);
+        let exists = await checkFileExists(picture_path);
         if (!exists) {
             picture_path = "/images/profile.png";
         }
+
+        console.log("small pic path: ", picture_path);
         document.getElementById("user-image-img").src = picture_path;
         document.getElementById("user-image-img").onclick = function () {
             showBigProfilePic(user_id);
         };
     } else {
+        console.log("small pic path was null: ", picture_path);
         document.getElementById("user-image-img").src = "/images/profile.png";
         document.getElementById("user-image-img").onclick = function () {
             showBigProfilePic(user_id);
@@ -448,17 +451,21 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
         }, 250);
     }
 
-    // Return if the clicked chat partner is the same as the previous
-    if (user_id == CURRENTLY_CHATTING_WITH_ID) {
-        return;
-    }
+    
+    prev_id = CURRENTLY_CHATTING_WITH_ID;
 
     // Change IDs
     CURRENTLY_CHATTING_WITH_ID = user_id;
     CURRENT_CHAT_GROUP = null; // Personal Chat -> Group ID is null!
 
+    
     // Update the highlighted contact div
     updateSelectedChatDisplay();
+
+    // Return if the clicked chat partner is the same as the previous
+    if (prev_id == CURRENTLY_CHATTING_WITH_ID) {
+        return;
+    }
 
     // Delete previous messages, Request 100 of the new chat partner from the server
     messagesUL.innerHTML = "";
@@ -466,6 +473,10 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
     FIRST_LOAD = true; // Flag to prevent buggy scrolling in the beginning
 
     document.getElementById('message-input').focus(); // Focus chat input, to allow direct texting onload
+
+    
+ 
+
 }
 
 
@@ -954,9 +965,9 @@ socket.on('response-chat-history', (rows) => {
                 messagesUL.innerHTML = "";
                 choosePersonalChat(contact_id, contact_username, picture_path, showHighlight=false);
                 CURRENTLY_CHATTING_WITH_ID = contact_id;
-                setTimeout(() => {
-                    updateSelectedChatDisplay();
-                }, 100);
+                // setTimeout(() => {
+                //     updateSelectedChatDisplay();
+                // }, 100);
                 FIRST_LOAD = true;
                 requestHistoryMessages(0, 100);
             }

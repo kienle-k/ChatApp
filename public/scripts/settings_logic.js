@@ -39,6 +39,19 @@ document.getElementById('profile-upload').addEventListener('change', function (e
     }
 });
 
+
+async function checkFileExists(fileUrl) {
+    console.log("The following error is calculated and checks for the existence of the file on the server :)");
+    try {
+        const response = await fetch(fileUrl, { method: 'HEAD' });
+        return response.ok; // true if file exists, false if not
+    } catch (error) {
+        console.error('Error checking file existence:', error);
+        return false; // If there's an error, assume file doesn't exist
+    }
+}
+
+
 // Load user data on page load
 async function loadData() {
     // First allow image display after loading
@@ -52,7 +65,13 @@ async function loadData() {
 
         usernameElement.value = data.username;
         emailElement.value = data.email;
-        profileImageElement.src = data.profile_picture || '/images/profile.png';
+
+        let exists = await checkFileExists(data.profile_picture);
+        if (!exists) {
+            data.profile_picture = '/images/profile.png'; // Fallback if file doesn't exist
+        }
+
+        profileImageElement.src = data.profile_picture || '/images/profile.png'; // Extra fallback
     } catch (error) {
         console.error('Error fetching profile data:', error);
         profileImageElement.src = '/images/profile.png';

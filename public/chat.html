@@ -98,7 +98,7 @@
             <div id="chat-container">
                 <div id="user-info-bar">
                     <button id="chat-window-toggler" class="toggle-contacts" onclick="setContactsForce(true)"><img src="/images/left_arrow.png"></button>
-                    <div id="user-image"><img id="user-image-img" src="/images/profile.png"></div>
+                    <div id="user-image"><img id="user-image-img" src="/images/profile.png" onerror="if (this.src != '/images/profile.png') this.src = '/images/profile.png';"></div>
                     <div id="contact-info">Chat</div>
                     <button id="openFilesButton"><img src="/images/openFiles.png"></button>
                     <!-- <button id="deleteChatButton"><img src="/images/delete.png"></button> -->
