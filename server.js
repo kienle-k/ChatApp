@@ -432,18 +432,20 @@ app.post('/upload', uploadFile.single('file'), async (req, res) => {
       connection.release();
   }
 });
-
-
 app.post('/download', async (req, res) => {
-  const connection = await pool.getConnection();
+  let connection;
   try {
-      
-      const to_user = req.body;
-
-      // Replace with the logged-in user's ID
+      // Ensure the user is authenticated
+      if (!req.session || !req.session.user) {
+          return res.status(401).json({ error: 'Unauthorized: User not logged in' });
+      }
       const userId = req.session.user.id;
+      const from_user = req.body.from_user;
 
-      // Query to fetch files sent to the user
+      // Connect to the database
+      connection = await pool.getConnection();
+
+      // SQL query to fetch files sent between the two users
       const query = `
           SELECT 
               file_name, 
@@ -452,30 +454,29 @@ app.post('/download', async (req, res) => {
           FROM 
               files
           WHERE 
-              receiver_id = ?;
+              (receiver_id = ? AND sender_id = ?)
+              OR (sender_id = ? AND receiver_id = ?)
       `;
+      const [results] = await connection.execute(query, [userId, from_user, userId, from_user]);
 
-      const [results] = await connection.execute(query, [userId]);
-
-
-      console.log(results); // Array of files sent to the user
-
+      // Handle empty results
       if (results.length === 0) {
-          // No files found for the user
-          return res.status(404).json({ message: 'No files found for this user.' });
+          return res.status(200).json({
+              message: 'No files found',
+              files: [],
+          });
       }
 
       // Return the list of files
       res.status(200).json({
           message: 'Files retrieved successfully',
-          files: results, // Return the list of files
+          files: results,
       });
-
   } catch (err) {
       console.error('Error fetching files:', err);
-      res.status(500).json({ error: 'Failed to fetch files', details: err });
+      res.status(500).json({ error: 'Failed to fetch files' });
   } finally {
-      // Ensure the connection is released
+      // Release the database connection
       if (connection) {
           connection.release();
       }
@@ -708,6 +709,59 @@ app.post('/api/update-my-info', uploadProfile.single('profile_picture'), async (
     res.status(500).send('An error occurred.');
   }
 });
+
+
+
+app.post('/api/delete-chat', async (req, res) => {
+  let connection;
+  try {
+      // Extract the two user IDs from the request body
+      const { other_user_id } = req.body;
+
+      const sessionUser = req.session.user;
+      const user_id = parseInt(sessionUser.id);
+
+
+      // Validate input
+      if (!user_id || !other_user_id) {
+          return res.status(400).json({ error: 'Both user_id and other_user_id are required.' });
+      }
+
+      // Connect to the database
+      connection = await pool.getConnection();
+
+      // SQL query to delete messages exchanged between the two users
+      const query = `
+          DELETE FROM chat_messages
+          WHERE 
+              (sender_id = ? AND receiver_id = ?)
+              OR (sender_id = ? AND receiver_id = ?)
+      `;
+
+      // Execute the query
+      const [result] = await connection.execute(query, [user_id, other_user_id, other_user_id, user_id]);
+
+      // Check if any rows were affected
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ message: 'No messages found between the specified users.' });
+      }
+
+      // Respond with success
+      res.status(200).json({
+          message: 'Chat messages deleted successfully.',
+          affectedRows: result.affectedRows,
+      });
+  } catch (err) {
+      console.error('Error deleting chat messages:', err);
+      res.status(500).json({ error: 'Failed to delete chat messages', details: err });
+  } finally {
+      // Ensure the database connection is released
+      if (connection) {
+          connection.release();
+      }
+  }
+});
+
 
 
 app.post('/api/get-group-details', isAuthenticated, async (req, res) => {

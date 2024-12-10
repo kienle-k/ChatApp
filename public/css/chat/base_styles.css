@@ -193,7 +193,7 @@ opacity: 0.7;
     box-sizing: border-box;
     flex-direction: row;
     align-items: center;
-    justify-content: flex-start;
+    /* justify-content: flex-start; */
     height: 60px;
     gap: 10px;
     padding: 5px;
@@ -441,7 +441,7 @@ opacity: 0.7;
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;
 
-    z-index: 20;
+    z-index: 170;
 }
 
 #search-bar input:focus {
@@ -452,7 +452,7 @@ opacity: 0.7;
     width: 60%;
     height: 100%;
     border-radius: 2px;
-    /* border-top-left-radius: 12px; */
+    border-top-left-radius: 12px;
     box-sizing: border-box;
     border: 0;
     padding-left: 15px;
@@ -523,7 +523,25 @@ opacity: 0.7;
 
 
 
+#deleteChatButton {
+    width: 40px;
+    height: 40px;
+    box-sizing: border-box;
+    border-radius: 15px;
+    border: none;
+    cursor: pointer;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+}
 
+#deleteChatButton img {
+    width: 80%;
+    height: 80%;
+    object-fit: contain;
+}
 
 
 #openFilesButton {
@@ -539,7 +557,8 @@ opacity: 0.7;
     justify-content: center;
     /* position: absolute; */
 
-    margin: 10px;
+    margin-left: 10px;
+    margin-right: 0px;
 
     position: relative;
 }
@@ -633,7 +652,18 @@ opacity: 0.7;
 
 
 
-
+#drop-down-background-modal {
+    display: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(50,50,50,0.4);
+    z-index: 19;
+}
 
 #drop-down-users {
     display: none;
@@ -655,6 +685,8 @@ opacity: 0.7;
 
     scrollbar-width: none; /* Firefox */
     -ms-overflow-style: none; /* IE and Edge */
+    z-index: 150;
+
 }
 
 #drop-down-users::-webkit-scrollbar {
@@ -673,7 +705,6 @@ opacity: 0.7;
 }
 
 
-
 #no-users {
     padding: 10px;
     font-size: 1.1em;
@@ -683,6 +714,7 @@ opacity: 0.7;
     margin-bottom: 5px;
     padding: 10px;
     width: 100%;
+    min-height: 70px;
     height: 70px;
     border: 0;
     box-sizing: border-box;
@@ -693,11 +725,21 @@ opacity: 0.7;
     justify-content: flex-start;
     gap: 20px;
     cursor: pointer;
+    overflow:hidden;
+    flex-wrap: nowrap;
 }
 
 .search-bar-user img {
     height: 70%;
     width: auto;
+}
+
+
+.search-bar-user .small-search-profile-pic {
+    height: 50px;
+    width: 50px;
+    object-fit: cover;
+    border-radius: 50%;
 }
 
     /* END SEARCH BAR STYLING */
