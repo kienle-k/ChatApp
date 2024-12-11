@@ -1144,10 +1144,6 @@ socket.on('message-confirmation', (output) => {
 socket.on('incoming-call', async (data) => {
     const remoteUserId = data.from_user;
 
-
-    choosePersonalChatwSwitchWindow(remoteUserId, data.from_username, null);
-
-
     document.getElementById('call-container').style.display = 'block';
 
     // Prompt user to accept the call
@@ -1193,6 +1189,33 @@ socket.on('incoming-call', async (data) => {
             to_user: remoteUserId,
             answer: answer
         });
+
+
+        if (!isContactLoaded(remoteUserId)){
+            try {
+                const data = await fetchUserAndLastMessage(remoteUserId); // Use `await` to fetch data
+                
+    
+                if (data) {
+                    console.log(data);
+    
+                    let picture_path = data.user.profile_picture;
+                    if (!picture_path.startsWith("/")){
+                        picture_path = "/" + picture_path;
+                    }
+
+                    let last_message = data.lastMessage || "";
+                
+                    addContactToList(picture_path, remoteUserId, data.user.username, last_message, "");
+                }
+            } catch (error) {
+                console.error("Error fetching user and last message:", error);
+            }
+        }
+    
+    
+        choosePersonalChatwSwitchWindow(remoteUserId, data.from_username, null);
+    
     }
 });
 

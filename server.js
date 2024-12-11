@@ -642,7 +642,13 @@ app.post('/api/get-user-and-last-message', async (req, res) => {
 
       const lastMessage = messageResult.length > 0 ? messageResult[0] : null;
 
-      const decryptedMessage = decryptMessage(lastMessage.message, lastMessage.iv);
+      let decryptedMessage;
+      
+      try{
+        decryptedMessage = decryptMessage(lastMessage.message, lastMessage.iv);
+      } catch {
+        decryptMessage = null;
+      }
 
       // Respond with user info and last message
       res.status(200).json({
