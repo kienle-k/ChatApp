@@ -46,7 +46,7 @@ function encryptMessage(message) {
 
 function decryptMessage(encryptedMessage, iv) {
   try {
-      console.log('Attempting decryption with IV:', iv); // Log IV during decryption
+      // console.log('Attempting decryption with IV:', iv); // Log IV during decryption
       const decipher = crypto.createDecipheriv(
           'aes-256-cbc',
           ENCRYPTION_KEY,
@@ -588,6 +588,77 @@ app.post('/api/find-user', isAuthenticated, async (req, res) => {
   } finally {
     connection.release();
   }
+});
+
+ 
+
+
+app.post('/api/get-user-and-last-message', async (req, res) => {
+  let connection;
+  try {
+      // Extract user IDs from request body
+      const { user_id  } = req.body;
+
+      const user2_id = user_id;
+      const user1_id = req.session.user.id;
+
+
+      // Validate input
+      if (!user1_id || !user2_id) {
+          return res.status(400).json({ error: 'Both user1_id and user2_id are required.' });
+      }
+
+      // Get a database connection
+      connection = await pool.getConnection();
+
+      // Query to fetch user info for user1
+      const userQuery = `
+          SELECT id, username, email, created_at, profile_picture
+          FROM users
+          WHERE id = ?;
+      `;
+      const [userResult] = await connection.execute(userQuery, [user2_id]);
+
+      if (userResult.length === 0) {
+          return res.status(404).json({ error: `User with ID ${user1_id} not found.` });
+      }
+
+      const userInfo = userResult[0];
+
+      // Query to fetch the last message exchanged between the two users
+      const messageQuery = `
+          SELECT 
+              message_id, sender_id, receiver_id, message, sent_at, iv
+          FROM 
+              chat_messages
+          WHERE 
+              (sender_id = ? AND receiver_id = ?)
+              OR (sender_id = ? AND receiver_id = ?)
+          ORDER BY 
+              sent_at DESC
+          LIMIT 1;
+      `;
+      const [messageResult] = await connection.execute(messageQuery, [user1_id, user2_id, user2_id, user1_id]);
+
+      const lastMessage = messageResult.length > 0 ? messageResult[0] : null;
+
+      const decryptedMessage = decryptMessage(lastMessage.message, lastMessage.iv);
+
+      // Respond with user info and last message
+      res.status(200).json({
+          user: userInfo,
+          lastMessage: decryptedMessage
+      });
+
+    } catch (err) {
+      console.error('Error fetching user and last message:', err);
+      res.status(500).json({ error: 'Failed to fetch user and last message', details: err });
+    } finally {
+      // Ensure the database connection is released
+      if (connection) {
+          connection.release();
+      }
+    }
 });
 
 

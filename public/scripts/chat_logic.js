@@ -30,6 +30,9 @@ var pending_messages = [];
 const bottomThreshold = 150;
 
 
+let FETCHING_FILES = false;
+
+
 
 let input;
 let messageContainer;
@@ -211,6 +214,17 @@ async function addContactToList(picture_path, contact_id, contact_username, last
     } catch (error) {
         picture_path = '/images/profile.png';
     }
+
+
+    if (contact_username == "AI" || contact_id == 1){
+        picture_path = "/images/ai_img.png";
+    }
+
+    if (!picture_path.startsWith("/")){
+        picture_path = "/" + picture_path;
+    }
+
+
 
     contact_list.insertAdjacentHTML('beforeend',
         `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='${picture_path}' data-username='${contact_username}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
@@ -401,6 +415,16 @@ async function updateSelectedChatDisplay() {
 
 // Opens a new personal chat, loads and displays it
 async function choosePersonalChat(user_id, username, picture_path = null, showHightlight = true) {
+    if (user_id == 1 || username == "AI"){
+        document.getElementById("openFilesButton").style.display = "none";
+        document.getElementById("call-btn").style.display = "none";
+        document.getElementById("file-button").style.display = "none";
+    } else {
+        document.getElementById("openFilesButton").style.display = "flex";
+        document.getElementById("call-btn").style.display = "flex";
+        document.getElementById("file-button").style.display = "flex";        
+    }
+
     const files_list = document.getElementById("files-list");
     files_list.style.display = "none";
     files_list.innerHTML = "";
@@ -654,13 +678,15 @@ function sendCustomMessage(txt) {
 
 
 // Send message to the server via Socket
-function sendMessage(event) {
+async function sendMessage(event) {
     event.preventDefault();
     const msgID = Date.now();
 
     if (selectedFile != null) {
-        sendFile();
-        sendCustomMessage("[Datei gesendet]");
+        await sendFile();
+        setTimeout(() => {
+            sendCustomMessage("[Datei gesendet]");
+        }, 300);
     }
 
     if (input.value == "") {
@@ -805,6 +831,7 @@ function sendFile() {
                 throw new Error(`Server responded with status ${response.status}`);
             }
             fileButtonLogic();
+            fetchFiles();
             return response.json();
         })
         .then(data => {
@@ -817,6 +844,41 @@ function sendFile() {
         fetchFiles();
     }, 100);
 }
+
+
+
+
+async function fetchUserAndLastMessage(userId) {
+    const apiUrl = '/api/get-user-and-last-message';
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_id: userId, // User whose data we want to fetch
+            }),
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        console.log('User Info:', data.user);
+        console.log('Last Message:', data.lastMessage);
+
+        return data;
+
+    } catch (error) {
+        console.error('Error fetching user and last message:', error);
+    }
+    return null;
+}
+
 
 
 
@@ -950,7 +1012,10 @@ socket.on('response-chat-history', (rows) => {
 
 
             if (picture_path == null){
-                picture_path = 'images/profile.png';
+                picture_path = '/images/profile.png';
+            }
+            if (!picture_path.startsWith("/")){
+                picture_path = "/" + picture_path;
             }
 
             // Insert new contact into display list
@@ -1008,13 +1073,13 @@ socket.on('response-history', (data) => {
 
 
 // Socket for receiving messages
-socket.on('chat-message', (msg) => {
+socket.on('chat-message', async (msg) => { // Make the callback async
 
-    from_user = msg.from_user;
-    from_username = msg.from_username;
-    text = msg.text;
+    const from_user = msg.from_user;
+    const from_username = msg.from_username;
+    const text = msg.text;
 
-    updateLastMessage(from_username, from_user, text);
+
 
     if (from_user == CURRENTLY_CHATTING_WITH_ID) {
         console.log("Received message: ", msg);
@@ -1022,10 +1087,37 @@ socket.on('chat-message', (msg) => {
         if (isListNearBottom()) {
             setTimeout(scrollMessagesToBottom, 0);
         }
+        if (text == "[Datei gesendet]") {
+            setTimeout(() => {
+                fetchFiles();
+            }, 400);
+        }
     } else {
-        console.log("Received message from user that is currently not chatted with: ", msg);
+        if (!isContactLoaded(from_user)){
+            console.log("Received message from user that is currently not chatted with: ", msg);
+
+            try {
+                const data = await fetchUserAndLastMessage(from_user); // Use `await` to fetch data
+                
+
+                if (data) {
+                    console.log(data);
+
+                    let picture_path = data.user.profile_picture;
+                    if (!picture_path.startsWith("/")){
+                        picture_path = "/" + picture_path;
+                    }
+                
+                    addContactToList(picture_path, from_user, from_username, data.lastMessage, "");
+                }
+            } catch (error) {
+                console.error("Error fetching user and last message:", error);
+            }
+        }
     }
+    updateLastMessage(from_username, from_user, text);
 });
+
 
 // Old approach, now API call -> different handling
 
@@ -1135,6 +1227,7 @@ socket.on('disconnect', () => {
 
 
 async function checkFileExists(fileUrl) {
+    console.log("\t\tChecking FILE:", fileUrl);
     
     try {
         const response = await fetch(fileUrl, { method: 'HEAD' });
@@ -1151,6 +1244,8 @@ async function checkFileExists(fileUrl) {
 
 
 async function fetchFiles() {
+    if (FETCHING_FILES == true){return;}
+    FETCHING_FILES = true;
     try {
         // Fetch files from the backend
         const response = await fetch('/download', {
@@ -1181,6 +1276,12 @@ async function fetchFiles() {
             const fileElement = document.createElement('div');
             fileElement.classList.add("highlight-on-hover");
 
+            if (file.file_path == null){continue}
+
+            if (!file.file_path.startsWith("/")){
+                file.file_path = "/" + file.file_path;
+            }
+            
             // Use await for checking the file existence
             let exists = await checkFileExists(file.file_path);
             if (exists) {
@@ -1211,6 +1312,8 @@ async function fetchFiles() {
     } catch (error) {
         console.error('Error during fetch operation:', error);
         document.getElementById('files-list').innerText = 'Error fetching files.';
+    } finally {
+        FETCHING_FILES = false;
     }
 }
 
