@@ -1325,8 +1325,14 @@ async function fetchFiles() {
 
         const data = await response.json();
 
+
+        const types = [
+            "jpg", "png", "pdf", "txt", "doc", "exe", "mp3", "mp4", "zip"
+        ]
                 
         let results = [];
+
+        let exists;
         // Iterate through the files and add them to the DIV
         for (const file of data.files) {
             const fileElement = document.createElement('div');
@@ -1340,27 +1346,41 @@ async function fetchFiles() {
             }
             
             // Use await for checking the file existence
-            let exists = await checkFileExists(file.file_path);
+            exists = await checkFileExists(file.file_path);
             if (exists) {
                 // If file exists, show download icon
                 console.log(file.file_path);
                 let type = file.file_path.split(".").pop();
 
-                if (type){
+                if (type != null){
                     type = type.toLowerCase();
                 }else {
                     type = "";
                 }
+                
+                if (types.includes(type)){
+                    iconexists = await checkFileExists(`/images/downloadFile_${type}.png`);
+                }else {
+                    iconexists = false;
+                }
+                // if (!iconexists){type = "default";}
+                if (!iconexists){
+                    fileElement.innerHTML = `<img style="width: 80%; height: 80%; object-fit: cover" src="/images/downloadFile_default.png">
+                                             <div class="file-list-icon-text">${type}</div>`;
+                }else if (type == "jpg" || type == "png"){
+                    fileElement.innerHTML = `<img style="width: 80%; height: 80%; object-fit: cover" src="${file.file_path}">
+                                                                 <div class="file-list-icon-text">${type}</div>`;
 
-                let exists = await checkFileExists(`/images/downloadFile_${type}.png`);
-                if (!exists){type = "default";}
-                fileElement.innerHTML = `<img style="width: 80%; height: 80%; object-fit: cover" src="/images/downloadFile_${type}.png">`;
+                }else {
+                    fileElement.innerHTML = `<img style="width: 80%; height: 80%; object-fit: cover" src="/images/downloadFile_${type}.png">`;
+                }
                 fileElement.onclick = () => {
                     downloadFile(file.file_path);
                 };
             } else {
                 // If file does not exist, show "deleted" icon
                 fileElement.innerHTML = `<img style="width: 70%; height: 70%; object-fit: cover" src="/images/downloadLostFile.png">`;
+
                 fileElement.onclick = () => {
                     alert("Diese Datei wurde gelöscht.");
                 };

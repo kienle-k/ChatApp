@@ -942,9 +942,26 @@ opacity: 0.7;
 .file-list-icon {
     transition: opacity 0.2s ease-in;
     margin: 5px;
+    position: relative;
 }
 
+.file-list-icon img {
+    border-radius: 5px;
+}
 
+.file-list-icon .file-list-icon-text {
+    position: absolute; /* Position relative to the parent */
+    top: 70%; /* Center vertically */
+    left: 70%; /* Center horizontally */
+    transform: translate(-50%, -50%); /* Perfect centering */
+    text-align: center; /* Center text within the overlay */
+    color: #ffffff; /* Adjust text color */
+    font-size: 14px; /* Adjust font size */
+    background-color: rgba(0, 0, 0, 0.5); /* Optional: semi-transparent background */
+    padding: 5px; /* Add padding around the text */
+    border-radius: 15px; /* Optional: round corners */
+    pointer-events: none; /* Prevent the text from intercepting clicks */
+}
 
 
 .files-info-div {
