@@ -236,15 +236,20 @@
 
     
 #messages {
-    border: 2px solid transparent; /*black; */
+    border: 2px solid transparent;
     background-color: #ededed;
 }
 
 
 
 #files-list {
-    border: 2px solid #2b769ea0; /*black; */
+    /* border: 2px solid #2b769ea0;*/
     background-color: #ededed;
+    box-shadow: 0px 0px 4px rgba(52, 52, 52, 0.836);
+}
+
+.files-info-div {
+    color: black;
 }
 
 

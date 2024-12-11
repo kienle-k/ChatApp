@@ -647,7 +647,7 @@ app.post('/api/get-user-and-last-message', async (req, res) => {
       try{
         decryptedMessage = decryptMessage(lastMessage.message, lastMessage.iv);
       } catch {
-        decryptMessage = null;
+        decryptedMessage = null;
       }
 
       // Respond with user info and last message

@@ -426,7 +426,12 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
     }
 
     const files_list = document.getElementById("files-list");
-    files_list.style.display = "none";
+    files_list.style.minHeight = "0px";
+    files_list.style.height = "0px";
+
+    setTimeout(()=> {
+        files_list.style.display = "none";
+    }, 400);
     files_list.innerHTML = "";
     console.log("USER selected for chatting", username, user_id);
 
@@ -439,6 +444,9 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
         let exists = await checkFileExists(picture_path);
         if (!exists) {
             picture_path = "/images/profile.png";
+        }
+        if (!picture_path.startsWith("/")){
+            picture_path = "/" + picture_path;
         }
 
         document.getElementById("user-image-img").src = picture_path;
@@ -494,10 +502,6 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
     FIRST_LOAD = true; // Flag to prevent buggy scrolling in the beginning
 
     document.getElementById('message-input').focus(); // Focus chat input, to allow direct texting onload
-
-    
- 
-
 }
 
 
@@ -663,9 +667,9 @@ function sendCustomMessage(txt) {
     // Send the message via socket to the server
     socket.emit('chat-message', messageData);
 
-    // Optionally update the UI or logs (e.g., appending the message to the chat)
-    const msgLi = addMessage(txt, 'sent'); // This can be customized based on your chat UI
-    setTimeout(scrollMessagesToBottom, 0); // Scroll to the latest message
+    
+    const msgLi = addMessage(txt, 'sent'); 
+    setTimeout(scrollMessagesToBottom, 0);
 
     // Update the last sent message in the contact field
     updateLastMessage("Du", CURRENTLY_CHATTING_WITH_ID, txt);
@@ -686,7 +690,7 @@ async function sendMessage(event) {
         await sendFile();
         setTimeout(() => {
             sendCustomMessage("[Datei gesendet]");
-        }, 300);
+        }, 500);
     }
 
     if (input.value == "") {
@@ -831,7 +835,9 @@ function sendFile() {
                 throw new Error(`Server responded with status ${response.status}`);
             }
             fileButtonLogic();
-            fetchFiles();
+            setTimeout(() => {
+                fetchFiles();
+            }, 100);
             return response.json();
         })
         .then(data => {
@@ -840,9 +846,6 @@ function sendFile() {
         .catch(error => {
             console.error('Error uploading file:', error);
         });
-    setTimeout(() => {
-        fetchFiles();
-    }, 100);
 }
 
 
@@ -916,6 +919,9 @@ async function startCall(userId) {
             offer: offer
         });
 
+
+
+
         // Handle incoming tracks (only audio)
         peerConnection.ontrack = (event) => {
             const remoteAudio = document.getElementById('remoteAudio');
@@ -933,15 +939,19 @@ async function startCall(userId) {
                 });
             }
         };
+
+        sendCustomMessage("[Anruf gestartet]");
+
+
+
     } catch (error) {
         console.error('Call setup error:', error);
     }
 }
 
 
-// In your client-side JavaScript
 function trigger_call() {
-    const selectedUserId = CURRENTLY_CHATTING_WITH_ID; // Implement this to get the current chat partner's ID
+    const selectedUserId = CURRENTLY_CHATTING_WITH_ID; 
 
     if (selectedUserId) {
         startCall(selectedUserId);
@@ -953,7 +963,6 @@ function trigger_call() {
     }
 }
 
-// Add an end call function
 function trigger_end_call() {
     if (peerConnection) {
         peerConnection.close();
@@ -969,6 +978,8 @@ function trigger_end_call() {
 
     // Optionally emit a 'end-call' event to the other user
     socket.emit('end-call', { to_user: CURRENTLY_CHATTING_WITH_ID });
+    
+    sendCustomMessage("[Anruf beendet]");
 }
 
 socket.on('response-chat-history', (rows) => {
@@ -1090,7 +1101,7 @@ socket.on('chat-message', async (msg) => { // Make the callback async
         if (text == "[Datei gesendet]") {
             setTimeout(() => {
                 fetchFiles();
-            }, 400);
+            }, 500);
         }
     } else {
         if (!isContactLoaded(from_user)){
@@ -1267,8 +1278,31 @@ async function checkFileExists(fileUrl) {
 
 
 async function fetchFiles() {
+    
     if (FETCHING_FILES == true){return;}
     FETCHING_FILES = true;
+
+    let isTheSame = false;
+    const filesListDiv = document.getElementById('files-list');
+
+    if (filesListDiv.dataset.userid != CURRENTLY_CHATTING_WITH_ID){
+        filesListDiv.innerHTML = ''; // Clear existing content instantly, if the previous files were not from the current user 
+    } else {
+        isTheSame = true;
+    }
+
+    filesListDiv.dataset.userid = CURRENTLY_CHATTING_WITH_ID; // Set the data file id to the current user
+
+    // filesListDiv.style.minHeight = "0px";
+    // filesListDiv.style.height = "0px";
+
+    if (filesListDiv.innerHTML == ""){
+        filesListDiv.innerHTML = '<div class="files-info-div">Dateien werden geladen...</div>';
+        filesListDiv.style.minHeight = "50px";
+        filesListDiv.style.height = "50px";
+    }
+
+
     try {
         // Fetch files from the backend
         const response = await fetch('/download', {
@@ -1283,20 +1317,20 @@ async function fetchFiles() {
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Error fetching files:', errorData.message);
-            document.getElementById('files-list').innerText = 'No files found.';
+            filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien</div>';
+            filesListDiv.style.minHeight = "50px";
+            filesListDiv.style.height = "50px";
             return;
         }
 
         const data = await response.json();
 
-        // Select the target div
-        const filesListDiv = document.getElementById('files-list');
-        filesListDiv.innerHTML = ''; // Clear existing content
-
+                
         let results = [];
         // Iterate through the files and add them to the DIV
         for (const file of data.files) {
             const fileElement = document.createElement('div');
+            fileElement.classList.add("file-list-icon");
             fileElement.classList.add("highlight-on-hover");
 
             if (file.file_path == null){continue}
@@ -1309,7 +1343,18 @@ async function fetchFiles() {
             let exists = await checkFileExists(file.file_path);
             if (exists) {
                 // If file exists, show download icon
-                fileElement.innerHTML = `<img style="width: 80%; height: 80%; object-fit: cover" src="/images/downloadFile.png">`;
+                console.log(file.file_path);
+                let type = file.file_path.split(".").pop();
+
+                if (type){
+                    type = type.toLowerCase();
+                }else {
+                    type = "";
+                }
+
+                let exists = await checkFileExists(`/images/downloadFile_${type}.png`);
+                if (!exists){type = "default";}
+                fileElement.innerHTML = `<img style="width: 80%; height: 80%; object-fit: cover" src="/images/downloadFile_${type}.png">`;
                 fileElement.onclick = () => {
                     downloadFile(file.file_path);
                 };
@@ -1325,16 +1370,42 @@ async function fetchFiles() {
             fileElement.style.width = "50px";
             fileElement.style.height = "50px";
             fileElement.style.cursor = 'pointer';
+            if (isTheSame == true){
+                fileElement.style.opacity = 1;
+            } else {
+                fileElement.style.opacity = 0;
+            }
 
             // Append the file element to the files list
             results.push(fileElement);
         }
+
+        filesListDiv.innerHTML = ''; // Clear existing content
+
+        if (results.length == 0){
+            filesListDiv.innerHTML = '<div class="files-info-div">Keine Dateien gefunden</div>';
+            filesListDiv.style.minHeight = "50px";
+            filesListDiv.style.height = "50px";
+        } else {
+            filesListDiv.style.minHeight = "150px";
+            filesListDiv.style.height = "150px";
+        }
+        
+
+        // Add new files        
         for (const fileElement of results) {
             filesListDiv.appendChild(fileElement);
+            setTimeout(()=> {
+                fileElement.style.opacity = 1;
+            }, 100);
         }
+
+
     } catch (error) {
         console.error('Error during fetch operation:', error);
-        document.getElementById('files-list').innerText = 'Error fetching files.';
+        filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien</div>';
+        filesListDiv.style.minHeight = "50px";
+        filesListDiv.style.height = "50px";
     } finally {
         FETCHING_FILES = false;
     }
@@ -1492,14 +1563,36 @@ window.onload = async function () {
 
 
     document.getElementById("openFilesButton").addEventListener('click', async function () {
-        style = document.getElementById("files-list").style.display;
+        const files_list = document.getElementById("files-list");
+        style = files_list.style.display;
         if (style == "flex") {
-            document.getElementById("files-list").style.display = "none";
+            files_list.style.overflowY = "hidden";
+            files_list.style.minHeight = "0px";
+            files_list.style.height = "0px";
+            setTimeout(()=> {
+                files_list.style.display = "none";
+                files_list.style.overflowY = "auto";
+            }, 400);
         } else {
-            const filesListDiv = document.getElementById('files-list');
-            filesListDiv.innerHTML = ''; // Clear existing content
-            document.getElementById("files-list").style.display = "flex";
+            // files_list.innerHTML = ''; // Clear existing content
+            files_list.style.display = "flex";
+            files_list.style.overflowY = "auto";
             fetchFiles();
+        }
+    });
+
+
+    document.getElementById("messages").addEventListener("click", async function () {
+        const files_list = document.getElementById("files-list");
+        style = files_list.style.display;
+        if (style == "flex") {
+            files_list.style.overflowY = "hidden";
+            files_list.style.minHeight = "0px";
+            files_list.style.height = "0px";
+            setTimeout(()=> {
+                files_list.style.display = "none";
+                files_list.style.overflowY = "auto";
+            }, 400);
         }
     });
 
