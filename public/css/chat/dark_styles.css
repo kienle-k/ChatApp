@@ -181,6 +181,12 @@ background-color: #332755;
 }
 
 
+
+#drop-down-background-modal {
+    background-color: #08030da4;;
+    box-shadow: 0px 0px 5px #08030d;
+}
+
 #user-list {  
 }
 

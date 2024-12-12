@@ -157,6 +157,23 @@ function showBigProfilePicForCall(id) {
 
 }
 
+function showBigProfilePicByUrl(src, name, email){
+
+    if (src) {
+        bigProfileDisplay.innerHTML = '';
+        bigProfileInfo.innerHTML = `<div><b>${name}</b></div>
+                                    <div>${email}</div>`;
+
+        bigProfileModal.style.display = "flex";
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = "Profile Picture";
+        img.classList.add('big-profile-pic');
+
+        bigProfileDisplay.appendChild(img);
+    }  
+}
 
 // Display the big profile picture 
 function showBigProfilePic(id) {
@@ -397,9 +414,6 @@ async function findUser() {
                     user.username += " (Du)";
                 }
 
-
-
-
                 // New contacts have a plus, already chatted-with users are displayed with another mark
                 let img_path = "/images/addcontact.png";
                 if (isContactLoaded(user.id)) {
@@ -421,7 +435,11 @@ async function findUser() {
                 }
 
                 // Create div with data & Add to result list
-                userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}" onclick="addContact(${user.id}, '${user.username}', '${profile_picture}')"><img src="${img_path}"/><img class="small-search-profile-pic" src="${profile_picture}">${user.username}</button>`; // <br>Email: ${user.email}
+                userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}">
+                                        <img class="user-searchlist-add-icon" src="${img_path}" onclick="addContact(${user.id}, '${user.username}', '${profile_picture}')">
+                                        <img class="small-search-profile-pic" src="${profile_picture}" onclick="showBigProfilePicByUrl('${profile_picture}', '${user.username}', '');">
+                                        ${user.username}
+                                    </button>`; // <br>Email: ${user.email}
                 resultsContainer.appendChild(userDiv);
             }
 
@@ -1354,7 +1372,7 @@ async function fetchFiles() {
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Error fetching files:', errorData.message);
-            filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien :/</div>';
+            filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien ⚠</div>';
             setTimeout(()=>{
             filesListDiv.style.minHeight = "50px";
             filesListDiv.style.height = "50px";
@@ -1432,7 +1450,7 @@ async function fetchFiles() {
                 fileElement.innerHTML = `<img style="width: 70%; height: 70%; object-fit: cover" src="/images/downloadLostFile.png">`;
 
                 fileElement.onclick = () => {
-                    alert("Diese Datei wurde gelöscht :/");
+                    alert("Diese Datei wurde gelöscht 🗑️");
                 };
             }
 
@@ -1454,7 +1472,7 @@ async function fetchFiles() {
         filesListDiv.innerHTML = ''; // Clear existing content
 
         if (results.length == 0){
-            filesListDiv.innerHTML = '<div class="files-info-div">Keine Dateien gefunden :|</div>';
+            filesListDiv.innerHTML = '<div class="files-info-div">Keine Dateien gefunden ⛒</div>';
             setTimeout(()=>{
             filesListDiv.style.minHeight = "50px";
             filesListDiv.style.height = "50px";
@@ -1478,7 +1496,7 @@ async function fetchFiles() {
 
     } catch (error) {
         console.error('Error during fetch operation:', error);
-        filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien :/</div>';
+        filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien ⚠</div>';
         setTimeout(()=>{
         filesListDiv.style.minHeight = "50px";
         filesListDiv.style.height = "50px";
@@ -1737,6 +1755,7 @@ window.onload = async function () {
     const user_search_input = document.getElementById('user-search-input');
 
     ct_bg.addEventListener("click", () => {
+        console.log("Stopping search");
         // Reset and hide the search results
         resultsContainer.innerHTML = '';
         ct_wrapper.style.opacity = "0";
