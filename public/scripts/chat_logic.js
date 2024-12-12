@@ -1333,8 +1333,10 @@ async function fetchFiles() {
 
     if (filesListDiv.innerHTML == ""){
         filesListDiv.innerHTML = '<div class="files-info-div">Dateien werden geladen...</div>';
+        setTimeout(()=>{
         filesListDiv.style.minHeight = "50px";
         filesListDiv.style.height = "50px";
+        }, 50);
     }
 
 
@@ -1352,9 +1354,11 @@ async function fetchFiles() {
         if (!response.ok) {
             const errorData = await response.json();
             console.error('Error fetching files:', errorData.message);
-            filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien</div>';
+            filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien :/</div>';
+            setTimeout(()=>{
             filesListDiv.style.minHeight = "50px";
             filesListDiv.style.height = "50px";
+            },50);
             return;
         }
 
@@ -1428,13 +1432,14 @@ async function fetchFiles() {
                 fileElement.innerHTML = `<img style="width: 70%; height: 70%; object-fit: cover" src="/images/downloadLostFile.png">`;
 
                 fileElement.onclick = () => {
-                    alert("Diese Datei wurde gelöscht.");
+                    alert("Diese Datei wurde gelöscht :/");
                 };
             }
 
             // Add styling for better visibility
             fileElement.style.width = "50px";
             fileElement.style.height = "50px";
+
             // fileElement.style.cursor = 'pointer';
             if (isTheSame == true){
                 fileElement.style.opacity = 1;
@@ -1449,12 +1454,16 @@ async function fetchFiles() {
         filesListDiv.innerHTML = ''; // Clear existing content
 
         if (results.length == 0){
-            filesListDiv.innerHTML = '<div class="files-info-div">Keine Dateien gefunden</div>';
+            filesListDiv.innerHTML = '<div class="files-info-div">Keine Dateien gefunden :|</div>';
+            setTimeout(()=>{
             filesListDiv.style.minHeight = "50px";
             filesListDiv.style.height = "50px";
+            },50);
         } else {
+            setTimeout(()=>{
             filesListDiv.style.minHeight = "150px";
             filesListDiv.style.height = "150px";
+            },50);
         }
         
 
@@ -1469,9 +1478,11 @@ async function fetchFiles() {
 
     } catch (error) {
         console.error('Error during fetch operation:', error);
-        filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien</div>';
+        filesListDiv.innerHTML = '<div class="files-info-div">Fehler beim Laden der Dateien :/</div>';
+        setTimeout(()=>{
         filesListDiv.style.minHeight = "50px";
         filesListDiv.style.height = "50px";
+        },50);
     } finally {
         FETCHING_FILES = false;
     }
