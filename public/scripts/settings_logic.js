@@ -1,6 +1,7 @@
 
 let NEW_IMAGE = false;
 
+let INIT_USERNAME = null;
 
 function goBack() {
     if (window.opener) {
@@ -67,6 +68,7 @@ async function loadData() {
         const response = await fetch('/api/get-my-info');
         const data = await response.json();
 
+        INIT_USERNAME = data.username;
         usernameElement.value = data.username;
         emailElement.value = data.email;
 
@@ -92,14 +94,33 @@ document.querySelector('.settings-form').addEventListener('submit', async functi
     const confirmPassword = document.getElementById('confirm-password').value.trim();
     const profileUpload = document.getElementById('profile-upload').files[0]; // Get the uploaded file
 
-    // New password was set
-    if (password != ""){
-        if (!passwordRegex.test(password)) {
-            passwordErrorMessage.textContent = 'Das Passwort erfüllt nicht die Anforderungen.';
+    // New username was set
+    if (username != INIT_USERNAME){
+        if (!usernameRegex.test(username)) {
+            if (username.length < 5) {
+                usernameErrorMessage.textContent = 'Der Benutzername muss mindestens 5 Zeichen lang sein.';
+            } else if (username.length > 30) {
+                usernameErrorMessage.textContent = 'Der Benutzername darf maximal 30 Zeichen lang sein.';
+            } else if (username[username.length-1] == "."){
+                usernameErrorMessage.textContent = 'Der Benutzername darf nicht mit einem "." enden.';
+            } else {
+                usernameErrorMessage.textContent = 'Der Benutzername darf nur Buchstaben, Zahlen, "_" und "." enthalten.';
+            }
             return;
         }
+    }
 
-        if (password !== confirmPassword) {
+    // New password was set
+    if (password != ""){    
+        if (!passwordRegex.test(password)) {
+            if (password.length < 8){
+                passwordErrorMessage.textContent = 'Das Passwort muss mindestens 8 Zeichen lang sein';
+            }else {
+                passwordErrorMessage.textContent = 'Das Passwort erfordert einen Großbuchstaben, eine Zahl und ein Sonderzeichen';
+            }
+            return;
+        } else if (password !== confirmPassword) {
+            event.preventDefault();
             errorMessage.textContent = 'Die Passwörter stimmen nicht überein.';
             return;
         }
@@ -121,7 +142,7 @@ document.querySelector('.settings-form').addEventListener('submit', async functi
         });
 
         if (response.ok) {
-            //alert("Settings updated successfully!");
+            alert("Settings updated successfully!");
             goBack();
             
         } else {
@@ -206,11 +227,15 @@ window.onload = function(){
 const passwordField = document.getElementById('password');
 const confirmPasswordField = document.getElementById('confirm-password');
 const passwordErrorMessage = document.getElementById('password-error-message');
+const usernameErrorMessage = document.getElementById('username-error-message');
+
 const errorMessage = document.getElementById('error-message');
 
 // Passwortanforderungen: mindestens 8 Zeichen, ein Großbuchstabe, eine Zahl, maximale Länge 30 Zeichen, Sonderzeichen erlaubt aber nicht Pflicht
 const passwordRegex = /^(?=.*[A-Z])(?=.*\d)[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,30}$/;
 //const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?])[A-Za-z\d!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]{8,30}$/; // härtere Anforderungen: Sonderzeichen Pflicht
+
+const usernameRegex = /^[A-Za-z\d._]{5,30}[^.]$/; // erlaubt _ und . mit am Ende kein .
 
 passwordField.addEventListener('input', function() {
 

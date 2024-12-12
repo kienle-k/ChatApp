@@ -36,11 +36,12 @@ body * {
     height: 100%;
     box-sizing: border-box;
     border: none;
-    z-index: 200;
+    z-index: 2000;
     position: absolute;
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: auto;
 }
 
 #profile-wrapper {
@@ -92,6 +93,59 @@ body * {
     /* background-color: rgba(200,200,200,0.5); */
 
 }
+
+/* FOR CALLS */
+
+#profile-wrapper-call {
+    margin-top: 50px;
+    width: 100%;
+    height: fit-content;
+    max-width: 100%;
+    max-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 25px;
+    padding: 0;
+    
+}
+
+#profile-wrapper-call #profile-pic-display-call{
+    width: 300px;
+    height: 300px;
+    max-width: 100%; /* Make the image cover the div */
+    overflow: hidden; 
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+#profile-pic-display-call .big-profile-pic {
+    height: 100%;
+    width: 100%;
+    object-fit: cover; /* Ensures the image fills and crops */
+    object-position: center; /* Centers the image within the div */
+    display: block; /* Removes any extra space below the image */ 
+}
+
+#profile-wrapper-call #profile-text-call {
+    font-size: 1.2em;
+    width: fit-content;
+    max-width: 90%;
+    height: fit-content;
+    max-width: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    flex-wrap: wrap;
+    text-wrap: wrap;
+    gap: 5px;
+    box-sizing: border-box;
+    /* background-color: rgba(200,200,200,0.5); */
+
+}
+
 
 button:active {
 opacity: 0.7;
@@ -691,34 +745,37 @@ opacity: 0.7;
     left: 0px;
     width: calc(100% - 0px);
     box-sizing: border-box;
-    height: auto;
-    overflow-y: auto;
+    height: 600px;
+    overflow-y: hidden;
+    overflow-x: hidden;
     z-index: 10; 
 
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-
-    scrollbar-width: none; /* Firefox */
-    -ms-overflow-style: none; /* IE and Edge */
+    border-bottom-left-radius: 19px;
+    border-bottom-right-radius: 19px;
     z-index: 150;
+    padding: 5px;
 
 }
 
-#drop-down-users::-webkit-scrollbar {
-    display: none; /* Chrome, Safari, and Edge */
-}
+
 
 #user-list {
     height: auto;
     margin: 0;
-    padding: 5px;
-    padding-top: 5px;
-    padding-bottom: 0;
+    padding: 0;
     list-style-type: none;
-    border-bottom-left-radius: 15px;
-    border-bottom-right-radius: 15px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
 }
 
+#user-list::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, and Edge */
+}
 
 #no-users {
     padding: 10px;
@@ -1016,44 +1073,26 @@ opacity: 0.7;
     /* END SEND CONTAINER STYLING */
 
 
-    #call-container {
-        display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000;
-    }
-
-#end-call-btn {
-    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-    width: 60px;
-    height: 60px;
-    /* background-color: transparent; */
-    border: none;
-    border-radius: 50%;
-    background-color: white;
-    cursor: pointer;
-
+#call-container {
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    background-color: rgba(0,0,0,0.8); 
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    display: none; 
 }
-
-#end-call-btn img {
-    width: 100%; /* Adjust image size relative to button */
-    height: 100%; /* Adjust image size relative to button */
-    object-fit: contain; /* Ensure the image scales properly */
-}
-
 
 
 
 
 /* CALL STYLES */
 
-#call-container {
-    display: none; 
-    position: fixed; 
-    top: 0; 
-    left: 0; 
-    width: 100%; 
-    height: 100%; 
-    background: rgba(0,0,0,0.8); 
-    z-index: 1000;
-}
 
 
 #end-call-btn {
@@ -1240,8 +1279,10 @@ opacity: 0.7;
         cursor: pointer;
     }
     
-    #profile-wrapper {
-        width: fit-content;
+    #profile-wrapper,
+    #profile-wrapper-call {
+        margin-top: 50px;
+        width: 100%;
         max-width: 100%;
         max-height: 100%;
         display: flex;
@@ -1250,7 +1291,8 @@ opacity: 0.7;
         padding: 0; 
     }
 
-    #profile-wrapper #profile-text {
+    #profile-wrapper #profile-text,
+    #profile-wrapper-call #profile-text-call {
         align-items: center;
     }
 

@@ -9,7 +9,7 @@ const errorMessage = document.getElementById('error-message');
 // const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{10,30}$/;
 const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*\W).{8,}$/;
 // Benutzername: mindestens 5 Zeichen, maximal 30 Zeichen
-const usernameRegex = /^[A-Za-z\d]{5,30}$/;
+const usernameRegex = /^[A-Za-z\d._]{5,30}[^.]$/; // erlaubt _ und . mit am Ende kein .
 
 usernameField.addEventListener('input', function() {
     const username = usernameField.value;
@@ -20,8 +20,10 @@ usernameField.addEventListener('input', function() {
             usernameErrorMessage.textContent = 'Der Benutzername muss mindestens 5 Zeichen lang sein.';
         } else if (username.length > 30) {
             usernameErrorMessage.textContent = 'Der Benutzername darf maximal 30 Zeichen lang sein.';
+        } else if (username[username.length-1] == "."){
+            usernameErrorMessage.textContent = 'Der Benutzername darf nicht mit einem "." enden.';
         } else {
-            usernameErrorMessage.textContent = 'Der Benutzername darf nur Buchstaben und Zahlen enthalten.';
+            usernameErrorMessage.textContent = 'Der Benutzername darf nur Buchstaben, Zahlen, "_" und "." enthalten.';
         }
     } else {
         usernameErrorMessage.textContent = '';
@@ -34,7 +36,7 @@ passwordField.addEventListener('input', function() {
             if (password.length < 8){
                 passwordErrorMessage.textContent = 'Das Passwort muss mindestens 8 Zeichen lang sein';
             }else {
-                passwordErrorMessage.textContent = 'Das Passwort erfordert einen Großbuchstaben und eine Zahl.';
+                passwordErrorMessage.textContent = 'Das Passwort erfordert einen Großbuchstaben, eine Zahl und ein Sonderzeichen';
             }
     } else {
         passwordErrorMessage.textContent = '';
@@ -58,13 +60,13 @@ document.getElementById('registerForm').addEventListener('submit', function(even
         } else if (username.length > 30) {
             usernameErrorMessage.textContent = 'Der Benutzername darf maximal 30 Zeichen lang sein.';
         } else {
-            usernameErrorMessage.textContent = 'Der Benutzername darf nur Buchstaben und Zahlen enthalten.';
+            usernameErrorMessage.textContent = 'Der Benutzername darf nur Buchstaben, Zahlen, "_" und "." enthalten.';
         }
     } else if (!passwordRegex.test(password)) {
         if (password.length < 8){
             passwordErrorMessage.textContent = 'Das Passwort muss mindestens 8 Zeichen lang sein';
         }else {
-            passwordErrorMessage.textContent = 'Das Passwort erfordert einen Großbuchstaben und eine Zahl.';
+            passwordErrorMessage.textContent = 'Das Passwort erfordert einen Großbuchstaben, eine Zahl und ein Sonderzeichen';
         }
     } else if (password !== confirmPassword) {
         event.preventDefault();

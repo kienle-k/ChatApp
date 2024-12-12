@@ -35,6 +35,27 @@ html {
 
 
 
+#profile-wrapper-call #profile-pic-display-call{
+    background-color: aquamarine;
+    box-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+
+}
+
+
+
+#profile-wrapper-call #profile-text-call {
+    color: rgba(255,255,255,0.8);
+    text-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+}
+
+
+
+#profile-pic-display-call .big-profile-pic {
+    background-color: rgb(19, 14, 32);
+}
+
+
+
 /* RANDOM CHAT*/
 
 #random-chat-button {
@@ -156,11 +177,11 @@ background-color: #332755;
 #drop-down-users {
     opacity: 0;
     background-color: rgba(26, 10, 37, 0.791);
+    border: 2px solid rgb(138, 113, 179);
 }
 
 
 #user-list {  
-    border: 2px solid rgb(138, 113, 179);
 }
 
 

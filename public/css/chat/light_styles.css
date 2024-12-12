@@ -49,6 +49,27 @@
 
 
 
+
+#profile-wrapper-call #profile-pic-display-call{
+    background-color: aquamarine;
+    border-radius: 20px;
+    box-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+
+}
+
+
+
+#profile-wrapper-call #profile-text-call {
+    color: white;
+    text-shadow: 3px 3px 4px rgba(20,20,20,0.5);
+}
+
+
+
+ 
+
+
+
 /* TOP BAR CONTENT */
 
 
@@ -119,12 +140,13 @@
 
 
 #drop-down-users {
+    opacity: 0;
     background-color: rgba(205, 205, 205, 0.791);
+    border: 2px solid darkgray;
 }
 
 
 #user-list {
-    border: 2px solid darkgray;
 }
 
 

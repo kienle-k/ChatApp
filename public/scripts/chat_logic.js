@@ -124,11 +124,45 @@ function choosePersonalChatwSwitchWindow(id, name, pic, showHighlight=true) {
     
 }
 
+function showBigProfilePicForCall(id) {
+    let src;
+    let name;
+
+    // const bigProfileWrapperCall = document.getElementById("profile-wrapper-call");
+    const bigProfileDisplayCall = document.getElementById("profile-pic-display-call");
+    const bigProfileTextCall = document.getElementById("profile-text-call");
+
+
+    for (let child of contact_list.children) {
+        if (child.getAttribute('data-id') == id) {
+            src = child.getAttribute('data-imgsrc');
+            name = child.getAttribute('data-username');
+            email = "";
+            break;
+        }
+    }
+    if (src) {
+        bigProfileDisplayCall.innerHTML = '';
+        bigProfileTextCall.innerHTML = `<div><b>${name}</b></div>
+                                    <div>${email}</div>`;
+
+
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = "Profile Picture";
+        img.classList.add('big-profile-pic');
+
+        bigProfileDisplayCall.appendChild(img);
+    }
+
+}
+
 
 // Display the big profile picture 
 function showBigProfilePic(id) {
     let src;
     let name;
+
 
     for (let child of contact_list.children) {
         if (child.getAttribute('data-id') == id) {
@@ -958,6 +992,7 @@ function trigger_call() {
 
         // Optionally show call interface
         document.getElementById('call-container').style.display = 'block';
+        showBigProfilePicForCall(selectedUserId);
     } else {
         alert('Please select a user to call');
     }
@@ -1158,7 +1193,7 @@ socket.on('incoming-call', async (data) => {
     document.getElementById('call-container').style.display = 'block';
 
     // Prompt user to accept the call
-    if (confirm(`Accept call from ${data.from_username}?`)) {
+    if (confirm(`${data.from_username} ruft an. Anruf annehmen?`)) {
 
         // Request camera and microphone access
         localStream = await navigator.mediaDevices.getUserMedia({
@@ -1374,8 +1409,19 @@ async function fetchFiles() {
                 }else {
                     fileElement.innerHTML = `<img style="width: 80%; height: 80%; object-fit: cover" src="/images/downloadFile_${type}.png">`;
                 }
+                fileElement.style.cursor = 'pointer'; //url("/images/download-cursor-small.png"),
+
                 fileElement.onclick = () => {
-                    downloadFile(file.file_path);
+                    fileElement.style.cursor = 'wait'; 
+                    downloadFile(file.file_path)
+                        .then(() => {
+                            // Reset the cursor after download has started
+                            
+                            setTimeout(() => {
+                                console.log("RESET TO IMG CURSOR");
+                                fileElement.style.cursor = 'pointer'; //url("/images/download-cursor-small.png"),
+                            }, 100);
+                        });
                 };
             } else {
                 // If file does not exist, show "deleted" icon
@@ -1389,7 +1435,7 @@ async function fetchFiles() {
             // Add styling for better visibility
             fileElement.style.width = "50px";
             fileElement.style.height = "50px";
-            fileElement.style.cursor = 'pointer';
+            // fileElement.style.cursor = 'pointer';
             if (isTheSame == true){
                 fileElement.style.opacity = 1;
             } else {
@@ -1433,13 +1479,17 @@ async function fetchFiles() {
 
 
 // Function to download file
-function downloadFile(filePath) {
-    const link = document.createElement('a');
-    link.href = filePath; // Assumes `file_path` is a direct URL to the file
-    link.download = filePath.split('/').pop(); // Extract the file name from the path
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+async function downloadFile(filePath) {
+    try  {
+        const link = document.createElement('a');
+        link.href = filePath; // Assumes `file_path` is a direct URL to the file
+        link.download = filePath.split('/').pop(); // Extract the file name from the path
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    } catch (error){
+        console.error("Download failed:",  error);
+    }
 }
 
 
