@@ -62,19 +62,22 @@ body * {
 #profile-wrapper #profile-pic-display{
     width: 300px;
     height: 300px;
-    max-width: 100%; /* Make the image cover the div */
-    overflow: hidden; 
+    max-width: 100%;
     border-radius: 15px;
+    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.596);
+    border: 2px solid rgba(255, 255, 255, 0.596);
     overflow: hidden;
 }
 
 #profile-pic-display .big-profile-pic {
     height: 100%;
     width: 100%;
-    object-fit: cover; /* Ensures the image fills and crops */
-    object-position: center; /* Centers the image within the div */
-    display: block; /* Removes any extra space below the image */ 
+    object-fit: cover;
+    object-position: center;
+    border-radius: 13px;
 }
+
 
 #profile-wrapper #profile-text {
     font-size: 1.2em;
@@ -1259,6 +1262,7 @@ opacity: 0.7;
 }
 
 @media (max-width: 600px) {
+    
     #contacts-window {
         display: flex;
         width: 100%;

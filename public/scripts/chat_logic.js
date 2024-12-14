@@ -258,7 +258,11 @@ function isContactLoaded(id) {
 
 // Add a new contact to the contacts list
 async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class, to_end=true) {
-    let exists = await checkFileExists(picture_path);
+    addContactToListwMail(picture_path, contact_id, contact_username, "", last_msg_text, selected_class, to_end=true);
+}
+async function addContactToListwMail(picture_path, contact_id, contact_username, contact_mail, last_msg_text, selected_class, to_end=true) {
+    // TODO: Email still not working, needs big time structure change
+        let exists = await checkFileExists(picture_path);
 
     try {
         if (picture_path == null || !exists) {
@@ -286,7 +290,7 @@ async function addContactToList(picture_path, contact_id, contact_username, last
     }
 
     contact_list.insertAdjacentHTML(place,
-        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='${picture_path}' data-username='${contact_username}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
+        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='${picture_path}' data-username='${contact_username}' data-mail='${contact_mail}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
             <button type="button" class="contact-profile-button" onclick="event.stopPropagation(); showBigProfilePic(${contact_id});">
                 <img src='${picture_path}'>
             </button>
@@ -482,7 +486,8 @@ async function updateSelectedChatDisplay() {
         child.classList.remove("selected-chat-user");
         if (contactButton && contactButton.getAttribute('data-id') == CURRENTLY_CHATTING_WITH_ID) {
             child.classList.add("selected-chat-user");
-            child.style.boxShadow = "none";
+            // child.style.boxShadow = "none";
+            child.classList.remove("new-message-box-highlight");
         }
     }
 }
@@ -490,10 +495,14 @@ async function updateSelectedChatDisplay() {
 
 // Opens a new personal chat, loads and displays it
 async function choosePersonalChat(user_id, username, picture_path = null, showHightlight = true) {
+    // Hide call and files when chatting with AI
     if (user_id == 1 || username == "AI"){
         document.getElementById("openFilesButton").style.display = "none";
         document.getElementById("call-btn").style.display = "none";
         document.getElementById("file-button").style.display = "none";
+        // Hide call when chatting with yourself
+    }else if (user_id == MY_USER_ID){
+        document.getElementById("call-btn").style.display = "none";
     } else {
         document.getElementById("openFilesButton").style.display = "flex";
         document.getElementById("call-btn").style.display = "flex";
@@ -517,6 +526,12 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
     } else {
         document.getElementById("contact-info").innerText = "";
     }
+
+    
+    if (user_id == 1 || username == "AI"){
+        picture_path = "/images/ai_img.png";
+    }
+
 
     if (picture_path != null) {
         // picture_path = `/${picture_path}`;
@@ -675,7 +690,8 @@ async function updateLastMessage(from_name, chat_partner_id, text, moveToTop=tru
         const contactId = button.getAttribute('data-id');
         if (contactId == chat_partner_id) {
             if (from_name != "Du" && chat_partner_id != CURRENTLY_CHATTING_WITH_ID){
-                item.style.boxShadow = "inset 0px 0px 10px white";
+                // item.style.boxShadow = "inset 0px 0px 10px white";
+                item.classList.add("new-message-box-highlight");
             }
             last_contact = item;
             const lastMessageDiv = item.querySelector('.last-message');
@@ -1216,7 +1232,8 @@ socket.on('chat-message', async (msg) => { // Make the callback async
                     }
                 
                     let new_contact_li = addContactToList(picture_path, from_user, from_username, data.lastMessage, "", to_end=true);
-                    new_contact_li.style.boxShadow = "inset 0px 0px 10px white";
+                    // new_contact_li.style.boxShadow = "inset 0px 0px 10px white";
+                    new_contact_li.classList.add("new-message-box-highlight");
                 }
             } catch (error) {
                 console.error("Error fetching user and last message:", error);

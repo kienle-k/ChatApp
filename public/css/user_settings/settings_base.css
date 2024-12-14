@@ -125,56 +125,73 @@ body * {
     position: absolute;
 }
 
+#profile-pic-modal {
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    border: none;
+    z-index: 2000;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto;
+}
+
 #profile-wrapper {
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 600px;
-    height: 300px;
+
+    width: fit-content;
+    height: fit-content;
     max-width: 100%;
     max-height: 100%;
-    position: relative;
     display: flex;
     flex-direction: row;
+    align-items: center;
+    justify-content: center;
     gap: 25px;
     padding: 0;
     
 }
 
 #profile-wrapper #profile-pic-display{
-
-    width: 50%;
+    width: 300px;
     height: 300px;
-    max-width: 50%;
-    overflow: hidden; 
-    border-radius: 20px;
-
+    max-width: 100%;
+    border-radius: 15px;
+    background-color: transparent;
+    background-color: rgba(255, 255, 255, 0.596);
+    border: 2px solid rgba(255, 255, 255, 0.596);
+    overflow: hidden;
 }
 
 #profile-pic-display .big-profile-pic {
-    width: 100%; /* Make the image cover the div */
     height: 100%;
-    object-fit: cover; /* Ensures the image fills and crops */
-    object-position: center; /* Centers the image within the div */
-    display: block; /* Removes any extra space below the image */ 
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+    border-radius: 13px;
 }
 
+
 #profile-wrapper #profile-text {
-    font-size: 2em;
-    width: 50%;
-    height: 300px;
+    font-size: 1.2em;
+    width: fit-content;
+    max-width: 90%;
+    height: fit-content;
     max-width: 50%;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
     flex-wrap: wrap;
+    text-wrap: wrap;
     gap: 5px;
     box-sizing: border-box;
+    /* background-color: rgba(200,200,200,0.5); */
 
 }
-
-
 
 
 /* Responsive Design */
@@ -191,6 +208,20 @@ body * {
 
     .upload-btn, .save-btn {
         font-size: 14px;
+    }
+
+    #profile-wrapper {
+        width: 100%;
+        max-width: 100%;
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 25px;
+        padding: 0; 
+    }
+
+    #profile-wrapper #profile-text {
+        align-items: center;
     }
 }
 

@@ -161,26 +161,29 @@ const bigProfileInfo = document.getElementById('profile-text');
 const emailInput = document.getElementById('email');
 const usernameInput = document.getElementById('username');
 
+
 function showBigProfilePic(){
-    // Get image source
     let src = document.getElementById("profile-picture").src;
 
-    if (src) { 
+    if (src) {
         bigProfileDisplay.innerHTML = '';
         bigProfileInfo.innerHTML = `<div><b>${usernameInput.value}</b></div>
                                     <div>${emailInput.value}</div>`;
-        
-        bigProfileModal.style.display = "block";
 
-        // Create a new image element
+        bigProfileModal.style.display = "flex";
+
         const img = document.createElement('img');
-        img.src = src; // Set the image source
-        img.alt = "Profile Picture"; // Set alt text for accessibility
+        img.src = src;
+        img.alt = "Profile Picture";
         img.classList.add('big-profile-pic');
 
         bigProfileDisplay.appendChild(img);
-    }
+    }  
 }
+
+
+
+
 
 async function loadUserSettings() {
     try {

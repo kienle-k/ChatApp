@@ -14,31 +14,14 @@ html {
 
 
 
-#profile-wrapper #profile-pic-display{
-    background-color: aquamarine;
-    box-shadow: 3px 3px 4px rgba(20,20,20,0.5);
-
-}
-
-
-
 #profile-wrapper #profile-text {
     color: rgba(255,255,255,0.8);
     text-shadow: 3px 3px 4px rgba(20,20,20,0.5);
 }
 
 
-
-#profile-pic-display .big-profile-pic {
-    background-color: rgb(19, 14, 32);
-}
-
-
-
-#profile-wrapper-call #profile-pic-display-call{
-    background-color: aquamarine;
-    box-shadow: 3px 3px 4px rgba(20,20,20,0.5);
-
+.new-message-box-highlight {
+    box-shadow: inset 0px 0px 10px white;
 }
 
 

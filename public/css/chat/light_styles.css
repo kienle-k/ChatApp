@@ -1,7 +1,4 @@
 
-#profile-pic-display .big-profile-pic {
-    background-color: rgb(215, 233, 253);
-}
 
 
 
@@ -31,13 +28,6 @@
 }
 
 
-#profile-wrapper #profile-pic-display{
-    background-color: aquamarine;
-    border-radius: 20px;
-    box-shadow: 3px 3px 4px rgba(20,20,20,0.5);
-
-}
-
 
 
 #profile-wrapper #profile-text {
@@ -46,7 +36,9 @@
 }
 
 
-
+.new-message-box-highlight {
+    box-shadow: inset 0px 0px 10px rgba(25, 25, 36, 0.733);
+}
 
 
 

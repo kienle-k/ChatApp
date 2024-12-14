@@ -89,12 +89,6 @@ button:not(.toggle-password, .back-btn):active {
 
 
 
-#profile-wrapper #profile-pic-display{
-
-    background-color: rgb(52, 30, 94);
-    box-shadow: 3px 3px 4px rgba(208, 186, 244, 0.5);
-
-}
 
 
 
