@@ -102,11 +102,15 @@
 
             <div id="chat-container">
                 <div id="user-info-bar">
-                    <button id="chat-window-toggler" class="toggle-contacts" onclick="setContactsForce(true)"><img src="/images/left_arrow.png"></button>
-                    <div id="user-image"><img id="user-image-img" src="/images/profile.png" onerror="if (this.src != '/images/profile.png') this.src = '/images/profile.png';"></div>
-                    <div id="contact-info">Chat</div>
-                    <button id="openFilesButton"><img src="/images/openFiles.png"></button>
-                    <!-- <button id="deleteChatButton"><img src="/images/delete.png"></button> -->
+                    <div style="width: 60%; height: 100%; display: flex; flex-direction: row; align-items: center; gap: 10px;">
+                        <button id="chat-window-toggler" class="toggle-contacts" onclick="setContactsForce(true)"><img src="/images/left_arrow.png"></button>
+                        <div id="user-image"><img id="user-image-img" src="/images/profile.png" onerror="if (this.src != '/images/profile.png') this.src = '/images/profile.png';"></div>
+                        <div id="contact-info">Chat</div>
+                    </div>
+                    <div id="chat-options">
+                        <button id="openFilesButton"><img src="/images/openFiles.png"></button>
+                        <button id="deleteChatButton"><img src="/images/delete.png"></button>
+                    </div>
                 </div>
                 <div id="files-list" style="display: none"></div>
                 

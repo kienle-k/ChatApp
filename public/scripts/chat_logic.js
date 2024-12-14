@@ -49,6 +49,8 @@ let fileButtonImage;
 let fileInput;
 
 
+const smallFilesHeight = "0px";
+
 
 // Function to run pre-load, selects darkmode css
 function check_and_setup_darkmode() {
@@ -255,7 +257,7 @@ function isContactLoaded(id) {
 
 
 // Add a new contact to the contacts list
-async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class) {
+async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class, to_end=true) {
     let exists = await checkFileExists(picture_path);
 
     try {
@@ -276,8 +278,14 @@ async function addContactToList(picture_path, contact_id, contact_username, last
     }
 
 
+    let place;
+    if (to_end == true){
+        place = 'afterbegin';
+    }else {
+        place = 'beforeend';
+    }
 
-    contact_list.insertAdjacentHTML('beforeend',
+    contact_list.insertAdjacentHTML(place,
         `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='${picture_path}' data-username='${contact_username}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
             <button type="button" class="contact-profile-button" onclick="event.stopPropagation(); showBigProfilePic(${contact_id});">
                 <img src='${picture_path}'>
@@ -289,8 +297,14 @@ async function addContactToList(picture_path, contact_id, contact_username, last
         </li>`
     );
 
+    contact_list.scrollTo({
+        top: 0,
+        behavior: 'smooth', // Enables smooth scrolling
+    }); // Scroll to the top where to contact is added
+
+
     // Return the last inserted contact element
-    return contact_list.lastElementChild;
+    return contact_list.firstElementChild;
 }
 
 // Add Contact to the chat list
@@ -405,6 +419,8 @@ async function findUser() {
         resultsContainer.innerHTML = '';
 
         if (data.success && data.users.length > 0) {
+            
+            data.users.sort((a, b) => isContactLoaded(a.id) - isContactLoaded(b.id)); // Group users by contacts / new users not previously loaded
 
             // Add every matching user to the results list
             for (let user of data.users) {
@@ -434,12 +450,18 @@ async function findUser() {
                     profile_picture = "/images/profile.png";
                 }
 
+                if (user.username == "AI" || user.id == 1){
+                    profile_picture = "/images/ai_img.png";
+                }
+
                 // Create div with data & Add to result list
-                userDiv.innerHTML = `<button class="search-bar-user" data-id="${user.id}">
+                userDiv.innerHTML = `<div class="search-bar-user" data-id="${user.id}">
+                                        <div style="width: fit-content; height: 100%; display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 15px;">
+                                            <img class="small-search-profile-pic" src="${profile_picture}" onclick="showBigProfilePicByUrl('${profile_picture}', '${user.username}', '');">
+                                            <div>${user.username}</div>
+                                        </div>
                                         <img class="user-searchlist-add-icon" src="${img_path}" onclick="addContact(${user.id}, '${user.username}', '${profile_picture}')">
-                                        <img class="small-search-profile-pic" src="${profile_picture}" onclick="showBigProfilePicByUrl('${profile_picture}', '${user.username}', '');">
-                                        ${user.username}
-                                    </button>`; // <br>Email: ${user.email}
+                                    </div>`; // <br>Email: ${user.email}
                 resultsContainer.appendChild(userDiv);
             }
 
@@ -460,6 +482,7 @@ async function updateSelectedChatDisplay() {
         child.classList.remove("selected-chat-user");
         if (contactButton && contactButton.getAttribute('data-id') == CURRENTLY_CHATTING_WITH_ID) {
             child.classList.add("selected-chat-user");
+            child.style.boxShadow = "none";
         }
     }
 }
@@ -478,8 +501,9 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
     }
 
     const files_list = document.getElementById("files-list");
-    files_list.style.minHeight = "0px";
-    files_list.style.height = "0px";
+    files_list.style.minHeight = smallFilesHeight;
+    files_list.style.opacity = 0;
+    files_list.style.height = smallFilesHeight;
 
     setTimeout(()=> {
         files_list.style.display = "none";
@@ -490,7 +514,10 @@ async function choosePersonalChat(user_id, username, picture_path = null, showHi
     // For Mobile view, contact info & image on top of the chat
     if (username != null && username != false) {
         document.getElementById("contact-info").innerText = username;
+    } else {
+        document.getElementById("contact-info").innerText = "";
     }
+
     if (picture_path != null) {
         // picture_path = `/${picture_path}`;
         let exists = await checkFileExists(picture_path);
@@ -637,19 +664,35 @@ function addMessage(message, messageType, on_top = false) {
 }
 
 // Display last sent message in the contact field 
-async function updateLastMessage(from_name, chat_partner_id, text) {
-
+async function updateLastMessage(from_name, chat_partner_id, text, moveToTop=true) {
+    
     const contactItems = document.querySelectorAll('.contact-container');
+
+    let last_contact = null;
 
     contactItems.forEach(item => {
         const button = item.querySelector('.choose-contact-button'); // Select the button
         const contactId = button.getAttribute('data-id');
         if (contactId == chat_partner_id) {
+            if (from_name != "Du" && chat_partner_id != CURRENTLY_CHATTING_WITH_ID){
+                item.style.boxShadow = "inset 0px 0px 10px white";
+            }
+            last_contact = item;
             const lastMessageDiv = item.querySelector('.last-message');
             lastMessageDiv.innerHTML = `<b style="color: darkgray">${from_name}:</b><br>${text}`;
-            return;
+            // return; // Make the time predictable to make the sorting better (always after the loop)
         }
     });
+    if (last_contact != null && moveToTop == true){
+        contact_list.prepend(last_contact);
+        // contact_list.scrollTo({
+        //     top: 0,
+        //     behavior: 'smooth', // Enables smooth scrolling
+        // });
+    }
+
+
+
 }
 
 
@@ -1083,7 +1126,7 @@ socket.on('response-chat-history', (rows) => {
             }
 
             // Insert new contact into display list
-            addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class);
+            addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class, to_end=false);
 
             if (CURRENTLY_CHATTING_WITH_ID == null){
                 // CURRENTLY_CHATTING_WITH_ID = contact_id;
@@ -1172,14 +1215,18 @@ socket.on('chat-message', async (msg) => { // Make the callback async
                         picture_path = "/" + picture_path;
                     }
                 
-                    addContactToList(picture_path, from_user, from_username, data.lastMessage, "");
+                    let new_contact_li = addContactToList(picture_path, from_user, from_username, data.lastMessage, "", to_end=true);
+                    new_contact_li.style.boxShadow = "inset 0px 0px 10px white";
                 }
             } catch (error) {
                 console.error("Error fetching user and last message:", error);
             }
         }
     }
-    updateLastMessage(from_username, from_user, text);
+
+    setTimeout(() => {
+        updateLastMessage(from_username, from_user, text);
+    }, 100);
 });
 
 
@@ -1346,8 +1393,8 @@ async function fetchFiles() {
 
     filesListDiv.dataset.userid = CURRENTLY_CHATTING_WITH_ID; // Set the data file id to the current user
 
-    // filesListDiv.style.minHeight = "0px";
-    // filesListDiv.style.height = "0px";
+    // filesListDiv.style.minHeight = smallFilesHeight;
+    // filesListDiv.style.height = smallFilesHeight;
 
     if (filesListDiv.innerHTML == ""){
         filesListDiv.innerHTML = '<div class="files-info-div">Dateien werden geladen...</div>';
@@ -1574,47 +1621,72 @@ async function downloadFile(filePath) {
 //     }
 // }
 
+async function removeChat(id){
+    const item = document.querySelector(`[data-id="${id}"]`);
+    if (item) {
+        item.remove(); // Removes the item from the DOM
+    }
+
+    const new_ct = contact_list.firstElementChild || null;
+    console.log(contact_list, new_ct, new_ct == null);
+
+    if (new_ct == null){
+        console.log("JUST GOING OUT OF CHAT & DELETING");
+        choosePersonalChat(null, null, null);
+    } else {
+        console.log(new_ct, "CHANGING TO USER");
+        choosePersonalChatwSwitchWindow(new_ct.getAttribute("data-id"), new_ct.getAttribute("data-username"), new_ct.getAttribute("data-imgsrc"));
+    }
+    setContactsForce(true);
+}
+    
 
 
-// // Function to delete chat
-// async function deleteChat() {
-//     if (!CURRENTLY_CHATTING_WITH_ID) {
-//         console.error("No user is currently selected for chatting.");
-//         alert("Please select a user to delete the chat with.");
-//         return;
-//     }
+// Function to delete chat
+async function deleteChat() {
+    if (!CURRENTLY_CHATTING_WITH_ID) {
+        console.error("No user is currently selected for chatting.");
+        alert("Please select a user to delete the chat with.");
+        return;
+    }
 
-//     try {
-//         // Show a confirmation dialog
-//         const confirmDelete = confirm("Are you sure you want to delete this chat?");
-//         if (!confirmDelete) return;
+    try {
+        // Show a confirmation dialog
+        const confirmDelete = confirm("Are you sure you want to delete this chat?");
+        if (!confirmDelete) return;
 
-//         // Make the API request
-//         const response = await fetch('/api/delete-chat', {
-//             method: 'POST',
-//             headers: {
-//                 'Content-Type': 'application/json',
-//             },
-//             body: JSON.stringify({
-//                 other_user_id: CURRENTLY_CHATTING_WITH_ID,
-//             }),
-//         });
+        // Make the API request
+        const response = await fetch('/api/delete-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                other_user_id: CURRENTLY_CHATTING_WITH_ID,
+            }),
+        });
 
-//         // Handle the response
-//         const result = await response.json();
+        // Handle the response
+        const result = await response.json();
 
-//         if (response.ok) {
-//             alert(`Chat deleted successfully. ${result.affectedRows} messages were removed.`);
-//         } else if (response.status === 404) {
-//             alert("No messages found between the specified users.");
-//         } else {
-//             alert(`Error deleting chat: ${result.error || 'Unknown error occurred.'}`);
-//         }
-//     } catch (error) {
-//         console.error("Error while deleting chat:", error);
-//         alert("An unexpected error occurred while trying to delete the chat.");
-//     }
-// }
+        if (response.ok || response.status === 404) {
+            removeChat(CURRENTLY_CHATTING_WITH_ID);
+        }
+
+        if (response.ok) {
+            // alert(`Chat deleted successfully. ${result.affectedRows} messages were removed.`);
+        } else if (response.status === 404) {
+            // alert(`Chat deleted successfully.`);
+            // alert("No messages found between the specified users.");
+        } else {
+            alert(`Error deleting chat: ${result.error || 'Unknown error occurred.'}`);
+        }
+
+    } catch (error) {
+        console.error("Error while deleting chat:", error);
+        alert("An unexpected error occurred while trying to delete the chat.");
+    }
+}
 
 
 
@@ -1666,14 +1738,16 @@ window.onload = async function () {
         style = files_list.style.display;
         if (style == "flex") {
             files_list.style.overflowY = "hidden";
-            files_list.style.minHeight = "0px";
-            files_list.style.height = "0px";
+            files_list.style.minHeight = smallFilesHeight;
+            files_list.style.height = smallFilesHeight;
             setTimeout(()=> {
+                files_list.style.opacity = 0;
                 files_list.style.display = "none";
                 files_list.style.overflowY = "auto";
             }, 400);
         } else {
             // files_list.innerHTML = ''; // Clear existing content
+            files_list.style.opacity = 1;
             files_list.style.display = "flex";
             files_list.style.overflowY = "auto";
             fetchFiles();
@@ -1686,8 +1760,8 @@ window.onload = async function () {
         style = files_list.style.display;
         if (style == "flex") {
             files_list.style.overflowY = "hidden";
-            files_list.style.minHeight = "0px";
-            files_list.style.height = "0px";
+            files_list.style.minHeight = smallFilesHeight;
+            files_list.style.height = smallFilesHeight;
             setTimeout(()=> {
                 files_list.style.display = "none";
                 files_list.style.overflowY = "auto";
@@ -1769,7 +1843,7 @@ window.onload = async function () {
 
 
 
-    // document.getElementById("deleteChatButton").addEventListener('click', deleteChat);
+    document.getElementById("deleteChatButton").addEventListener('click', deleteChat);
 
 
     // Close modal when the background is clicked

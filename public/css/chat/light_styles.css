@@ -257,6 +257,12 @@
     color: white;
 }
 
+#deleteChatButton {
+    border: 2px solid transparent;
+    background-color: #ededed;
+    color: white;
+}
+
     /* END SEND CONTAINER STYLING */
 
 

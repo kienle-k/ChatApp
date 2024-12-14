@@ -315,6 +315,13 @@ background-color: #332755;
     color: rgba(255,255,255,0.8);
 }
 
+
+#deleteChatButton {
+    border: 2px solid transparent;
+    background-color: #161124;
+    color: rgba(255,255,255,0.8);
+}
+
 #messages {
     border: 2px solid transparent;
     background-color: #161124;
