@@ -126,9 +126,10 @@ function choosePersonalChatwSwitchWindow(id, name, pic, showHighlight=true) {
     
 }
 
-function showBigProfilePicForCall(id) {
+function showBigProfilePicForCall(id, src_1=null) {
     let src;
     let name;
+
 
     // const bigProfileWrapperCall = document.getElementById("profile-wrapper-call");
     const bigProfileDisplayCall = document.getElementById("profile-pic-display-call");
@@ -143,6 +144,12 @@ function showBigProfilePicForCall(id) {
             break;
         }
     }
+
+    if (src_1 != null){
+        src = src_1;
+    }
+
+    
     if (src) {
         bigProfileDisplayCall.innerHTML = '';
         bigProfileTextCall.innerHTML = `<div><b>${name}</b></div>
@@ -257,10 +264,10 @@ function isContactLoaded(id) {
 
 
 // Add a new contact to the contacts list
-async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class, to_end=true) {
-    addContactToListwMail(picture_path, contact_id, contact_username, "", last_msg_text, selected_class, to_end=true);
+async function addContactToList(picture_path, contact_id, contact_username, last_msg_text, selected_class, to_end=true, add_classes="") {
+    return await addContactToListwMail(picture_path, contact_id, contact_username, "", last_msg_text, selected_class, to_end=to_end, add_classes=add_classes);
 }
-async function addContactToListwMail(picture_path, contact_id, contact_username, contact_mail, last_msg_text, selected_class, to_end=true) {
+async function addContactToListwMail(picture_path, contact_id, contact_username, contact_mail, last_msg_text, selected_class, to_end=true, add_classes="") {
     // TODO: Email still not working, needs big time structure change
         let exists = await checkFileExists(picture_path);
 
@@ -290,7 +297,7 @@ async function addContactToListwMail(picture_path, contact_id, contact_username,
     }
 
     contact_list.insertAdjacentHTML(place,
-        `<li class="contact-container ${selected_class}" data-id=${contact_id} data-imgsrc='${picture_path}' data-username='${contact_username}' data-mail='${contact_mail}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
+        `<li class="contact-container ${selected_class} ${add_classes}" data-id=${contact_id} data-imgsrc='${picture_path}' data-username='${contact_username}' data-mail='${contact_mail}' onclick="choosePersonalChatwSwitchWindow(${contact_id}, '${contact_username}', '${picture_path}')">
             <button type="button" class="contact-profile-button" onclick="event.stopPropagation(); showBigProfilePic(${contact_id});">
                 <img src='${picture_path}'>
             </button>
@@ -1000,10 +1007,11 @@ async function fetchUserAndLastMessage(userId) {
 
 
 async function startCall(userId) {
+    document.getElementById("calling-info").innerText = "Warten...";
     try {
         // Request only audio access (no video)
         localStream = await navigator.mediaDevices.getUserMedia({
-            audio: true
+            audio: true,
         });
 
         // Create peer connection
@@ -1030,11 +1038,9 @@ async function startCall(userId) {
             offer: offer
         });
 
-
-
-
         // Handle incoming tracks (only audio)
         peerConnection.ontrack = (event) => {
+            document.getElementById("calling-info").innerText = "Verbunden 🔗";
             const remoteAudio = document.getElementById('remoteAudio');
             if (event.streams[0].getAudioTracks().length > 0) {
                 remoteAudio.srcObject = event.streams[0];
@@ -1056,6 +1062,7 @@ async function startCall(userId) {
 
 
     } catch (error) {
+        alert(error);
         console.error('Call setup error:', error);
     }
 }
@@ -1068,7 +1075,7 @@ function trigger_call() {
         startCall(selectedUserId);
 
         // Optionally show call interface
-        document.getElementById('call-container').style.display = 'block';
+        document.getElementById('call-container').style.display = 'flex';
         showBigProfilePicForCall(selectedUserId);
     } else {
         alert('Please select a user to call');
@@ -1076,6 +1083,7 @@ function trigger_call() {
 }
 
 function trigger_end_call() {
+    document.getElementById("calling-info").innerText = "Anruf beendet.";
     if (peerConnection) {
         peerConnection.close();
         peerConnection = null;
@@ -1227,13 +1235,19 @@ socket.on('chat-message', async (msg) => { // Make the callback async
                     console.log(data);
 
                     let picture_path = data.user.profile_picture;
+
+                    if(!(picture_path) || picture_path == null){
+                        picture_path = "/images/profile.png";
+                    }
                     if (!picture_path.startsWith("/")){
                         picture_path = "/" + picture_path;
                     }
-                
-                    let new_contact_li = addContactToList(picture_path, from_user, from_username, data.lastMessage, "", to_end=true);
-                    // new_contact_li.style.boxShadow = "inset 0px 0px 10px white";
-                    new_contact_li.classList.add("new-message-box-highlight");
+                    
+                    if (text != "[Anruf gestartet]"){
+                        let new_contact_li = await addContactToList(picture_path, from_user, from_username, data.lastMessage, "", to_end=true);
+                        // new_contact_li.style.boxShadow = "inset 0px 0px 10px white";
+                        new_contact_li.classList.add("new-message-box-highlight");
+                    }
                 }
             } catch (error) {
                 console.error("Error fetching user and last message:", error);
@@ -1268,11 +1282,15 @@ socket.on('message-confirmation', (output) => {
 });
 
 
+
+
+
+
 // Socket event listener for incoming call
 socket.on('incoming-call', async (data) => {
     const remoteUserId = data.from_user;
 
-    document.getElementById('call-container').style.display = 'block';
+    document.getElementById('call-container').style.display = 'flex';
 
     // Prompt user to accept the call
     if (confirm(`${data.from_username} ruft an. Anruf annehmen?`)) {
@@ -1318,6 +1336,8 @@ socket.on('incoming-call', async (data) => {
             answer: answer
         });
 
+        document.getElementById("calling-info").innerText = "Verbunden 🔗";
+
 
         if (!isContactLoaded(remoteUserId)){
             try {
@@ -1328,9 +1348,15 @@ socket.on('incoming-call', async (data) => {
                     console.log(data);
     
                     let picture_path = data.user.profile_picture;
+                    if (!picture_path || picture_path == null){
+                        picture_path = "/images/profile.png";
+                    }
+
                     if (!picture_path.startsWith("/")){
                         picture_path = "/" + picture_path;
                     }
+
+                    showBigProfilePicForCall(remoteUserId, picture_path);
 
                     let last_message = data.lastMessage || "";
                 
@@ -1340,6 +1366,8 @@ socket.on('incoming-call', async (data) => {
                 console.error("Error fetching user and last message:", error);
             }
         }
+
+
     
     
         choosePersonalChatwSwitchWindow(remoteUserId, data.from_username, null);
@@ -1349,12 +1377,14 @@ socket.on('incoming-call', async (data) => {
 
 
 socket.on('call-answered', async (data) => {
+    document.getElementById("calling-info").innerText = "Verbunden 🔗";
     await peerConnection.setRemoteDescription(data.answer);
 });
 
 
 // Client-side code to handle 'call-ended' event
 socket.on('call-ended', (data) => {
+    document.getElementById("calling-info").innerText = "Anruf beendet.";
     // Hide the call container when the call ends
     document.getElementById('call-container').style.display = 'none';
     console.log("Call ended.");

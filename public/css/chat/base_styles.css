@@ -1110,6 +1110,7 @@ opacity: 0.7;
     flex-direction: column;
     align-items: center;
     justify-content: space-around;
+    gap: 10px;
     display: none; 
 }
 
@@ -1120,13 +1121,11 @@ opacity: 0.7;
 
 
 
-#end-call-btn {
-    position: absolute;
-    bottom: 20px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 60px;
-    height: 60px;
+#call-container #end-call-btn {
+    margin-top: 50px;
+    margin-bottom: 80px;
+    width: 90px;
+    height: 90px;
     box-sizing: border-box;
     border-radius: 20px;
     border: none;
@@ -1142,6 +1141,20 @@ opacity: 0.7;
     width: 80%; /* Adjust image size relative to button */
     height: 80%; /* Adjust image size relative to button */
     object-fit: contain; /* Ensure the image scales properly */
+}
+
+
+#call-container #calling-info {
+    width: 150px;
+    max-width: 95%;
+    height: fit-content;
+    background-color: #8d888850;
+    box-shadow: 0px 0px 8px #8d88889a;
+    color: white;
+    border-radius: 10px;
+    padding: 5px;
+    box-sizing: border-box;
+    text-align: center;
 }
 
 

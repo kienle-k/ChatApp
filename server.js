@@ -930,7 +930,8 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     console.log(`User socket has disconnected.`);
-    if (sessionUser) {
+    if (sessionUser && connected_users[sessionUser.id]) {
+      connected_users[sessionUser.id] = null;
       delete connected_users[sessionUser.id];
     }
   });
@@ -1243,6 +1244,7 @@ app.get('/api/get-user-settings', isAuthenticated, async (req, res) => {
 
 
 // Start the server
-server.listen(port, () => {
-  console.log(`Server is running at http://localhost:${port}`);
+// server.listen(port, () => {
+server.listen(port,'localhost', () => {
+    console.log(`Server is running at http://localhost:${port}`);
 });
